@@ -18,16 +18,16 @@ body { width: 1200px; height: 630px; overflow: hidden; background: #FAFBFC; font
 body::before { content: ""; position: absolute; right: -160px; top: -40px; width: 820px; height: 820px; border-radius: 50%; background: radial-gradient(closest-side, #FFF, rgba(255,255,255,0)); }
 .logo { position: absolute; left: 72px; top: 64px; height: 30px; width: auto; aspect-ratio: 1117/171; --logo-m: url(#vgl); --logo-a: #102850; --logo-b: #48A0A8; }
 .lg-m { fill: var(--logo-m); } .lg-a { fill: var(--logo-a); } .lg-b { fill: var(--logo-b); }
-h1 { position: absolute; left: 72px; top: 156px; width: 600px; font-size: 70px; line-height: 1.02; letter-spacing: -.04em; font-weight: 560; }
-h1 em { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; font-size: 1.08em; letter-spacing: -.012em; }
-p { position: absolute; left: 72px; top: 440px; font-size: 26px; color: #3E4C5C; letter-spacing: -.01em; }
-.trust { top: 520px; font-size: 18px; color: #5E6C7B; }
+h1 { position: absolute; left: 72px; top: 146px; width: 640px; font-size: 66px; line-height: 1.02; letter-spacing: -.04em; font-weight: 560; }
+h1 em { display: block; font-family: "Instrument Serif"; font-style: italic; font-weight: 400; font-size: 1.08em; letter-spacing: -.012em; }
+p { position: absolute; left: 72px; top: 396px; width: 600px; font-size: 25px; line-height: 1.35; color: #3E4C5C; letter-spacing: -.01em; }
+.trust { top: 510px; width: auto; font-size: 18px; color: #5E6C7B; }
 img { position: absolute; right: 48px; top: 104px; width: 450px; }
 </style></head><body>${sprite}
 <svg class="logo" viewBox="0 0 1117 171"><use href="#logo"/></svg>
-<h1>Ecógrafos y diatermias, <em>sin letra pequeña.</em></h1>
-<p>Te asesora Javier, fisioterapeuta. No un comercial.</p>
-<p class="trust">Certificados CE · 2 años de garantía · Mantenimiento asegurado</p>
+<h1>Equipos médicos de alta calidad. <em>Sin letra pequeña.</em></h1>
+<p>Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesora Javier, fisioterapeuta.</p>
+<p class="trust">Certificados CE / MDR · 2 años de garantía · Envíos a UE, USA y LATAM</p>
 <img src="${f('assets/img/hero-vytamed-760.webp')}" alt="">
 </body></html>`;
 

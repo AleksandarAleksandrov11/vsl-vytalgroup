@@ -6,7 +6,7 @@
 //   { ok: true } se muestra el "gracias" y se dispara Lead (una vez, eventID = event_id).
 
 import { COUNTRIES, EMAIL_DOMAINS } from './data.js';
-import { createPrefix } from './prefix.js';
+import { createSelect } from './select.js';
 import { getAttribution } from './attribution.js';
 import { lead } from './tracking.js';
 
@@ -14,12 +14,27 @@ const TOTAL = 6;
 const MIN_MS = 3000;
 const WA = 'https://wa.me/34616372644?text=';
 const EMAIL_RE = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[a-z]{2,}$/i;
-const WHAT = { 'Ecógrafo': 'un ecógrafo', 'Diatermia': 'una diatermia', 'Otro equipo': 'otro equipo del catálogo' };
+const WHAT = {
+  'Ecógrafo': 'un ecógrafo',
+  'Diatermia': 'una diatermia',
+  'Presoterapia': 'un equipo de presoterapia',
+  'Ondas de choque': 'un equipo de ondas de choque',
+  'Magnetoterapia de alta intensidad': 'un equipo de magnetoterapia de alta intensidad',
+  'Láser de alta potencia': 'un láser de alta potencia',
+  'Electrólisis percutánea ecoguiada': 'un equipo de electrólisis percutánea ecoguiada',
+  'Camillas de fisioterapia': 'una camilla de fisioterapia',
+  'Otro equipo': 'otro equipo del catálogo',
+};
+// "Otro equipo" en el paso 1 abre un desplegable con el resto de categorías del catálogo
+const OTHER = ['Magnetoterapia de alta intensidad', 'Láser de alta potencia', 'Electrólisis percutánea ecoguiada', 'Camillas de fisioterapia', 'Otro'];
+const WITH_MODELS = ['Ecógrafo', 'Diatermia'];
+const norm = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
 let form;
 let steps;
 let ui;
 let prefix;
+let other;
 let state;
 let ready = false;
 let busy = false;
@@ -144,7 +159,9 @@ function updateSuggestion() {
 // ------------------------------------------------------------------ validación
 function problem(n) {
   switch (n) {
-    case 1: return state.equipo ? '' : 'Elige una opción.';
+    case 1:
+      if (!state.equipo) return 'Elige una opción.';
+      return state.equipo === 'Otro equipo' && !state.otro ? 'Elige qué equipo buscas.' : '';
     case 2: return radio('perfil') ? '' : 'Elige una opción.';
     case 3: return radio('plazo') ? '' : 'Elige una opción.';
     case 4: {
@@ -252,6 +269,16 @@ function back() {
   if (state.step > 1 && !finished) goTo(state.step - 1, 'back');
 }
 
+// Equipo que llega a la hoja: la categoría elegida en el desplegable si se marcó "Otro equipo"
+function equipoFinal() {
+  if (state.equipo !== 'Otro equipo') return state.equipo;
+  return state.otro && state.otro !== 'Otro' ? state.otro : 'Otro equipo';
+}
+function showOther(on) {
+  ui.other.hidden = !on;
+  if (!on) state.otro = '';
+}
+
 // ------------------------------------------------------------------ preselección desde las tarjetas
 function showPicked(on) {
   ui.pickedBox.hidden = !on;
@@ -262,6 +289,7 @@ function applyPreselect(model, equipo) {
   if (finished) return;
   state.equipo = equipo;
   state.modelo = model;
+  showOther(false);
   const r = form.querySelector(`input[name="equipo"][value="${equipo}"]`);
   if (r) r.checked = true;
   setError(1, '');
@@ -286,8 +314,8 @@ function payload() {
     nombre: ui.name.value.trim(),
     telefono: phoneFull(),
     email: ui.email.value.trim(),
-    equipo: state.equipo,
-    modelo: state.modelo || (state.equipo === 'Otro equipo' ? '' : 'Sin decidir'),
+    equipo: equipoFinal(),
+    modelo: state.modelo || (WITH_MODELS.includes(state.equipo) ? 'Sin decidir' : ''),
     perfil: radio('perfil'),
     plazo: radio('plazo'),
     consentimiento: `Sí · ${new Date().toISOString()}`,
@@ -309,7 +337,7 @@ function payload() {
 }
 function waText() {
   const name = ui.name.value.trim().split(/\s+/)[0];
-  const what = state.modelo ? shortModel(state.modelo) : WHAT[state.equipo] || 'vuestros equipos';
+  const what = state.modelo ? shortModel(state.modelo) : WHAT[equipoFinal()] || 'vuestros equipos';
   return encodeURIComponent(`Hola Javier, ${name ? `soy ${name}. ` : ''}Vengo de la web y me interesa ${what}.`);
 }
 function setLoading(on) {
@@ -381,7 +409,7 @@ function done(real) {
   update();
   showEnd(ui.done);
   ui.live.textContent = ui.doneTitle.textContent;
-  if (real) lead(state.eventId, state.modelo ? shortModel(state.modelo) : state.equipo, state.equipo);
+  if (real) lead(state.eventId, state.modelo ? shortModel(state.modelo) : equipoFinal(), equipoFinal());
   window.dispatchEvent(new CustomEvent('vg:lead-done'));
 }
 function failed() {
@@ -409,6 +437,7 @@ export function initForm() {
     back: $('[data-back]'),
     opts: $('[data-opts]'),
     pickedBox: $('[data-picked-box]'),
+    other: $('[data-other]'),
     picked: $('[data-picked]'),
     name: $('#f-name'),
     tel: $('#f-tel'),
@@ -424,29 +453,61 @@ export function initForm() {
     failWa: $('[data-fail-wa]'),
     live: $('[data-live]'),
   };
-  state = { step: 1, equipo: '', modelo: '', country: COUNTRIES[0], eventId: uuid(), t0: performance.now() };
+  state = { step: 1, equipo: '', modelo: '', otro: '', country: COUNTRIES[0], eventId: uuid(), t0: performance.now() };
 
-  prefix = createPrefix($('[data-prefix]'), {
-    countries: COUNTRIES,
+  prefix = createSelect($('[data-prefix]'), {
+    id: 'pf',
+    className: 'sel--prefix',
+    title: 'Prefijo',
+    options: COUNTRIES.map((c) => ({ value: c.iso, label: c.name, html: `${c.flag}<span>${c.name}</span>`, hint: c.dial ? `+${c.dial}` : '', c })),
     value: 'ES',
-    onChange: (c) => {
-      setCountry(c);
+    searchable: true,
+    searchLabel: 'Buscar país o prefijo',
+    button: (x) => `${x.c.flag}<span>${x.c.dial ? `+${x.c.dial}` : '+'}</span>`,
+    buttonLabel: (x) => `Prefijo: ${x.c.name}${x.c.dial ? ` +${x.c.dial}` : ''}. Cambiar`,
+    match: (x, q) => norm(x.label).includes(q.replace(/^\+/, '')) || (!!x.c.dial && x.c.dial.startsWith(q.replace(/\D/g, '') || '#')),
+    always: (x) => x.value === 'XX',
+    onChange: (x) => {
+      setCountry(x.c);
       onTelInput();
       ui.tel.focus({ preventScroll: true });
     },
   });
   setCountry(COUNTRIES[0]);
 
+  other = createSelect($('[data-other-select]'), {
+    id: 'otro',
+    title: '¿Qué equipo buscas?',
+    placeholder: 'Elige un equipo',
+    labelledby: 'q-other',
+    options: OTHER.map((v) => ({ value: v, label: v })),
+    onChange: (x) => {
+      state.otro = x.value;
+      setError(1, '');
+      update();
+      setTimeout(next, reduced() ? 0 : 280);
+    },
+  });
+
   form.addEventListener('pointerdown', (e) => { pointerPick = !!e.target.closest('.opt'); });
   form.addEventListener('click', (e) => {
     const t = e.target;
     if (t.matches('.opt input')) {
+      let wait = false;
       if (t.name === 'equipo') {
         state.equipo = t.value;
         state.modelo = '';
+        wait = t.value === 'Otro equipo';
+        showOther(wait);
       }
       setError(state.step, '');
       update();
+      if (wait) {
+        // Con "Otro equipo" no se avanza: se abre el desplegable para elegir cuál
+        if (pointerPick) setTimeout(() => other.button.click(), reduced() ? 0 : 200);
+        pointerPick = false;
+        return;
+      }
       if (pointerPick) {
         pointerPick = false;
         setTimeout(next, reduced() ? 0 : 280);
@@ -474,7 +535,7 @@ export function initForm() {
   form.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter' || e.isComposing) return;
     const t = e.target;
-    if (t.closest('.pf')) return; // el buscador de prefijos gestiona su propio Enter
+    if (t.closest('.sel')) return; // los desplegables gestionan su propio Enter
     if (t.matches('input:not([type=checkbox]), .opt input')) {
       e.preventDefault();
       next();

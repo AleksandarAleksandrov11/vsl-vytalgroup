@@ -18,6 +18,8 @@ const { chromium } = require('playwright');
   await p.waitForTimeout(1500);
   const go = (sel) => p.evaluate((s) => document.querySelector(s).scrollIntoView({ block: 'center' }), sel);
   const steps = [
+    ['historia (siguiente)', () => p.tap('[data-reel-next]', { position: { x: 60, y: 120 } })],
+    ['historia (pausa)', () => p.tap('[data-reel-toggle]')],
     ['segmentado', async () => { await go('#equipos .seg'); await p.waitForTimeout(900); await p.tap('#tab-dia'); }],
     ['segmentado (vuelta)', () => p.tap('#tab-eco')],
     ['lo quiero', () => p.tap('[data-want="Acclarix LX9 (EDAN)"]')],
@@ -26,8 +28,8 @@ const { chromium } = require('playwright');
     ['plazo', () => p.tap('.qf__step.is-active label.opt:has(input[value="Lo antes posible"])')],
     ['nombre', async () => { await p.tap('#f-name'); await p.keyboard.type('Ana'); }],
     ['siguiente', () => p.tap('.qf__step.is-active [data-next]')],
-    ['prefijo', () => p.tap('.pf__btn')],
-    ['elegir país', () => p.tap('.pf__opt[data-iso="PT"]')],
+    ['prefijo', () => p.tap('.sel--prefix .sel__btn')],
+    ['elegir país', () => p.tap('.sel--prefix .sel__opt:has-text("Portugal")')],
     ['acordeón', async () => { await go('#q3'); await p.waitForTimeout(900); await p.tap('#q3'); }],
     ['acordeón (cerrar)', () => p.tap('#q3')],
   ];

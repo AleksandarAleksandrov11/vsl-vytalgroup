@@ -1,70 +1,85 @@
-# PLAN · Rediseño completo de la landing VytalGroup
+# PLAN · Brief v3: ajustes sobre el rediseño
 
-Trabajo en solitario y secuencial, sin subagentes. Se marca cada tarea al completarla.
-Regla de oro: menos. Ante la duda, se quita.
+Trabajo en solitario y secuencial, sin subagentes ni workflows. Se marca cada tarea al completarla.
+Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, espaciados, componentes y tono).
 
-## 1. Análisis
-- [x] Leer el brief del rediseño entero
-- [x] Decidir qué se reaprovecha: google-sheets.gs, consentimiento, tracking, atribución, envío del formulario, contenido legal, imágenes de producto, foto de Javier y PDF del catálogo
-- [x] Comprobar en las fuentes el término exacto del mantenimiento: "asegurado" (brief y web actual)
-- [x] Vídeo de la diatermia: quien sale no es Javier (lo confirmó el cliente), así que no se usa y se borra
-- [x] Anotar lo que falta (carpeta `referencias/`, confirmación de "menos de 24 h")
+## 0. Estado de partida (capturas en 375, 768 y 1440 px)
+- 5 secciones: Hero ("Ecógrafos y diatermias, sin letra pequeña."), Equipos (segmentado + 3 tarjetas), Por qué VytalGroup (marino), Dudas (5) y Formulario (6 pasos).
+- El mensaje habla solo de ecógrafos y diatermias. No se ven presoterapia, ondas de choque, magnetoterapia, láser, electrólisis ni camillas.
+- El catálogo es solo un enlace de texto bajo las tarjetas y en el footer.
+- Fondos: claro en todo salvo "Por qué VytalGroup" y el footer (marino).
+- 177 palabras visibles. Lighthouse 100 en todo.
 
-## 2. Recursos
-- [x] Geist variable (400 a 600) e Instrument Serif cursiva, autoalojadas en woff2 con subset latino
-- [x] Recortes de producto homogéneos (mismo tamaño visual y misma sombra): Eco Wireless, Acclarix AX8, Acclarix LX9, Diatermia Multifunción, Reatherm y HR Tek
-- [x] Imagen del hero (producto protagonista, versión móvil y escritorio)
-- [x] Retrato de Javier para la sección marina, con etalonaje suave
-- [x] Nueva imagen Open Graph 1200 × 630 con el nuevo diseño
-- [x] Borrar fuentes, imágenes, vídeos y scripts que dejan de usarse
+## 1. Cambios pedidos
+### Enfoque y metadatos
+- [x] Mensaje general: equipos médicos de alta calidad, sin timos ni letra pequeña (hero, title, description, OG, JSON-LD)
+- [x] Nueva imagen OG con "Equipos médicos de alta calidad. Sin letra pequeña."
 
-## 3. Maquetación (HTML + CSS desde cero)
-- [x] Tokens: paleta clara, marino solo en 4.3 y footer, tipografía fluida, radios, sombras
-- [x] Header: logo + "Quiero asesoramiento"; transparente, desenfoque al bajar; en móvil se oculta al bajar
-- [x] Hero: titular corto, línea de apoyo, un botón, línea de confianza, producto con barrido de ecografía
-- [x] Equipos: control segmentado Ecógrafos | Diatermias, 3 tarjetas por categoría, carrusel en móvil, enlace al catálogo
-- [x] Por qué VytalGroup: foto de Javier, frase, 3 razones con conteo, firma y botón
-- [x] Dudas: 5 preguntas en acordeón y un enlace de WhatsApp
-- [x] Formulario de 6 pasos, pantalla de éxito y de error
-- [x] Footer mínimo
-- [x] Barra fija móvil (CTA + WhatsApp pequeño)
-- [x] Banner de cookies mínimo y panel con interruptores propios
-- [x] Páginas legales con el nuevo diseño
+### Estructura
+- [x] Hero: titular general, línea de apoyo nueva, CTA y enlace "Ver catálogo"
+- [x] Línea de confianza en movimiento bajo el hero, tipo cifras (petición del cliente)
+- [x] Lo más pedido: segmentado actual + CTA de sección (el apoyo "¿No sabes cuál elegir?" se quitó para quedar en ~250 palabras)
+- [x] NUEVA · Más equipos: 6 categorías con imagen y nombre, descripción al pasar o tocar, CTA
+- [x] Por qué VytalGroup: "Sin timos. Sin letra pequeña.", comparador de 3 filas con checks que se dibujan, CTA
+- [x] NUEVA · Testimonios: 8 de ejemplo en bucle infinito hacia la izquierda, marcados como ejemplo (petición del cliente)
+- [x] NUEVA · Catálogo: maqueta 3D que se abre en abanico, inclinación con el cursor, "Descargar catálogo" y "¿Prefieres que te asesore?"
+- [x] Dudas: 5 preguntas (nueva "¿Solo vendéis ecógrafos y diatermias?"; fuera "¿Qué garantía tienen?", repetida), CTA y WhatsApp
+- [x] Formulario: paso 1 ampliado y desplegable propio para "Otro equipo"; WhatsApp de éxito y Apps Script al día
+- [x] Footer revisado; barra móvil oculta también en el catálogo
+- [x] Fondos y texturas distintos por sección (petición del cliente)
 
-## 4. JavaScript (vanilla, sin librerías)
-- [x] main.js: header, reveals, segmentado, carrusel, conteo, acordeón, barra móvil, botón magnético, CTA con preselección
-- [x] form.js: 6 pasos, Enter, avance automático, validación, prefijos con buscador, honeypot, 3 s, doble envío
-- [x] Reaprovechar attribution.js, consent.js y tracking.js (ViewContent con la categoría activa)
-- [x] config.js con `SHEETS_ENDPOINT` y `META_PIXEL_ID` vacíos
+### Animaciones
+- [x] Titulares de sección por líneas con máscara (60 a 80 ms)
+- [x] Imágenes de producto: fundido, escala 0,96 → 1 y parallax leve (solo escritorio)
+- [x] Rejilla de Más equipos: entrada escalonada, zoom 1,04 y descripción
+- [x] Comparador: filas una a una y checks con stroke-dashoffset
+- [x] Conteo de números revisado
+- [x] Catálogo: abanico e inclinación
+- [x] Barra de progreso de lectura de 2 px bajo la cabecera
+- [x] Botones: brillo, hundimiento y magnetismo en escritorio
+- [x] Halo de luz que sigue al cursor en las tarjetas (escritorio)
+- [x] Cambio de categoría con transición cruzada y desplazamiento corto
+- [x] `prefers-reduced-motion`: sin parallax, inclinación, marquesinas ni conteos; solo fundidos
 
-## 5. Integraciones, build y despliegue
-- [x] `integrations/google-sheets.gs` con las nuevas columnas
-- [x] `SITE_URL` en un único sitio; canonical, OG, JSON-LD, sitemap y robots salen de ahí
-- [x] Build: hash en todo /assets (menos el PDF), CSS crítico inline, sin scripts inline (CSP)
-- [x] `vercel.json` con cabeceras, CSP, caché y URLs limpias; quitar Netlify
-- [x] Servidor local que aplica las cabeceras de `vercel.json`
+### Recursos
+- [x] Imágenes de las 6 categorías con el mismo tratamiento que los destacados (recortes, lienzo 4:3, sombra)
+- [x] Portada y dos páginas interiores del catálogo para la maqueta
 
-## 6. Revisión final (sección 13)
-- [x] Minimalismo: 5 secciones, < 180 palabras (por código), un texto de CTA, sin badges, un botón por tarjeta
+## 2. Revisión final (sección 8)
 - [x] Capturas de página completa en 320, 360, 375, 390, 414, 430, 768, 1024, 1280, 1440 y 1920, revisadas una a una
-- [x] Botón del hero visible en 375 × 667; sin desbordes ni solapes (por código)
-- [x] Segmentado, carrusel, acordeón y desplegable con táctil y teclado
-- [x] Formulario: 6 pasos, preselección, validaciones, endpoint vacío, endpoint simulado con UTM, doble clic
-- [x] Tracking: nada de Facebook sin consentimiento, Lead único con eventID, ViewContent, DescargaCatalogo y Contact
-- [x] Vercel: JSON válido, cero errores de CSP, caché, PDF, URLs limpias, canonical y OG
-- [x] Contenido: sin rayas, sin veterinaria, sin datos inventados, ortografía
-- [x] Lighthouse móvil ≥ 95 en las cuatro categorías, CLS 0, LCP < 2 s, INP < 200 ms
-- [x] HTML válido, consola limpia, teclado, `prefers-reduced-motion`, sin archivos muertos
-- [x] Repaso final como fisio que llega desde un anuncio
+- [x] Estructura: secciones, un CTA por sección, texto de asesoramiento idéntico, palabras contadas por código
+- [x] Contenido: sin rayas, sin veterinaria, sin datos inventados (testimonios marcados como ejemplo), ortografía
+- [x] Animaciones fluidas, CLS 0 y movimiento reducido
+- [x] Responsive: botón del hero en 375 × 667, sin desbordes, barra móvil
+- [x] Formulario y tracking: paso 1 ampliado, preselección, UTM, Lead único, DescargaCatalogo, nada de Facebook sin consentimiento
+- [x] Calidad: Lighthouse móvil ≥ 95, consola y CSP limpias, HTML válido, teclado, sin archivos muertos
 
-## 7. Entrega
-- [x] README (estructura, Google Sheets, píxel, dominio y `SITE_URL`, pendientes, decisiones)
+## 3. Entrega
+- [x] README actualizado (cambios y pendientes)
 - [x] Commit y push a `claude/vytalgroup-landing-meta-1y05py`
-- [x] Resumen con Lighthouse y lista de lo eliminado
+- [x] Resumen con Lighthouse
 
-## Notas finales
-- Resultado: Lighthouse 100 en las cuatro categorías (móvil y escritorio, landing y legales); LCP móvil 1,7 a 1,8 s; CLS 0; interacción más lenta 104 ms.
-- Pruebas: `npm test` (formulario y tracking 77/77, interfaz y reglas del brief 57/57, diseño 17/17 tamaños).
-- 177 palabras visibles, 5 secciones, un texto de CTA ("Lo quiero" en tarjetas, como pide el brief).
-- El vídeo de la diatermia no es de Javier: no se usa y se ha borrado. Se usa su foto.
+## 4. Resultado de la revisión final
+- 8 secciones (las 7 del brief + testimonios) y footer. Un CTA por sección: "Quiero asesoramiento" en todas y "Descargar catálogo" en el catálogo.
+- Palabras visibles, por código: 244 en secciones, 24 en la línea de confianza y 23 en cabecera y footer.
+- Capturas de las 11 anchuras (y horizontal) revisadas una a una. Ajustes que salieron de la revisión:
+  - titular del hero siempre en 3 líneas;
+  - "+" de Más equipos en la esquina de la imagen;
+  - descripción a tarjeta completa en móvil;
+  - 3 columnas desde 640 px;
+  - comparador con la columna de VytalGroup más ancha en 320 px;
+  - "Sin letra pequeña." en su propia línea.
+- Pruebas: formulario 89/89, interfaz 80/80, diseño 17/17. INP 112 ms. HTML válido (vnu). Sin rayas, veterinaria, ISO/FDA ni emojis.
+- Lighthouse:
+  - móvil: 99, 99 y 100 en rendimiento, y 100 en accesibilidad, buenas prácticas y SEO;
+  - escritorio y páginas legales: 100 en todo.
 
+## 5. v4: hero con material real de clientes (sin testimonios)
+- [x] Descargar y revisar el material: 7 fotos (una repetida) y un vídeo de 14 s. Se descartan las capturas de WhatsApp e Instagram por los datos personales que muestran.
+- [x] Quitar la sección de testimonios: HTML, CSS, pruebas, aviso de compilación y README.
+- [x] Hero limpio: sin recorte, rejilla de puntos ni barrido. Tarjeta "Clientes" en formato historia con el vídeo y 2 fotos.
+- [x] Vídeo: bucle sin saltos, 4:5, WebM + MP4 sin audio, pedido después de `load`, nunca con ahorro de datos. Foto de la misma sesión como LCP.
+- [x] Pausa (WCAG 2.2.2), pausa fuera de pantalla, anterior y siguiente, y movimiento reducido.
+- [x] Pruebas nuevas (UI 90/90, formulario 89/89, diseño 17/17) y capturas revisadas en todos los anchos, horizontal incluido.
+- [x] Lighthouse 100 en todo (móvil y escritorio), HTML válido, INP 120 ms.
+- [ ] Pendiente del cliente: permiso de imagen de las personas que aparecen.
