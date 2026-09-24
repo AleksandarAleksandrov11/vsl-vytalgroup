@@ -1,5 +1,5 @@
 // VytalGroup · landing
-// Cabecera y barra de progreso, escaparate del hero, entradas al hacer scroll
+// Cabecera y barra de progreso, entradas al hacer scroll
 // (bloques, titulares por líneas e imágenes), parallax y halo en escritorio, control segmentado,
 // carrusel, categorías, conteo, comparador, marquesina, acordeón, barra fija
 // en móvil, botones magnéticos, carga diferida del formulario y eventos del píxel.
@@ -48,22 +48,6 @@ window.addEventListener('scroll', () => {
   if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
 }, { passive: true });
 onScroll();
-
-// ------------------------------------------------------------------ hero: el equipo sigue un poco al cursor (escritorio)
-const stage = $('[data-stage]');
-if (stage && fine && !reduced) {
-  const zone = stage.closest('.hero');
-  let raf = 0;
-  zone.addEventListener('pointermove', (e) => {
-    cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(() => {
-      const r = zone.getBoundingClientRect();
-      stage.style.setProperty('--sx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
-      stage.style.setProperty('--sy', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
-    });
-  }, { passive: true });
-  zone.addEventListener('pointerleave', () => { stage.style.removeProperty('--sx'); stage.style.removeProperty('--sy'); });
-}
 
 // ------------------------------------------------------------------ entradas al hacer scroll
 // Solo se preparan los elementos que están por debajo de la primera pantalla: nada parpadea.

@@ -28,7 +28,8 @@
 <link rel="manifest" href="/site.webmanifest">
 <link rel="preload" href="/assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/assets/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" as="image" type="image/avif" imagesrcset="/assets/img/hero-vytamed-400.avif 400w, /assets/img/hero-vytamed-560.avif 560w, /assets/img/hero-vytamed-760.avif 760w" imagesizes="(min-width: 1280px) 520px, (min-width: 900px) 42vw, min(92vw, 460px)" fetchpriority="high">
+<link rel="preload" as="image" type="image/avif" href="/assets/img/hero-fondo-m-600.avif" media="(max-width: 899px)" fetchpriority="high">
+<link rel="preload" as="image" type="image/avif" imagesrcset="/assets/img/hero-fondo-960.avif 960w, /assets/img/hero-fondo-1600.avif 1600w" imagesizes="100vw" media="(min-width: 900px)" fetchpriority="high">
 <link rel="stylesheet" href="/assets/css/base.css" data-inline>
 <link rel="stylesheet" href="/assets/css/landing.css" data-inline>
 <script defer src="/config.js"></script>
@@ -77,6 +78,13 @@
 <main id="main">
   <!-- 1 · Hero -->
   <section class="hero" id="inicio" aria-labelledby="hero-title">
+    <!-- Fondo: foto real de la diatermia VytalGroup en una clínica (catálogo), difuminada y con velo marino -->
+    <picture class="hero__bg" aria-hidden="true">
+      <source media="(max-width: 899px)" type="image/avif" srcset="/assets/img/hero-fondo-m-600.avif 600w" sizes="100vw">
+      <source media="(max-width: 899px)" type="image/webp" srcset="/assets/img/hero-fondo-m-600.webp 600w" sizes="100vw">
+      <source type="image/avif" srcset="/assets/img/hero-fondo-960.avif 960w, /assets/img/hero-fondo-1600.avif 1600w" sizes="100vw">
+      <img src="/assets/img/hero-fondo-1600.webp" srcset="/assets/img/hero-fondo-960.webp 960w, /assets/img/hero-fondo-1600.webp 1600w" sizes="100vw" width="1600" height="922" alt="" fetchpriority="high">
+    </picture>
     <div class="wrap hero__grid">
       <div class="hero__copy">
         <h1 class="h1" id="hero-title"><span class="w" style="--i:0"><span>Equipos</span></span> <span class="w" style="--i:1"><span>médicos</span></span> <span class="w" style="--i:2"><span>de</span></span> <span class="w" style="--i:3"><span>alta</span></span> <span class="w" style="--i:4"><span>calidad.</span></span> <em><span class="w" style="--i:5"><span>Sin</span></span> <span class="w" style="--i:6"><span>letra</span></span> <span class="w" style="--i:7"><span>pequeña.</span></span></em></h1>
@@ -84,23 +92,6 @@
         <div class="hero__actions">
           <a class="btn btn--primary btn--lg hero__cta" href="#asesoramiento" data-cta data-magnetic>Quiero asesoramiento</a>
           <a class="link hero__more" href="#mas-equipos">Ver catálogo<svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        </div>
-      </div>
-      <div class="hero__visual">
-        <!-- Escaparate: la diatermia flotando, con ondas tipo ecografía que salen de ella -->
-        <div class="stage" data-stage>
-          <span class="stage__wave" aria-hidden="true"></span>
-          <span class="stage__wave" aria-hidden="true"></span>
-          <span class="stage__wave" aria-hidden="true"></span>
-          <span class="stage__glow" aria-hidden="true"></span>
-          <picture class="stage__device">
-            <source type="image/avif" srcset="/assets/img/hero-vytamed-400.avif 400w, /assets/img/hero-vytamed-560.avif 560w, /assets/img/hero-vytamed-760.avif 760w" sizes="(min-width: 1280px) 520px, (min-width: 900px) 42vw, min(92vw, 460px)">
-            <img class="stage__img" src="/assets/img/hero-vytamed-560.webp" srcset="/assets/img/hero-vytamed-400.webp 400w, /assets/img/hero-vytamed-560.webp 560w, /assets/img/hero-vytamed-760.webp 760w" sizes="(min-width: 1280px) 520px, (min-width: 900px) 42vw, min(92vw, 460px)" width="776" height="733" alt="Diatermia Multifunción VytaMeD, con pantalla táctil y mapa corporal" fetchpriority="high">
-          </picture>
-          <picture class="stage__refl" aria-hidden="true">
-            <source type="image/avif" srcset="/assets/img/hero-vytamed-400.avif 400w, /assets/img/hero-vytamed-560.avif 560w, /assets/img/hero-vytamed-760.avif 760w" sizes="(min-width: 1280px) 520px, (min-width: 900px) 42vw, min(92vw, 460px)">
-            <img src="/assets/img/hero-vytamed-560.webp" srcset="/assets/img/hero-vytamed-400.webp 400w, /assets/img/hero-vytamed-560.webp 560w, /assets/img/hero-vytamed-760.webp 760w" sizes="(min-width: 1280px) 520px, (min-width: 900px) 42vw, min(92vw, 460px)" width="776" height="733" alt="">
-          </picture>
         </div>
       </div>
     </div>
@@ -265,11 +256,11 @@
   <!-- 4 · Por qué VytalGroup -->
   <section class="sec why" id="por-que" aria-labelledby="why-title">
     <div class="wrap">
-      <div class="sec__head">
-        <h2 class="h2" id="why-title" data-lines>Sin timos. <em>Sin letra pequeña.</em></h2>
-        <p class="why__story" data-rv>Me quemé en jornadas de 12 horas.<br>Monté VytalGroup para que no te engañen.</p>
-      </div>
       <div class="why__grid">
+        <div class="why__head">
+          <h2 class="h2" id="why-title" data-lines>Sin timos. <em>Sin letra pequeña.</em></h2>
+          <p class="why__story" data-rv>Me quemé en jornadas de 12 horas.<br>Monté VytalGroup para que no te engañen.</p>
+        </div>
         <figure class="why__photo" data-rv>
           <picture>
             <source type="image/avif" srcset="/assets/img/javier-320.avif 320w, /assets/img/javier-384.avif 384w" sizes="(min-width: 1024px) 400px, 320px">
@@ -280,7 +271,7 @@
             <li><strong><span data-count="2">2</span> años</strong><span>de garantía</span></li>
             <li><strong><span data-count="0" data-from="9">0</span> sorpresas</strong><span>en mantenimiento</span></li>
             <li><strong>Fisioterapeutas</strong><span>te asesoran, no comerciales</span></li>
-          </ul>
+        </ul>
       </div>
       <div class="cmp" data-cmp>
         <table class="cmp__table">

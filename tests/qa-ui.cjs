@@ -256,35 +256,39 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await ctx.close();
   });
 
-  await block('Hero: escaparate', async () => {
-    const { ctx, p, logs } = await page(b, {});
-    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
-    await p.waitForTimeout(2600);
-    const r = await p.evaluate(() => {
-      const img = document.querySelector('.stage__img');
-      const pre = document.querySelector('link[rel="preload"][as="image"]');
-      const hero = getComputedStyle(document.querySelector('#inicio'));
-      return {
-        alt: img.alt, prio: img.getAttribute('fetchpriority'), loaded: img.complete && img.naturalWidth > 0,
-        preload: !!pre && /hero-vytamed/.test(pre.getAttribute('imagesrcset')),
-        dark: /rgb\(1[0-9], 2[0-9], 4[0-9]\)|gradient/.test(hero.backgroundImage + hero.backgroundColor),
-        h1: getComputedStyle(document.querySelector('.h1')).color,
-        waves: [...document.querySelectorAll('.stage__wave')].map((w) => getComputedStyle(w).animationName).join(','),
-        waveHidden: [...document.querySelectorAll('.stage__wave')].every((w) => w.getAttribute('aria-hidden') === 'true'),
-        float: getComputedStyle(document.querySelector('.stage__device')).animationName,
-        logo: getComputedStyle(document.querySelector('.hd .logo')).getPropertyValue('--logo-a').trim(),
-        media: [...document.querySelectorAll('video, .reel')].length,
-      };
-    });
-    ok(r.alt && r.prio === 'high' && r.loaded && r.preload, 'Hero: la diatermia es la imagen principal, precargada (LCP)', r.alt);
-    ok(r.dark && r.h1 === 'rgb(255, 255, 255)' && r.logo.toUpperCase() === '#FFF', 'Hero: fondo oscuro, titular y logo de cabecera en blanco', JSON.stringify({ h1: r.h1, logo: r.logo }));
-    ok(r.waves === 'wave,wave,wave' && r.waveHidden && r.float === 'floaty', 'Hero: ondas tipo ecografía en bucle y equipo flotando (decorativo, oculto a lectores)', `${r.waves} · ${r.float}`);
-    ok(r.media === 0, 'Hero: sin fotos ni vídeos de clientes');
-    await p.mouse.move(1300, 300, { steps: 4 }); await p.waitForTimeout(300);
-    const sx = await p.evaluate(() => parseFloat(document.querySelector('[data-stage]').style.getPropertyValue('--sx')));
-    ok(sx > 0.2, 'Hero: el equipo sigue un poco al cursor en escritorio', String(sx));
-    ok(!logs.length, 'Hero: consola limpia', logs.join(' / '));
-    await ctx.close();
+  await block('Hero: foto de fondo', async () => {
+    for (const [w, h, m] of [[1440, 900, false], [390, 844, true]]) {
+      const { ctx, p, logs } = await page(b, { width: w, height: h, mobile: m });
+      await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+      await p.waitForTimeout(1600);
+      const r = await p.evaluate(() => {
+        const img = document.querySelector('.hero__bg img');
+        const bg = document.querySelector('.hero__bg');
+        const hero = document.querySelector('#inicio');
+        const veil = getComputedStyle(hero, '::before');
+        const box = bg.getBoundingClientRect();
+        const hb = hero.getBoundingClientRect();
+        return {
+          alt: img.getAttribute('alt'), hidden: bg.getAttribute('aria-hidden'), prio: img.getAttribute('fetchpriority'),
+          loaded: img.complete && img.naturalWidth > 0, src: img.currentSrc.split('/').pop(),
+          preload: [...document.querySelectorAll('link[rel="preload"][as="image"]')].map((l) => l.getAttribute('media')).join(' | '),
+          cover: getComputedStyle(img).objectFit === 'cover' && Math.abs(box.width - hb.width) < 2 && Math.abs(box.height - hb.height) < 2,
+          veil: /linear-gradient/.test(veil.backgroundImage) && /rgba\(8, 20, 34/.test(veil.backgroundImage),
+          filter: getComputedStyle(img).filter,
+          h1: getComputedStyle(document.querySelector('.h1')).color,
+          logo: getComputedStyle(document.querySelector('.hd .logo')).getPropertyValue('--logo-a').trim(),
+          media: document.querySelectorAll('#inicio video, .reel, .stage, .hero__visual').length,
+          anim: [...document.querySelectorAll('#inicio *')].map((e) => getComputedStyle(e).animationName).filter((n) => n !== 'none' && n !== 'word-up' && n !== 'fade-up' && n !== 'marquee'),
+          tall: Math.round(hb.height) >= Math.min(innerHeight, 980) - 2,
+        };
+      });
+      ok(r.alt === '' && r.hidden === 'true' && r.prio === 'high' && r.loaded && /hero-fondo-(m-600|960|1600)/.test(r.src) && r.preload === '(max-width: 899px) | (min-width: 900px)', `Hero ${w}px: foto de clínica de fondo (decorativa), prioritaria y precargada por tamaño`, r.src);
+      ok(r.cover && r.veil && r.filter === 'none' && r.tall, `Hero ${w}px: la foto cubre todo el hero, velo marino encima y difuminado ya en el archivo (sin filter)`, JSON.stringify({ cover: r.cover, veil: r.veil, filter: r.filter, tall: r.tall }));
+      ok(r.h1 === 'rgb(255, 255, 255)' && r.logo.toUpperCase() === '#FFF', `Hero ${w}px: titular y logo de cabecera en blanco`, JSON.stringify({ h1: r.h1, logo: r.logo }));
+      ok(r.media === 0 && !r.anim.length, `Hero ${w}px: solo foto, sin equipo recortado, ondas, vídeos ni fotos de clientes`, r.anim.join(','));
+      ok(!logs.length, `Hero ${w}px: consola limpia`, logs.join(' / '));
+      await ctx.close();
+    }
   });
 
   // Mismo sistema en todos los dispositivos: titulares y CTA de sección centrados
@@ -300,9 +304,25 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
         const hero = getComputedStyle(document.querySelector('.hero__copy')).textAlign;
         return { heads, ctas, hero };
       });
-      const badH = r.heads.filter(([, ta, o]) => ta !== 'center' || o > 2);
+      // Excepción en escritorio: el titular de Javier va a la derecha de su foto, alineado a la izquierda
+      const badH = r.heads.filter(([id, ta, o]) => !(!m && id === 'why-title') && (ta !== 'center' || o > 2));
       const badC = r.ctas.filter(([, o]) => o > 2);
       ok(!badH.length && !badC.length && r.hero === (m ? 'center' : 'start'), `Alineación ${w}px: titulares y CTA de sección centrados${m ? ', hero centrado' : ', hero a la izquierda'}`, JSON.stringify({ badH, badC, hero: r.hero }));
+      const why = await p.evaluate(() => {
+        const box = (s) => document.querySelector(s).getBoundingClientRect();
+        const ph = box('.why__photo'); const t = box('#why-title'); const st = box('.why__story'); const li = box('.why__list');
+        const story = document.querySelector('.why__story');
+        return {
+          right: t.left >= ph.right + 20 && st.left >= ph.right + 20 && li.left >= ph.right + 20,
+          below: t.top >= ph.bottom - 2 || ph.top >= st.bottom - 2,
+          ta: [getComputedStyle(document.querySelector('#why-title')).textAlign, getComputedStyle(story).textAlign],
+          lines: story.innerHTML.split('<br>').map((x) => x.trim()),
+          borders: [...document.querySelectorAll('.why__list li, .cmp__table td, .cmp__table th, .cmp__table tr')].map((e) => { const c = getComputedStyle(e); return [c.borderTopWidth, c.borderBottomWidth].join(' '); }).filter((x) => x !== '0px 0px').length,
+        };
+      });
+      if (m) ok(why.below && why.ta.join() === 'center,center', `Por qué ${w}px: titular, historia y cifras centrados bajo la foto`, JSON.stringify(why));
+      else ok(why.right && why.ta.join() === 'left,left', `Por qué ${w}px: titular, historia y cifras a la derecha de la foto, alineados a la izquierda`, JSON.stringify(why));
+      ok(why.lines.length === 2 && why.lines[1] === 'Monté VytalGroup para que no te engañen.' && !why.borders, `Por qué ${w}px: historia en dos líneas y sin líneas separadoras en cifras ni comparador`, JSON.stringify({ lines: why.lines, borders: why.borders }));
       await ctx.close();
     }
   });
@@ -350,7 +370,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await p.waitForTimeout(300);
     const r = await p.evaluate(() => ({
       word: getComputedStyle(document.querySelector('.h1 .w > span')).transform,
-      deal: [...document.querySelectorAll('.stage, .stage__device, .stage__wave, .stage__glow')].map((e) => getComputedStyle(e).animationName).filter((n) => n !== 'none').join(',') || 'none',
+      deal: [...document.querySelectorAll('.hero__lead, .hero__actions, .ticker')].map((e) => getComputedStyle(e).animationName).filter((n) => n !== 'none').join(',') || 'none',
       rv: document.querySelectorAll('.rv').length,
       smooth: getComputedStyle(document.documentElement).scrollBehavior,
       marquee: [...document.querySelectorAll('.ticker__track')].map((t) => getComputedStyle(t).animationName).join(','),
@@ -366,8 +386,8 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(!st.py, 'Movimiento reducido: sin parallax', JSON.stringify(st));
     const { ctx: c2, p: p2 } = await page(b, {});
     await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
-    const anim = await p2.evaluate(() => ({ deal: getComputedStyle(document.querySelector('.stage')).animationName, kb: getComputedStyle(document.querySelector('.stage__glow')).animationName, word: getComputedStyle(document.querySelector('.h1 .w > span')).animationName, rv: document.querySelectorAll('.rv').length, lines: document.querySelectorAll('[data-lines].is-split').length, rvi: document.querySelectorAll('.rvi').length }));
-    ok(anim.deal === 'stage-in' && anim.kb === 'glow' && anim.word === 'word-up' && anim.rv > 5 && anim.lines >= 5 && anim.rvi >= 6, 'Animaciones: entrada del escaparate con halo que respira, titular por palabras, titulares por líneas y entradas al hacer scroll', JSON.stringify(anim));
+    const anim = await p2.evaluate(() => ({ deal: [...document.querySelectorAll('.hero__lead, .hero__actions, .ticker')].map((e) => getComputedStyle(e).animationName).join(','), word: getComputedStyle(document.querySelector('.h1 .w > span')).animationName, rv: document.querySelectorAll('.rv').length, lines: document.querySelectorAll('[data-lines].is-split').length, rvi: document.querySelectorAll('.rvi').length }));
+    ok(anim.deal === 'fade-up,fade-up,fade-up' && anim.word === 'word-up' && anim.rv > 5 && anim.lines >= 5 && anim.rvi >= 6, 'Animaciones: titular por palabras, entrada suave del resto del hero, titulares por líneas y entradas al hacer scroll', JSON.stringify(anim));
     await scrollToSel(p2, '.why__photo', 100); await p2.waitForTimeout(400);
     const w = await p2.evaluate(() => ({ py: document.querySelector('.why__photo img').style.getPropertyValue('--py'), lines: new Set([...document.querySelectorAll('#por-que [data-lines] .w')].map((x) => x.style.getPropertyValue('--i'))).size, magnetic: document.querySelectorAll('[data-magnetic]').length }));
     ok(w.py && w.py !== '0.0px' && w.lines >= 1 && w.magnetic >= 6, 'Animaciones: parallax leve en escritorio y botones magnéticos', JSON.stringify(w));
