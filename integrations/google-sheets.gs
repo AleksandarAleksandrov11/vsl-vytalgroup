@@ -52,7 +52,9 @@ const COLUMNS = [
   ['event_id', 'event_id'],
   ['estado', 'Estado'],
 ];
-const REQUIRED = ['nombre', 'telefono', 'email', 'equipo', 'perfil', 'plazo', 'consentimiento', 'event_id'];
+// El formulario solo pide lo imprescindible: equipo, nombre y WhatsApp (más el consentimiento).
+// Email, Perfil y Plazo se mantienen como columnas por si se vuelven a pedir; llegan vacías.
+const REQUIRED = ['nombre', 'telefono', 'equipo', 'consentimiento', 'event_id'];
 
 // ------------------------------------------------------------------ entrada
 function doPost(e) {
@@ -65,7 +67,7 @@ function doPost(e) {
 
     const missing = REQUIRED.filter(function (k) { return !String(data[k] || '').trim(); });
     if (missing.length) return json_({ ok: false, error: 'Faltan campos: ' + missing.join(', ') });
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(data.email))) return json_({ ok: false, error: 'Email no válido' });
+    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(data.email))) return json_({ ok: false, error: 'Email no válido' });
 
     lock.waitLock(20000);
     const sheet = getSheet_();
@@ -143,11 +145,8 @@ function notify_(d) {
     '',
     'Nombre: ' + d.nombre,
     'Teléfono: ' + d.telefono,
-    'Email: ' + d.email,
     'Equipo: ' + d.equipo,
     'Modelo: ' + (d.modelo || 'No aplica'),
-    'Perfil: ' + d.perfil,
-    'Plazo: ' + d.plazo,
     'Campaña: ' + [d.utm_source, d.utm_medium, d.utm_campaign].filter(String).join(' / '),
     'Fecha: ' + d.fecha,
   ];
@@ -155,7 +154,6 @@ function notify_(d) {
     to: NOTIFY_EMAIL,
     subject: 'Nuevo lead: ' + d.nombre + ' (' + (d.modelo || d.equipo) + ')',
     body: lines.join('\n'),
-    replyTo: d.email,
   });
 }
 

@@ -14,19 +14,20 @@ const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><style>
 @font-face { font-family: Geist; src: url(${f('assets/fonts/geist.woff2')}); font-weight: 400 600; }
 @font-face { font-family: "Instrument Serif"; src: url(${f('assets/fonts/instrument-serif-italic.woff2')}); font-style: italic; }
 * { margin: 0; box-sizing: border-box; }
-body { width: 1200px; height: 630px; overflow: hidden; background: #FAFBFC; font-family: Geist; color: #0B1929; position: relative; }
-body::before { content: ""; position: absolute; right: -160px; top: -40px; width: 820px; height: 820px; border-radius: 50%; background: radial-gradient(closest-side, #FFF, rgba(255,255,255,0)); }
-.logo { position: absolute; left: 72px; top: 64px; height: 30px; width: auto; aspect-ratio: 1117/171; --logo-m: url(#vgl); --logo-a: #102850; --logo-b: #48A0A8; }
+body { width: 1200px; height: 630px; overflow: hidden; background: radial-gradient(ellipse 55% 75% at 78% 52%, #15435C 0%, #0E2537 46%, #0B1929 76%); font-family: Geist; color: #FFF; position: relative; }
+body::before { content: ""; position: absolute; right: 60px; top: 80px; width: 470px; height: 470px; border-radius: 50%; background: radial-gradient(closest-side, rgba(92,200,200,.4), rgba(92,200,200,0)); }
+body::after { content: ""; position: absolute; right: 90px; top: 110px; width: 410px; height: 410px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px rgba(127,211,214,.35); }
+.logo { position: absolute; left: 72px; top: 64px; height: 30px; width: auto; aspect-ratio: 1117/171; --logo-m: url(#vgd); --logo-a: #FFF; --logo-b: #5CC8C8; }
 .lg-m { fill: var(--logo-m); } .lg-a { fill: var(--logo-a); } .lg-b { fill: var(--logo-b); }
 h1 { position: absolute; left: 72px; top: 146px; width: 640px; font-size: 66px; line-height: 1.02; letter-spacing: -.04em; font-weight: 560; }
-h1 em { display: block; font-family: "Instrument Serif"; font-style: italic; font-weight: 400; font-size: 1.08em; letter-spacing: -.012em; }
-p { position: absolute; left: 72px; top: 396px; width: 600px; font-size: 25px; line-height: 1.35; color: #3E4C5C; letter-spacing: -.01em; }
-.trust { top: 510px; width: auto; font-size: 18px; color: #5E6C7B; }
-img { position: absolute; right: 48px; top: 104px; width: 450px; }
+h1 em { display: block; font-family: "Instrument Serif"; font-style: italic; font-weight: 400; font-size: 1.08em; letter-spacing: -.012em; color: #8FDCDC; }
+p { position: absolute; left: 72px; top: 396px; width: 600px; font-size: 25px; line-height: 1.35; color: rgba(255,255,255,.8); letter-spacing: -.01em; }
+.trust { top: 510px; width: auto; font-size: 18px; color: rgba(255,255,255,.6); }
+img { position: absolute; right: 60px; top: 110px; width: 460px; z-index: 1; filter: drop-shadow(0 30px 40px rgba(0,0,0,.45)); }
 </style></head><body>${sprite}
 <svg class="logo" viewBox="0 0 1117 171"><use href="#logo"/></svg>
 <h1>Equipos médicos de alta calidad. <em>Sin letra pequeña.</em></h1>
-<p>Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesora Javier, fisioterapeuta.</p>
+<p>Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas, no comerciales.</p>
 <p class="trust">Certificados CE / MDR · 2 años de garantía · Envíos a UE, USA y LATAM</p>
 <img src="${f('assets/img/hero-vytamed-760.webp')}" alt="">
 </body></html>`;

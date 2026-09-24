@@ -1,14 +1,13 @@
 // VytalGroup · landing
-// Cabecera y barra de progreso, tarjeta "Clientes" del hero (reel.js), entradas al hacer scroll
+// Cabecera y barra de progreso, escaparate del hero, entradas al hacer scroll
 // (bloques, titulares por líneas e imágenes), parallax y halo en escritorio, control segmentado,
-// carrusel, categorías, conteo, comparador, maqueta del catálogo, marquesina, acordeón, barra fija
+// carrusel, categorías, conteo, comparador, marquesina, acordeón, barra fija
 // en móvil, botones magnéticos, carga diferida del formulario y eventos del píxel.
 // Solo se animan transform, opacity y variables CSS. Con prefers-reduced-motion quedan los fundidos.
 
 import { captureAttribution } from './attribution.js';
 import { initConsent } from './consent.js';
 import { initTracking, viewContent, catalogDownload, contact } from './tracking.js';
-import { initReel } from './reel.js';
 
 const html = document.documentElement;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -28,20 +27,13 @@ const header = $('[data-header]');
 const progress = $('[data-progress-bar]');
 const plx = fine && desktop.matches && !reduced ? $$('[data-parallax]') : [];
 plx.forEach((img) => { if (img.closest('.why__photo')) img.style.setProperty('--ps', '1.1'); });
-let lastY = window.scrollY;
 let ticking = false;
 function onScroll() {
   const y = window.scrollY;
+  // La cabecera es fija y siempre visible; al bajar se compacta y toma fondo
   header.classList.toggle('is-scrolled', y > 8);
-  const dy = y - lastY;
-  if (Math.abs(dy) > 6) {
-    // En móvil se oculta al bajar y reaparece al subir
-    header.classList.toggle('is-hidden', !desktop.matches && dy > 0 && y > 320 && !header.contains(document.activeElement));
-    lastY = y;
-  }
   const max = document.documentElement.scrollHeight - window.innerHeight;
   progress.style.setProperty('--p', max > 0 ? Math.min(1, y / max).toFixed(4) : 0);
-  progress.classList.toggle('is-top', header.classList.contains('is-hidden'));
   // Parallax vertical muy leve (6 % del recorrido, máx. 16 px) medido sobre el contenedor
   const vh = window.innerHeight;
   plx.forEach((img) => {
@@ -57,9 +49,21 @@ window.addEventListener('scroll', () => {
 }, { passive: true });
 onScroll();
 
-// ------------------------------------------------------------------ tarjeta "Clientes" del hero
-const reelEl = $('[data-reel]');
-if (reelEl) initReel(reelEl, { reduced, tilt: fine && desktop.matches && !reduced });
+// ------------------------------------------------------------------ hero: el equipo sigue un poco al cursor (escritorio)
+const stage = $('[data-stage]');
+if (stage && fine && !reduced) {
+  const zone = stage.closest('.hero');
+  let raf = 0;
+  zone.addEventListener('pointermove', (e) => {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const r = zone.getBoundingClientRect();
+      stage.style.setProperty('--sx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+      stage.style.setProperty('--sy', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+    });
+  }, { passive: true });
+  zone.addEventListener('pointerleave', () => { stage.style.removeProperty('--sx'); stage.style.removeProperty('--sy'); });
+}
 
 // ------------------------------------------------------------------ entradas al hacer scroll
 // Solo se preparan los elementos que están por debajo de la primera pantalla: nada parpadea.
@@ -257,43 +261,6 @@ if (cmp && reveal && !reduced && belowFold(cmp)) {
   io.observe(cmp);
 }
 
-// ------------------------------------------------------------------ catálogo: abanico al entrar e inclinación con el cursor
-const book = $('[data-book]');
-if (book) {
-  if (hasIO && !reduced) {
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
-      book.classList.add('is-open');
-    }, { threshold: .4 });
-    io.observe(book);
-  } else {
-    book.classList.add('is-open');
-  }
-  if (fine && !reduced) {
-    const zone = book.closest('section');
-    const stack = $('.book__stack', book);
-    let raf = 0;
-    zone.addEventListener('pointermove', (e) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const r = zone.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - 0.5;
-        const y = (e.clientY - r.top) / r.height - 0.5;
-        book.classList.add('is-tilting');
-        stack.style.setProperty('--ry', `${(x * 14).toFixed(2)}deg`);
-        stack.style.setProperty('--rx', `${(-y * 10).toFixed(2)}deg`);
-      });
-    }, { passive: true });
-    zone.addEventListener('pointerleave', () => {
-      cancelAnimationFrame(raf);
-      book.classList.remove('is-tilting');
-      stack.style.removeProperty('--rx');
-      stack.style.removeProperty('--ry');
-    });
-  }
-}
-
 // ------------------------------------------------------------------ marquesina: en pausa fuera de pantalla
 if (hasIO) {
   const io = new IntersectionObserver((entries) => {
@@ -367,6 +334,19 @@ if (hasIO) {
 ['pointerdown', 'focusin'].forEach((ev) => formSec.addEventListener(ev, loadForm, { once: true }));
 
 // Al llegar al formulario desde un CTA, el foco pasa a la pregunta actual
+// Enlaces internos: desplazamiento suave solo en saltos cortos; en los largos (p. ej. de una
+// tarjeta al formulario) se va directo, porque un scroll suave de miles de píxeles en un móvil
+// modesto tarda y hace que la página responda tarde si el usuario ya está tocando o escribiendo.
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a || e.defaultPrevented || a.getAttribute('href').length < 2) return;
+  const target = document.getElementById(a.getAttribute('href').slice(1));
+  if (!target) return;
+  e.preventDefault();
+  const dist = Math.abs(target.getBoundingClientRect().top);
+  target.scrollIntoView({ behavior: reduced || dist > window.innerHeight * 1.5 ? 'instant' : 'smooth', block: 'start' });
+});
+
 function afterScroll(fn) {
   let done = false;
   const go = () => { if (!done) { done = true; fn(); } };
@@ -383,15 +363,14 @@ document.addEventListener('click', (e) => {
 });
 
 // ------------------------------------------------------------------ barra fija en móvil
-// Aparece al pasar el hero y se oculta en el catálogo (para no competir con "Descargar catálogo")
-// y en el formulario. El icono de WhatsApp se oculta cuando se ve el enlace de Dudas.
+// Aparece al pasar el hero y se oculta con el formulario en pantalla.
+// El icono de WhatsApp se oculta cuando se ve el enlace de Dudas.
 const bar = $('[data-mbar]');
 const faqWa = $('[data-faq-wa]');
 const hero = $('#inicio');
-const catalogSec = $('#catalogo');
-const vis = { hero: true, form: false, catalog: false, faqWa: false };
+const vis = { hero: true, form: false, faqWa: false };
 function paintBar() {
-  const on = !vis.hero && !vis.form && !vis.catalog;
+  const on = !vis.hero && !vis.form;
   bar.classList.toggle('is-on', on);
   bar.inert = !on;
   bar.classList.toggle('no-wa', vis.faqWa);
@@ -401,12 +380,11 @@ if (hasIO) {
     entries.forEach((e) => {
       if (e.target === hero) vis.hero = e.isIntersecting;
       else if (e.target === formSec) vis.form = e.isIntersecting;
-      else if (e.target === catalogSec) vis.catalog = e.isIntersecting;
       else if (e.target === faqWa) vis.faqWa = e.isIntersecting;
     });
     paintBar();
   }, { rootMargin: '0px 0px -12% 0px' });
-  [hero, formSec, catalogSec, faqWa].forEach((el) => el && io.observe(el));
+  [hero, formSec, faqWa].forEach((el) => el && io.observe(el));
 }
 
 // ------------------------------------------------------------------ botones magnéticos (escritorio)

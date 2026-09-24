@@ -18,7 +18,7 @@ import { SITE_URL } from '../site.config.mjs';
 const ROOT = process.cwd();
 const DIST = join(ROOT, 'dist');
 const PAGES = ['index.html', 'aviso-legal.html', 'privacidad.html', 'cookies.html'];
-const HASHED = ['assets/brand', 'assets/fonts', 'assets/img', 'assets/video'];
+const HASHED = ['assets/brand', 'assets/fonts', 'assets/img'];
 const PDF = 'assets/docs/catalogo-vytalgroup-2026.pdf';
 const TARGETS = { chrome: 100 << 16, safari: 15 << 16, ios_saf: 15 << 16, firefox: 100 << 16, edge: 100 << 16, samsung: 16 << 16 };
 const BUDGET = { initial: 250, js: 30, css: 25 };
@@ -138,8 +138,7 @@ writeFileSync(join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${S
 
 // ---------------------------------------------------------------- informe y presupuestos
 const file = (p) => readFileSync(join(DIST, p.replace(/^\//, '')));
-// Foto de la tarjeta "Clientes" en el peor caso de móvil (pantalla de densidad 3: 800w)
-const heroMobile = map.get('/assets/img/cliente-diatermia-800.avif');
+const heroMobile = map.get('/assets/img/hero-vytamed-760.avif');
 const initial = [
   ['index.html (con CSS inline)', gz(file('index.html'))],
   ['config.js', gz(file('config.js'))],
@@ -161,7 +160,6 @@ const cssIndex = gz(Buffer.from(inlineCss['index.html']));
 console.log(`JS propio total (gzip): ${kb(js)} (presupuesto ${BUDGET.js} KB)`);
 console.log(`CSS de la landing (gzip): ${kb(cssIndex)} (presupuesto ${BUDGET.css} KB)`);
 console.log(`Catálogo PDF: ${kb(statSync(join(DIST, PDF)).size)}`);
-console.log(`Vídeo del hero (se pide después de load; nunca con ahorro de datos): ${['webm', 'mp4'].map((x) => `${x} ${kb(file(map.get(`/assets/video/cliente-diatermia.${x}`)).length)}`).join(' · ')}`);
 const over = [total > BUDGET.initial * 1024 && 'carga inicial', js > BUDGET.js * 1024 && 'JS', cssIndex > BUDGET.css * 1024 && 'CSS'].filter(Boolean);
 if (over.length) throw new Error(`Presupuesto superado: ${over.join(', ')}`);
 console.log('\nListo: dist/');

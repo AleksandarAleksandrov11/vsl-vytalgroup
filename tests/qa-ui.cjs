@@ -49,7 +49,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       nav: document.querySelectorAll('nav').length,
       ids: [...document.querySelectorAll('main > section')].map((x) => x.id),
     }));
-    ok(s.ids.join(',') === 'inicio,equipos,mas-equipos,por-que,catalogo,dudas,asesoramiento' && s.footers === 1, 'Estructura: las 7 secciones del brief (sin testimonios) y el footer', s.ids.join(', '));
+    ok(s.ids.join(',') === 'inicio,equipos,mas-equipos,por-que,dudas,asesoramiento' && s.footers === 1, 'Estructura: 6 secciones (sin testimonios ni sección de catálogo) y el footer', s.ids.join(', '));
     ok(s.nav === 0, 'Minimalismo: sin menú de navegación');
     // Palabras visibles del contenido: sin cabecera, footer, respuestas del acordeón, formulario ni la línea de confianza
     const words = await p.evaluate(() => {
@@ -69,8 +69,8 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(words.main <= 260, 'Minimalismo: unas 250 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
     // Un CTA por sección con el mismo texto; el catálogo es la única excepción
     const perSec = await p.$$eval('main > section:not(#asesoramiento)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
-    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento', 'por-que:Quiero asesoramiento', 'catalogo:Descargar catálogo', 'dudas:Quiero asesoramiento'];
-    ok(perSec.join('|') === want.join('|'), 'CTA: uno por sección, "Quiero asesoramiento" en todas y "Descargar catálogo" en el catálogo', perSec.join(' | '));
+    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento+Descargar catálogo', 'por-que:Quiero asesoramiento', 'dudas:Quiero asesoramiento'];
+    ok(perSec.join('|') === want.join('|'), 'CTA: "Quiero asesoramiento" en cada sección y "Descargar catálogo" junto a él en Más equipos', perSec.join(' | '));
     const cta = await p.$$eval('[data-cta]', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
     ok(cta.length === 1 && cta[0] === 'Quiero asesoramiento', 'CTA: texto de asesoramiento idéntico en todas partes (cabecera, secciones y barra móvil)', cta.join(' | '));
     const badges = await p.evaluate(() => [...document.querySelectorAll('[class]')].map((e) => String(e.className.baseVal ?? e.className)).filter((c) => /badge|chip|tag\b|pill|label--|ribbon/.test(c)));
@@ -95,10 +95,8 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(r.cta <= 667 && r.title >= r.head, 'Hero: el botón se ve sin hacer scroll en 375 × 667 y la cabecera no tapa el titular', JSON.stringify(r));
     ok(await p.evaluate(() => getComputedStyle(document.querySelector('[data-header]'), '::before').opacity === '0'), 'Cabecera: transparente al inicio');
     await scrollTo(p, 900); await p.waitForTimeout(200);
-    await scrollTo(p, 1200); await p.waitForTimeout(700);
-    ok(await p.evaluate(() => document.querySelector('[data-header]').classList.contains('is-hidden') && document.querySelector('[data-header]').getBoundingClientRect().bottom <= 1), 'Cabecera móvil: se oculta al bajar');
-    await scrollTo(p, 1000); await p.waitForTimeout(700);
-    ok(await p.evaluate(() => { const h = document.querySelector('[data-header]'); return !h.classList.contains('is-hidden') && h.classList.contains('is-scrolled') && getComputedStyle(h, '::before').opacity === '1'; }), 'Cabecera móvil: reaparece al subir, con fondo y desenfoque');
+    await scrollTo(p, 1800); await p.waitForTimeout(700);
+    ok(await p.evaluate(() => { const h = document.querySelector('[data-header]'); const r = h.getBoundingClientRect(); return r.top === 0 && r.bottom > 40 && getComputedStyle(h).position === 'fixed' && h.classList.contains('is-scrolled') && getComputedStyle(h, '::before').opacity === '1'; }), 'Cabecera móvil: fija y siempre visible al bajar, con fondo y desenfoque');
     await ctx.close();
   });
 
@@ -135,8 +133,8 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const { ctx, p } = await page(b, { width: 390, height: 844, mobile: true });
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
     await scrollToSel(p, '#equipos'); await p.waitForTimeout(900);
-    const r = await p.evaluate(() => { const t = document.querySelector('#panel-eco .cards'); const c = t.children; return { snap: getComputedStyle(t).scrollSnapType, second: Math.round(c[1].getBoundingClientRect().left), vw: innerWidth, dots: getComputedStyle(document.querySelector('#panel-eco .dots')).display }; });
-    ok(r.snap.startsWith('x') && r.second < r.vw && r.dots === 'flex', 'Carrusel: scroll-snap, asoma la siguiente tarjeta y puntos visibles', JSON.stringify(r));
+    const r = await p.evaluate(() => { const t = document.querySelector('#panel-eco .cards'); const c = t.children; return { snap: getComputedStyle(t).scrollSnapType, first: Math.round(c[0].getBoundingClientRect().left), firstR: Math.round(c[0].getBoundingClientRect().right), second: Math.round(c[1].getBoundingClientRect().left), vw: innerWidth, dots: getComputedStyle(document.querySelector('#panel-eco .dots')).display }; });
+    ok(r.snap.startsWith('x') && r.second >= r.vw && Math.abs(r.first - (r.vw - r.firstR)) <= 2 && r.dots === 'flex', 'Carrusel móvil: una tarjeta cada vez, centrada, sin asomar la siguiente, con puntos', JSON.stringify(r));
     await p.evaluate(() => { const t = document.querySelector('#panel-eco .cards'); t.scrollTo({ left: t.children[2].offsetLeft, behavior: 'instant' }); });
     await p.waitForTimeout(500);
     ok(await p.evaluate(() => [...document.querySelectorAll('#panel-eco .dots span')].findIndex((d) => d.classList.contains('is-on')) === 2), 'Carrusel: los puntos siguen la tarjeta visible');
@@ -154,7 +152,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
     await scrollToSel(p, '#dudas', 60); await p.waitForTimeout(900);
     await p.tap('#q1'); await p.waitForTimeout(800);
-    ok((await p.getAttribute('#q1', 'aria-expanded')) === 'true' && await p.isVisible('#a1') && (await p.textContent('#a1')).includes('te recomiendo uno'), 'Acordeón: abre al tocar');
+    ok((await p.getAttribute('#q1', 'aria-expanded')) === 'true' && await p.isVisible('#a1') && (await p.textContent('#a1')).includes('te recomendamos uno'), 'Acordeón: abre al tocar');
     const clean = await p.evaluate(() => [...document.querySelectorAll('.acc__item, .faq__more, #asesoramiento, .ft')].every((e) => !e.style.transform));
     ok(clean, 'Acordeón: la animación solo usa transform y termina limpia');
     await p.focus('#q2'); await p.keyboard.press('Enter'); await p.waitForTimeout(700);
@@ -175,7 +173,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const on = await p.evaluate(() => { const m = document.querySelector('[data-mbar]'); const r = m.getBoundingClientRect(); return { on: m.classList.contains('is-on'), inert: m.inert, bottom: Math.round(r.bottom), vh: innerHeight, btns: m.querySelectorAll('a').length }; });
     ok(on.on && !on.inert && on.bottom <= on.vh && on.btns === 2, 'Barra móvil: aparece al pasar el hero (CTA + WhatsApp)', JSON.stringify(on));
     await scrollToSel(p, '.why__list', 200); await p.waitForTimeout(1600);
-    ok((await p.$$eval('[data-count]', (els) => els.map((e) => e.textContent))).join(',') === '2,0,1', 'Conteo: 2 años, 0 sorpresas, 1 fisio');
+    ok((await p.$$eval('[data-count]', (els) => els.map((e) => e.textContent))).join(',') === '2,0', 'Conteo: 2 años y 0 sorpresas');
     await scrollToSel(p, '[data-faq-wa]', 300); await p.waitForTimeout(700);
     const waVisible = await p.evaluate(() => [...document.querySelectorAll('a[href*="wa.me"]')].filter((a) => { const r = a.getBoundingClientRect(); const s = getComputedStyle(a); return r.width && r.bottom > 0 && r.top < innerHeight && s.display !== 'none' && a.checkVisibility({ visibilityProperty: true }) && !a.closest('[inert]'); }).length);
     ok(waVisible === 1, 'WhatsApp: un solo enlace visible a la vez', `${waVisible} visibles`);
@@ -197,9 +195,9 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       const tr = document.querySelector('.ticker__track');
       const hero = document.querySelector('#inicio').getBoundingClientRect();
       const tk = document.querySelector('.ticker').getBoundingClientRect();
-      return { lists: lists.length, dup: lists[1] && lists[1].getAttribute('aria-hidden'), same: lists[0].textContent === lists[1].textContent, anim: getComputedStyle(tr).animationName, inHero: tk.bottom <= hero.bottom + 1, items: [...lists[0].children].map((li) => li.textContent.trim().replace(/\s+/g, ' ')) };
+      return { halfW: Math.round(tr.scrollWidth / 2), vw: innerWidth, lists: lists.length, dup: lists[1] && lists[1].getAttribute('aria-hidden'), same: lists[0].textContent === lists[1].textContent, anim: getComputedStyle(tr).animationName, inHero: tk.bottom <= hero.bottom + 1, items: [...lists[0].children].map((li) => li.textContent.trim().replace(/\s+/g, ' ')) };
     });
-    ok(t.lists === 2 && t.dup === 'true' && t.same && t.anim === 'marquee' && t.inHero, 'Línea de confianza: bajo el hero, en bucle y con la copia oculta a lectores', t.items.join(' · '));
+    ok(t.lists === 4 && t.dup === 'true' && t.same && t.anim === 'marquee' && t.inHero && t.halfW >= t.vw, 'Línea de confianza: bajo el hero, en bucle infinito sin huecos (media pista ≥ ancho de pantalla) y con las copias ocultas a lectores', `${t.items.join(' · ')} · media pista ${t.halfW}px`);
     const p0 = await p.evaluate(() => getComputedStyle(document.querySelector('.progress span')).transform);
     await scrollToSel(p, '#por-que'); await p.waitForTimeout(400);
     const p1 = await p.evaluate(() => { const s = document.querySelector('.progress span'); const r = s.getBoundingClientRect(); const hd = document.querySelector('[data-header]'); const h = hd.getBoundingClientRect(); const k = new DOMMatrix(getComputedStyle(hd, '::before').transform).d; return { w: Math.round(r.width), h: Math.round(r.height), top: Math.round(r.top), head: Math.round(h.top + h.height * k), bg: getComputedStyle(s).backgroundColor }; });
@@ -258,91 +256,69 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await ctx.close();
   });
 
-  await block('Hero: tarjeta Clientes', async () => {
+  await block('Hero: escaparate', async () => {
     const { ctx, p, logs } = await page(b, {});
-    const media = [];
-    let loaded = 0;
-    p.on('request', (r) => { if (/\.(mp4|webm)$/.test(r.url())) media.push({ url: r.url().split('/').pop(), afterLoad: loaded > 0 }); });
-    p.on('load', () => { loaded = Date.now(); });
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
-    const first = await p.evaluate(() => {
-      const img = document.querySelector('.reel__card .reel__img');
+    await p.waitForTimeout(2600);
+    const r = await p.evaluate(() => {
+      const img = document.querySelector('.stage__img');
       const pre = document.querySelector('link[rel="preload"][as="image"]');
-      return { cards: document.querySelectorAll('.reel__card').length, alt: img.alt, prio: img.getAttribute('fetchpriority'), preload: !!pre && /cliente-diatermia/.test(pre.getAttribute('imagesrcset')), caps: [...document.querySelectorAll('.reel__cap')].map((c) => c.textContent.trim()), head: document.querySelector('.reel__head').textContent.trim().replace(/\s+/g, ' ') };
+      const hero = getComputedStyle(document.querySelector('#inicio'));
+      return {
+        alt: img.alt, prio: img.getAttribute('fetchpriority'), loaded: img.complete && img.naturalWidth > 0,
+        preload: !!pre && /hero-vytamed/.test(pre.getAttribute('imagesrcset')),
+        dark: /rgb\(1[0-9], 2[0-9], 4[0-9]\)|gradient/.test(hero.backgroundImage + hero.backgroundColor),
+        h1: getComputedStyle(document.querySelector('.h1')).color,
+        waves: [...document.querySelectorAll('.stage__wave')].map((w) => getComputedStyle(w).animationName).join(','),
+        waveHidden: [...document.querySelectorAll('.stage__wave')].every((w) => w.getAttribute('aria-hidden') === 'true'),
+        float: getComputedStyle(document.querySelector('.stage__device')).animationName,
+        logo: getComputedStyle(document.querySelector('.hd .logo')).getPropertyValue('--logo-a').trim(),
+        media: [...document.querySelectorAll('video, .reel')].length,
+      };
     });
-    ok(first.cards === 3 && first.alt && first.prio === 'high' && first.preload, 'Hero: tarjeta "Clientes" con 3 fotos reales y la primera precargada (LCP)', first.caps.join(' · '));
-    await p.waitForFunction(() => document.querySelector('.reel__card').classList.contains('is-playing'), null, { timeout: 12000 });
-    const v = await p.evaluate(() => { const x = document.querySelector('.reel__video'); return { muted: x.muted, inline: x.playsInline, paused: x.paused, t: x.currentTime, src: x.currentSrc.split('/').pop(), hidden: x.getAttribute('aria-hidden'), bar: parseFloat(document.querySelector('.reel__bars i').style.getPropertyValue('--t')) }; });
-    ok(v.muted && v.inline && !v.paused && v.hidden === 'true' && /^cliente-diatermia\.[a-f0-9]{8}\.webm$/.test(v.src), 'Hero: el vídeo real se reproduce en silencio dentro de la tarjeta (WebM con hash)', JSON.stringify(v));
-    ok(media.length >= 1 && media.every((m) => m.afterLoad), 'Hero: el vídeo se pide después del evento load (no retrasa la carga)', media.map((m) => m.url).join(', '));
-    await p.waitForTimeout(600);
-    const bar = await p.evaluate(() => parseFloat(document.querySelector('.reel__bars i').style.getPropertyValue('--t')));
-    ok(bar > v.bar, 'Hero: la barra de la historia avanza con el vídeo', `${v.bar.toFixed(3)} → ${bar.toFixed(3)}`);
-    // Pausa (WCAG 2.2.2)
-    await p.click('[data-reel-toggle]');
-    await p.waitForTimeout(300);
-    const pz = await p.evaluate(() => ({ label: document.querySelector('[data-reel-toggle]').getAttribute('aria-label'), paused: document.querySelector('.reel__video').paused, cls: document.querySelector('[data-reel]').classList.contains('is-paused'), t: document.querySelector('.reel__bars i').style.getPropertyValue('--t') }));
-    await p.waitForTimeout(700);
-    const t2 = await p.evaluate(() => document.querySelector('.reel__bars i').style.getPropertyValue('--t'));
-    ok(pz.label === 'Reproducir' && pz.paused && pz.cls && pz.t === t2, 'Hero: el botón pausa el vídeo y la historia', JSON.stringify(pz));
-    await p.click('[data-reel-toggle]');
-    await p.waitForTimeout(300);
-    ok(await p.evaluate(() => document.querySelector('[data-reel-toggle]').getAttribute('aria-label') === 'Pausar' && !document.querySelector('.reel__video').paused), 'Hero: y la reanuda');
-    // Pasar tocando los lados
-    await p.mouse.move(5, 5);
-    await p.evaluate(() => document.querySelector('[data-reel-next]').click());
-    await p.waitForTimeout(900);
-    const n1 = await p.evaluate(() => ({ front: [...document.querySelectorAll('.reel__card')].findIndex((c) => c.classList.contains('is-front')), ps: [...document.querySelectorAll('.reel__card')].map((c) => c.style.getPropertyValue('--p')).join(','), vpaused: document.querySelector('.reel__video').paused, bars: [...document.querySelectorAll('.reel__bars i')].map((i) => Number(i.style.getPropertyValue('--t')) > 0.999 ? 1 : 0).join(',') }));
-    ok(n1.front === 1 && n1.ps === '2,0,1' && n1.vpaused && n1.bars.startsWith('1,0'), 'Hero: "Siguiente" pasa a la segunda tarjeta y pausa el vídeo', JSON.stringify(n1));
-    await p.evaluate(() => document.querySelector('[data-reel-prev]').click());
-    await p.waitForTimeout(900);
-    const n0 = await p.evaluate(() => ({ front: [...document.querySelectorAll('.reel__card')].findIndex((c) => c.classList.contains('is-front')), vpaused: document.querySelector('.reel__video').paused }));
-    ok(n0.front === 0 && !n0.vpaused, 'Hero: "Anterior" vuelve al vídeo y lo reanuda', JSON.stringify(n0));
-    // Avance automático de las fotos (5 s)
-    await p.evaluate(() => document.querySelector('[data-reel-next]').click());
-    await p.waitForTimeout(5800);
-    ok(await p.evaluate(() => document.querySelectorAll('.reel__card')[2].classList.contains('is-front')), 'Hero: las fotos avanzan solas cada 5 s');
-    // Fuera de pantalla se pausa
-    await scrollToSel(p, '#por-que'); await p.waitForTimeout(500);
-    ok(await p.evaluate(() => document.querySelector('[data-reel]').classList.contains('is-paused')), 'Hero: la historia se pausa fuera de pantalla');
+    ok(r.alt && r.prio === 'high' && r.loaded && r.preload, 'Hero: la diatermia es la imagen principal, precargada (LCP)', r.alt);
+    ok(r.dark && r.h1 === 'rgb(255, 255, 255)' && r.logo.toUpperCase() === '#FFF', 'Hero: fondo oscuro, titular y logo de cabecera en blanco', JSON.stringify({ h1: r.h1, logo: r.logo }));
+    ok(r.waves === 'wave,wave,wave' && r.waveHidden && r.float === 'floaty', 'Hero: ondas tipo ecografía en bucle y equipo flotando (decorativo, oculto a lectores)', `${r.waves} · ${r.float}`);
+    ok(r.media === 0, 'Hero: sin fotos ni vídeos de clientes');
+    await p.mouse.move(1300, 300, { steps: 4 }); await p.waitForTimeout(300);
+    const sx = await p.evaluate(() => parseFloat(document.querySelector('[data-stage]').style.getPropertyValue('--sx')));
+    ok(sx > 0.2, 'Hero: el equipo sigue un poco al cursor en escritorio', String(sx));
     ok(!logs.length, 'Hero: consola limpia', logs.join(' / '));
     await ctx.close();
-    // Ahorro de datos: no se descarga el vídeo
-    const { ctx: c2, p: p2 } = await page(b, { width: 390, height: 844, mobile: true });
-    await c2.addInitScript(() => { Object.defineProperty(navigator, 'connection', { configurable: true, value: { saveData: true, effectiveType: '4g' } }); });
-    const media2 = [];
-    p2.on('request', (r) => { if (/\.(mp4|webm)$/.test(r.url())) media2.push(r.url()); });
-    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
-    await p2.waitForTimeout(3500);
-    ok(!media2.length && await p2.evaluate(() => !document.querySelector('.reel__video').getAttribute('src')), 'Hero: con ahorro de datos no se descarga el vídeo (se ve la foto)');
-    await c2.close();
+  });
+
+  // Mismo sistema en todos los dispositivos: titulares y CTA de sección centrados
+  await block('Alineación', async () => {
+    for (const [w, h, m] of [[390, 844, true], [1440, 900, false]]) {
+      const { ctx, p } = await page(b, { width: w, height: h, mobile: m });
+      await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+      const r = await p.evaluate(() => {
+        const vw = document.documentElement.clientWidth;
+        const off = (el) => { const b = el.getBoundingClientRect(); return Math.round(Math.abs((b.left + b.right) / 2 - vw / 2)); };
+        const heads = [...document.querySelectorAll('main > section:not(#inicio) h2')].map((h) => [h.id, getComputedStyle(h).textAlign, off(h)]);
+        const ctas = [...document.querySelectorAll('main > section:not(#inicio) .sec__cta, .why__foot')].map((c) => [c.closest('section').id, off(c)]);
+        const hero = getComputedStyle(document.querySelector('.hero__copy')).textAlign;
+        return { heads, ctas, hero };
+      });
+      const badH = r.heads.filter(([, ta, o]) => ta !== 'center' || o > 2);
+      const badC = r.ctas.filter(([, o]) => o > 2);
+      ok(!badH.length && !badC.length && r.hero === (m ? 'center' : 'start'), `Alineación ${w}px: titulares y CTA de sección centrados${m ? ', hero centrado' : ', hero a la izquierda'}`, JSON.stringify({ badH, badC, hero: r.hero }));
+      await ctx.close();
+    }
   });
 
   await block('Catálogo', async () => {
     const { ctx, p } = await page(b, {});
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
-    ok(!(await p.evaluate(() => document.querySelector('[data-book]').classList.contains('is-open'))), 'Catálogo: la maqueta empieza cerrada');
-    await scrollToSel(p, '#catalogo'); await p.waitForTimeout(1800);
     const r = await p.evaluate(() => {
-      const a = document.querySelector('#catalogo .btn[data-catalog]');
-      const tf = (s) => getComputedStyle(document.querySelector(s)).transform;
-      return { open: document.querySelector('[data-book]').classList.contains('is-open'), cover: tf('.book__cover'), p3: tf('.book__page--3'), imgs: [...document.querySelectorAll('.book img')].filter((i) => i.complete && i.naturalWidth).length, meta: document.querySelector('.catalog__meta').textContent.trim(), dl: a.hasAttribute('download'), href: a.getAttribute('href'), txt: a.textContent.trim(), alt: document.querySelector('.catalog__actions .link').textContent.trim() };
+      const a = document.querySelector('#mas-equipos .btn[data-catalog]');
+      const cta = document.querySelector('#mas-equipos [data-cta]');
+      const s = getComputedStyle(a);
+      return { dl: a.hasAttribute('download'), href: a.getAttribute('href'), txt: a.textContent.trim(), bg: s.backgroundColor, color: s.color, sameRow: Math.abs(a.getBoundingClientRect().top - cta.getBoundingClientRect().top) < 2, hero: document.querySelector('.hero__more').getAttribute('href'), foot: !!document.querySelector('.ft a[href$="catalogo-vytalgroup-2026.pdf"]') };
     });
-    ok(r.open && r.cover !== 'none' && r.p3 !== r.cover && r.imgs === 3, 'Catálogo: la maqueta se abre en abanico al entrar', `${r.cover} / ${r.p3}`);
-    ok(r.meta === 'PDF · 53 páginas · Descarga directa' && r.dl && /catalogo-vytalgroup-2026\.pdf$/.test(r.href) && r.txt === 'Descargar catálogo' && r.alt === '¿Prefieres que te asesore?', 'Catálogo: datos del PDF, "Descargar catálogo" (descarga directa) y "¿Prefieres que te asesore?"', JSON.stringify({ meta: r.meta, href: r.href }));
-    const box = await p.evaluate(() => { const r = document.querySelector('[data-book]').getBoundingClientRect(); return { x: r.left + r.width * 0.9, y: r.top + r.height * 0.2 }; });
-    await p.mouse.move(box.x, box.y, { steps: 4 }); await p.waitForTimeout(500);
-    const tilt = await p.evaluate(() => { const s = document.querySelector('.book__stack'); return { rx: s.style.getPropertyValue('--rx'), ry: s.style.getPropertyValue('--ry'), on: document.querySelector('[data-book]').classList.contains('is-tilting') }; });
-    ok(tilt.on && parseFloat(tilt.ry) !== 0 && parseFloat(tilt.rx) !== 0, 'Catálogo: inclinación con el cursor (escritorio)', JSON.stringify(tilt));
+    ok(r.dl && /catalogo-vytalgroup-2026\.pdf$/.test(r.href) && r.txt === 'Descargar catálogo' && r.bg === 'rgb(11, 25, 41)' && r.color === 'rgb(255, 255, 255)' && r.sameRow, 'Catálogo: botón oscuro "Descargar catálogo" junto al CTA en Más equipos (descarga directa)', JSON.stringify(r));
+    ok(r.hero === '#mas-equipos' && r.foot && !(await p.$('#catalogo')), 'Catálogo: sin sección propia; "Ver catálogo" lleva a Más equipos y el PDF sigue en el footer', r.hero);
     await ctx.close();
-    const { ctx: c2, p: m } = await page(b, { width: 390, height: 844, mobile: true });
-    await m.goto(BASE + '/', { waitUntil: 'networkidle' });
-    await scrollToSel(m, '[data-cmp]', 200); await m.waitForTimeout(700);
-    const onBefore = await m.evaluate(() => document.querySelector('[data-mbar]').classList.contains('is-on'));
-    await scrollToSel(m, '#catalogo .btn[data-catalog]', 400); await m.waitForTimeout(700);
-    const onCat = await m.evaluate(() => document.querySelector('[data-mbar]').classList.contains('is-on'));
-    ok(onBefore && !onCat, 'Barra móvil: se oculta en el catálogo', JSON.stringify({ onBefore, onCat }));
-    await c2.close();
   });
 
   // ------------------------------------------------------------ fuentes, teclado y movimiento reducido
@@ -374,26 +350,24 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await p.waitForTimeout(300);
     const r = await p.evaluate(() => ({
       word: getComputedStyle(document.querySelector('.h1 .w > span')).transform,
-      deal: getComputedStyle(document.querySelector('.reel__card')).animationName,
+      deal: [...document.querySelectorAll('.stage, .stage__device, .stage__wave, .stage__glow')].map((e) => getComputedStyle(e).animationName).filter((n) => n !== 'none').join(',') || 'none',
       rv: document.querySelectorAll('.rv').length,
       smooth: getComputedStyle(document.documentElement).scrollBehavior,
       marquee: [...document.querySelectorAll('.ticker__track')].map((t) => getComputedStyle(t).animationName).join(','),
       dups: [...document.querySelectorAll('.ticker__list[aria-hidden]')].every((l) => getComputedStyle(l).display === 'none'),
-      reel: { paused: document.querySelector('[data-reel]').classList.contains('is-paused'), label: document.querySelector('[data-reel-toggle]').getAttribute('aria-label'), src: document.querySelector('.reel__video').getAttribute('src') },
       split: document.querySelectorAll('[data-lines].is-split, .rvi, .cmp.is-armed').length,
       count: [...document.querySelectorAll('[data-count]')].map((e) => e.textContent).join(','),
     }));
     ok(r.word === 'none' && r.deal === 'none' && r.rv === 0 && r.split === 0 && r.smooth === 'auto', 'Movimiento reducido: sin animaciones de entrada ni desplazamiento suave', JSON.stringify(r));
-    ok(r.marquee === 'none' && r.dups && r.count === '2,0,1', 'Movimiento reducido: línea de confianza quieta (sin copia) y cifras finales sin conteo', `${r.marquee} · ${r.count}`);
-    ok(r.reel.paused && r.reel.label === 'Reproducir' && !r.reel.src, 'Movimiento reducido: la tarjeta Clientes empieza en pausa y sin vídeo (se puede reproducir con el botón)', JSON.stringify(r.reel));
-    await scrollToSel(p, '#catalogo'); await p.waitForTimeout(400);
+    ok(r.marquee === 'none' && r.dups && r.count === '2,0', 'Movimiento reducido: línea de confianza quieta (sin copias) y cifras finales sin conteo', `${r.marquee} · ${r.count}`);
+    await scrollToSel(p, '#por-que'); await p.waitForTimeout(400);
     await p.mouse.move(700, 400, { steps: 3 }); await p.waitForTimeout(300);
-    const st = await p.evaluate(() => ({ open: document.querySelector('[data-book]').classList.contains('is-open'), tilt: document.querySelector('.book__stack').style.getPropertyValue('--ry'), py: [...document.querySelectorAll('[data-parallax]')].some((i) => i.style.getPropertyValue('--py')), tr: getComputedStyle(document.querySelector('.book__cover')).transitionProperty }));
-    ok(st.open && !st.tilt && !st.py && !/transform/.test(st.tr), 'Movimiento reducido: maqueta ya abierta, sin inclinación ni parallax', JSON.stringify(st));
+    const st = await p.evaluate(() => ({ py: [...document.querySelectorAll('[data-parallax]')].some((i) => i.style.getPropertyValue('--py')) }));
+    ok(!st.py, 'Movimiento reducido: sin parallax', JSON.stringify(st));
     const { ctx: c2, p: p2 } = await page(b, {});
     await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
-    const anim = await p2.evaluate(() => ({ deal: getComputedStyle(document.querySelector('.reel__card')).animationName, kb: getComputedStyle(document.querySelector('.reel__card.is-front .reel__img')).animationName, word: getComputedStyle(document.querySelector('.h1 .w > span')).animationName, rv: document.querySelectorAll('.rv').length, lines: document.querySelectorAll('[data-lines].is-split').length, rvi: document.querySelectorAll('.rvi').length }));
-    ok(anim.deal === 'deal' && anim.kb === 'kenburns' && anim.word === 'word-up' && anim.rv > 5 && anim.lines >= 6 && anim.rvi >= 6, 'Animaciones: baraja de clientes que se reparte, zoom lento de la foto, titular por palabras, titulares por líneas y entradas al hacer scroll', JSON.stringify(anim));
+    const anim = await p2.evaluate(() => ({ deal: getComputedStyle(document.querySelector('.stage')).animationName, kb: getComputedStyle(document.querySelector('.stage__glow')).animationName, word: getComputedStyle(document.querySelector('.h1 .w > span')).animationName, rv: document.querySelectorAll('.rv').length, lines: document.querySelectorAll('[data-lines].is-split').length, rvi: document.querySelectorAll('.rvi').length }));
+    ok(anim.deal === 'stage-in' && anim.kb === 'glow' && anim.word === 'word-up' && anim.rv > 5 && anim.lines >= 5 && anim.rvi >= 6, 'Animaciones: entrada del escaparate con halo que respira, titular por palabras, titulares por líneas y entradas al hacer scroll', JSON.stringify(anim));
     await scrollToSel(p2, '.why__photo', 100); await p2.waitForTimeout(400);
     const w = await p2.evaluate(() => ({ py: document.querySelector('.why__photo img').style.getPropertyValue('--py'), lines: new Set([...document.querySelectorAll('#por-que [data-lines] .w')].map((x) => x.style.getPropertyValue('--i'))).size, magnetic: document.querySelectorAll('[data-magnetic]').length }));
     ok(w.py && w.py !== '0.0px' && w.lines >= 1 && w.magnetic >= 6, 'Animaciones: parallax leve en escritorio y botones magnéticos', JSON.stringify(w));

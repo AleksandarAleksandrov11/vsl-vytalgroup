@@ -1,11 +1,11 @@
 // Ejecuta las pruebas automáticas contra la versión compilada (dist/), servida con las
 // cabeceras de vercel.json (CSP incluida):
-//  · qa-form   → formulario de 6 pasos (paso 1 ampliado y "Otro equipo"), validaciones, envío
+//  · qa-form   → formulario de 2 pasos (equipo; nombre y WhatsApp), desplegables, validaciones, envío
 //                (Apps Script simulado), UTM, antispam, consentimiento y eventos del píxel
 //                (Meta simulado, sin salir a internet).
 //  · qa-ui     → estructura (secciones, palabras, un CTA por sección), cabecera, barra de progreso,
-//                tarjeta "Clientes" del hero (vídeo, pausa, avance, ahorro de datos), línea de
-//                confianza, segmentado, carrusel, más equipos, comparador,
+//                hero (escaparate con ondas), alineación, línea de confianza, segmentado,
+//                carrusel, más equipos, comparador, descarga del catálogo,
 //                catálogo, acordeón, conteo, barra móvil, fuentes, teclado, movimiento reducido,
 //                CSP, caché y metadatos.
 //  · qa-layout → capturas de página completa en todos los anchos y comprobación por código de
