@@ -149,7 +149,6 @@
   .why__foot { margin-top: 64px; }
 }
 @media (min-width: 1024px) {
-  .why { margin-inline: 16px; border-radius: 32px; }
   .why__grid { grid-template-columns: 400px minmax(0, 1fr); column-gap: clamp(56px, 7vw, 112px); }
 }
 
@@ -157,6 +156,7 @@
    4 · Dudas
    ========================================================================== */
 .wrap--narrow { max-width: calc(760px + var(--g) * 2); }
+.faq { position: relative; isolation: isolate; }
 .faq .h2 { margin-bottom: 36px; }
 .acc { border-top: 1px solid var(--line-2); }
 .acc__item { position: relative; background: var(--bg); border-bottom: 1px solid var(--line-2); }
@@ -174,7 +174,7 @@
 /* ==========================================================================
    5 · Formulario
    ========================================================================== */
-.lead { position: relative; background: radial-gradient(70% 45% at 50% 0%, rgba(72, 160, 168, .09), transparent 70%), #FFF; }
+.lead { position: relative; isolation: isolate; background: radial-gradient(70% 45% at 50% 0%, rgba(72, 160, 168, .09), transparent 70%), #FFF; }
 .wrap--form { max-width: calc(600px + var(--g) * 2); text-align: center; }
 .fcard { position: relative; margin-top: 36px; padding: 18px 18px 24px; border-radius: 28px; background: #FFF; text-align: left; box-shadow: inset 0 0 0 1px var(--line), 0 30px 70px -40px rgba(11, 25, 41, .3); }
 @media (min-width: 640px) { .fcard { padding: 28px 40px 40px; } }
@@ -304,6 +304,21 @@
 .hp { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); opacity: 0; pointer-events: none; }
 
 /* ==========================================================================
+   Transición entre secciones (de Lo más pedido hacia abajo): cada sección empieza con el color
+   de la anterior y se funde con el suyo en su margen superior, con una curva suave (sin línea
+   recta ni bandas). El pie queda separado con su corte recto.
+   ========================================================================== */
+.more::after, .why::after, .vs::after, .faq::after, .lead::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; z-index: -1; height: var(--blend, var(--sec)); pointer-events: none;
+  background: linear-gradient(180deg, rgb(var(--from)) 0%, rgb(var(--from) / .976) 10%, rgb(var(--from) / .905) 20%, rgb(var(--from) / .794) 30%, rgb(var(--from) / .655) 40%, rgb(var(--from) / .5) 50%, rgb(var(--from) / .345) 60%, rgb(var(--from) / .206) 70%, rgb(var(--from) / .095) 80%, rgb(var(--from) / .024) 90%, rgb(var(--from) / 0) 100%);
+}
+.more { --from: 250 251 252; }  /* de Lo más pedido (#FAFBFC) */
+.why { --from: 238 242 245; }   /* de Más equipos (#EEF2F5) */
+.vs { --from: 11 25 41; --blend: clamp(72px, 2.5rem + 5vw, 120px); } /* de Por qué VytalGroup (marino) */
+.faq { --from: 210 235 235; }   /* del final de la comparativa (#D2EBEB) */
+.lead { --from: 250 251 252; }  /* de Dudas (#FAFBFC) */
+
+/* ==========================================================================
    Barra fija en móvil
    ========================================================================== */
 .mbar { position: fixed; z-index: 60; left: 0; right: 0; bottom: 0; display: flex; gap: 10px; padding: 10px max(12px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); background: rgba(250, 251, 252, .86); -webkit-backdrop-filter: saturate(1.8) blur(16px); backdrop-filter: saturate(1.8) blur(16px); box-shadow: 0 -1px 0 var(--line); transform: translateY(110%); transition: transform .55s var(--ease); }
@@ -406,38 +421,51 @@ html.has-cookie-banner .mbar { transform: translateY(110%); }
   .more__note { margin-top: 40px; }
 }
 
-/* ==========================================================================
-   Por qué VytalGroup: comparador
-   ========================================================================== */
 /* "Sin letra pequeña." en su propia línea, como en el hero */
 #why-title em { display: block; }
-/* De la foto de Javier se pasa directo a la tabla */
-.cmp { max-width: 840px; margin: 36px auto 0; padding: 8px; border-radius: 24px; background: rgba(255, 255, 255, .05); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+
+/* ==========================================================================
+   Lo habitual frente a VytalGroup: sección propia, turquesa claro (distinta del
+   marino de Por qué VytalGroup y del claro de Dudas), con una tabla pequeña
+   ========================================================================== */
+.vs { position: relative; isolation: isolate; padding: clamp(72px, 2.5rem + 5vw, 120px) 0; background: linear-gradient(170deg, #E3F2F2 0%, #D2EBEB 100%); }
+.vs::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background-image: radial-gradient(rgba(43, 125, 134, .2) 1px, transparent 1.5px); background-size: 20px 20px; -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 10%, transparent 75%); mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 10%, transparent 75%); }
+.vs .sec__head { gap: 14px; }
+.vs__lead { max-width: 46ch; font-size: clamp(1.0625rem, 1rem + .4vw, 1.25rem); line-height: 1.45; color: var(--ink-2); }
+@media (max-width: 639px) { #vs-title em { display: block; } }
+
+.cmp { max-width: 720px; margin: 0 auto; padding: 8px; border-radius: 24px; background: #FFF; box-shadow: 0 1px 2px rgba(11, 25, 41, .05), 0 28px 56px -32px rgba(11, 25, 41, .35); }
 .cmp__table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
-.cmp__table th, .cmp__table td { width: 50%; padding: 14px 12px; text-align: center; vertical-align: middle; }
-.cmp__table th { padding-top: 18px; padding-bottom: 12px; font-size: .8125rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: rgba(255, 255, 255, .6); }
+.cmp__table th, .cmp__table td { width: 50%; padding: 12px 10px; text-align: center; vertical-align: middle; }
+.cmp__table th { padding-top: 16px; padding-bottom: 8px; font-size: .75rem; font-weight: 560; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .cmp__table td { font-size: .9375rem; line-height: 1.4; text-wrap: pretty; }
-.cmp__table td:first-child { color: rgba(255, 255, 255, .5); }
+.cmp__table td:first-child { color: var(--ink-3); }
 /* Columna de VytalGroup: fondo turquesa suave de arriba abajo */
-.cmp__table th + th, .cmp__table td + td { background: rgba(92, 200, 200, .1); color: #FFF; }
-.cmp__table th + th { color: #7FD3D6; border-radius: 16px 16px 0 0; }
-.cmp__table tbody tr:last-child td + td { border-radius: 0 0 16px 16px; padding-bottom: 18px; }
-.cmp__table tbody tr:last-child td:first-child { padding-bottom: 18px; }
-.cmp__no { text-decoration: line-through; text-decoration-thickness: 1px; text-decoration-color: rgba(255, 255, 255, .35); }
-.cmp__check { display: block; width: 22px; height: 22px; margin: 0 auto 6px; fill: none; stroke: #5CC8C8; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 0; }
+.cmp__table th + th, .cmp__table td + td { background: rgba(72, 160, 168, .1); color: var(--ink); font-weight: 500; }
+.cmp__table th + th { color: #2B7D86; border-radius: 16px 16px 0 0; }
+.cmp__table tbody tr:last-child td { padding-bottom: 16px; }
+.cmp__table tbody tr:last-child td + td { border-radius: 0 0 16px 16px; }
+.cmp__no { text-decoration: line-through; text-decoration-thickness: 1px; text-decoration-color: rgba(11, 25, 41, .3); }
+/* Iconos: aspa gris en lo habitual y check blanco sobre turquesa en VytalGroup */
+.cmp__x, .cmp__check { display: block; flex: none; width: 26px; height: 26px; margin: 0 auto 8px; border-radius: 50%; }
+.cmp__x { position: relative; background: rgba(11, 25, 41, .07); }
+.cmp__x::before, .cmp__x::after { content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 1.6px; margin: -.8px 0 0 -5px; border-radius: 1px; background: var(--ink-3); transform: rotate(45deg); }
+.cmp__x::after { transform: rotate(-45deg); }
+.cmp__check { padding: 5px; background: var(--teal); fill: none; stroke: #FFF; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 0; }
 .cmp.is-armed tr { opacity: 0; transform: translateY(14px); }
 .cmp.is-armed .cmp__check { stroke-dashoffset: 24; }
 .cmp.is-armed.is-in tr { opacity: 1; transform: none; transition: opacity .7s var(--ease), transform .8s var(--ease); transition-delay: calc(var(--r, 0) * 220ms); }
 .cmp.is-armed.is-in .cmp__check { stroke-dashoffset: 0; transition: stroke-dashoffset .8s var(--ease); transition-delay: calc(var(--r, 0) * 220ms + 350ms); }
 .cmp tbody tr:nth-child(2) { --r: 1; }
 .cmp tbody tr:nth-child(3) { --r: 2; }
+/* Desde tableta: icono a la izquierda del texto, tabla alineada como una tabla */
 @media (min-width: 640px) {
-  .cmp { margin-top: 56px; padding: 12px; border-radius: 28px; }
-  .cmp__table th, .cmp__table td { padding: 16px 24px; }
-  .cmp__table th { padding-top: 22px; padding-bottom: 14px; }
-  .cmp__table td { font-size: 1.0625rem; }
-  .cmp__check { display: inline-block; width: 24px; height: 24px; margin: 0 10px 0 0; vertical-align: -6px; }
-  .cmp__table tbody tr:last-child td { padding-bottom: 24px; }
+  .cmp { padding: 10px; border-radius: 28px; }
+  .cmp__table th, .cmp__table td { padding: 14px 22px; text-align: left; }
+  .cmp__table th { padding-top: 20px; padding-bottom: 10px; padding-left: 64px; }
+  .cmp__table td { position: relative; padding-left: 64px; font-size: 1.0625rem; }
+  .cmp__x, .cmp__check { position: absolute; left: 22px; top: 50%; margin: -13px 0 0; }
+  .cmp__table tbody tr:last-child td { padding-bottom: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

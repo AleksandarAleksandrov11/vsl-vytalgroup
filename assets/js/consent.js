@@ -45,16 +45,36 @@ export function initConsent({ delay = 900 } = {}) {
     html.classList.remove('has-cookie-banner');
     setTimeout(() => { banner.hidden = true; }, 600);
   }
+  let closing = 0;
   function openPanel() {
+    if (panel.open) return;
+    clearTimeout(closing);
+    panel.classList.remove('is-closing');
     const c = consentState();
     toggle.checked = !!(c && c.marketing);
     if (typeof panel.showModal === 'function') panel.showModal();
     else panel.setAttribute('open', '');
-    toggle.focus();
+    // Sin desplazar nada: el foco va al interruptor sin mover el diálogo ni la página
+    toggle.focus({ preventScroll: true });
   }
+  // Cierre con la misma suavidad que la apertura (y al instante con movimiento reducido)
   function closePanel() {
-    if (panel.open) panel.close();
+    if (!panel.open || panel.classList.contains('is-closing')) return;
+    const box = panel.querySelector('.cp__in');
+    const done = () => {
+      clearTimeout(closing);
+      box.removeEventListener('animationend', done);
+      panel.classList.remove('is-closing');
+      if (typeof panel.close === 'function') panel.close();
+      else panel.removeAttribute('open');
+    };
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { done(); return; }
+    panel.classList.add('is-closing');
+    box.addEventListener('animationend', done);
+    closing = setTimeout(done, 400);
   }
+  // Escape también cierra con la animación
+  panel.addEventListener('cancel', (e) => { e.preventDefault(); closePanel(); });
   function decide(marketing) {
     save(marketing);
     closePanel();

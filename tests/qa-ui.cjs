@@ -49,7 +49,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       nav: document.querySelectorAll('nav').length,
       ids: [...document.querySelectorAll('main > section')].map((x) => x.id),
     }));
-    ok(s.ids.join(',') === 'inicio,garantias,equipos,mas-equipos,por-que,dudas,asesoramiento' && s.footers === 1, 'Estructura: hero, franja de garantías, 5 secciones y el footer', s.ids.join(', '));
+    ok(s.ids.join(',') === 'inicio,garantias,equipos,mas-equipos,por-que,comparativa,dudas,asesoramiento' && s.footers === 1, 'Estructura: hero, franja de garantías, 6 secciones (con "Lo habitual frente a VytalGroup" aparte) y el footer', s.ids.join(', '));
     ok(s.nav === 0, 'Minimalismo: sin menú de navegación');
     // Palabras visibles del contenido: sin cabecera, footer, respuestas del acordeón, formulario ni la línea de confianza
     const words = await p.evaluate(() => {
@@ -69,7 +69,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(words.main <= 260, 'Minimalismo: unas 250 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
     // Un CTA por sección con el mismo texto; el catálogo es la única excepción
     const perSec = await p.$$eval('main > section:not(#asesoramiento):not(#garantias)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
-    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento+Descargar catálogo', 'por-que:Quiero asesoramiento', 'dudas:Quiero asesoramiento'];
+    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento+Descargar catálogo', 'por-que:Quiero asesoramiento', 'comparativa:Quiero asesoramiento', 'dudas:Quiero asesoramiento'];
     ok(perSec.join('|') === want.join('|'), 'CTA: "Quiero asesoramiento" en cada sección y "Descargar catálogo" junto a él en Más equipos', perSec.join(' | '));
     const cta = await p.$$eval('[data-cta]', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
     ok(cta.length === 1 && cta[0] === 'Quiero asesoramiento', 'CTA: texto de asesoramiento idéntico en todas partes (cabecera, secciones y barra móvil)', cta.join(' | '));
@@ -312,14 +312,24 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       await q.goto(BASE + '/', { waitUntil: 'networkidle' });
       const t = await q.evaluate(() => {
         const vw = document.documentElement.clientWidth;
-        const box = document.querySelector('.cmp');
+        const sec = document.querySelector('#comparativa');
+        const box = sec.querySelector('.cmp');
         const r = box.getBoundingClientRect();
         const cs = getComputedStyle(box);
-        const col = getComputedStyle(document.querySelector('.cmp tbody td + td')).backgroundColor;
-        const ta = [...document.querySelectorAll('.cmp th, .cmp td')].map((c) => getComputedStyle(c).textAlign);
-        return { off: Math.round(Math.abs((r.left + r.right) / 2 - vw / 2)), w: Math.round(r.width), bg: cs.backgroundColor, radius: parseFloat(cs.borderTopLeftRadius), col, center: ta.every((x) => x === 'center') };
+        const bgOf = (el) => { const c = getComputedStyle(el); return c.backgroundImage !== 'none' ? c.backgroundImage : c.backgroundColor; };
+        const col = getComputedStyle(sec.querySelector('.cmp tbody td + td')).backgroundColor;
+        const title = sec.querySelector('h2');
+        const icons = [sec.querySelectorAll('.cmp__x').length, sec.querySelectorAll('.cmp__check').length];
+        return {
+          title: title.textContent.replace(/\s+/g, ' ').trim(), lead: sec.querySelector('.vs__lead').textContent.trim(), cta: sec.querySelector('[data-cta]').textContent.trim(),
+          bg: bgOf(sec), why: bgOf(document.querySelector('#por-que')), faq: bgOf(document.querySelector('#dudas')),
+          off: Math.round(Math.abs((r.left + r.right) / 2 - vw / 2)), w: Math.round(r.width), card: cs.backgroundColor, radius: parseFloat(cs.borderTopLeftRadius), col, icons,
+          after: sec.previousElementSibling.id, before: sec.nextElementSibling.id,
+        };
       });
-      ok(t.off <= 2 && t.bg !== 'rgba(0, 0, 0, 0)' && t.radius >= 20 && t.col !== 'rgba(0, 0, 0, 0)' && t.center, `Comparador ${w}px: tabla minimalista centrada, con fondo y la columna de VytalGroup resaltada`, JSON.stringify(t));
+      ok(t.title === 'Lo habitual frente a VytalGroup.' && t.lead === 'Lo que cambia cuando te asesoran fisioterapeutas.' && t.cta === 'Quiero asesoramiento' && t.after === 'por-que' && t.before === 'dudas', `Comparativa ${w}px: sección propia tras la de Javier, con título, subtítulo y CTA`, JSON.stringify({ title: t.title, after: t.after, before: t.before }));
+      ok(/gradient/.test(t.bg) && t.bg !== t.why && t.bg !== t.faq, `Comparativa ${w}px: fondo propio (turquesa claro), distinto del de Javier y del de Dudas`, t.bg.slice(0, 60));
+      ok(t.off <= 2 && t.w <= 720 && t.card === 'rgb(255, 255, 255)' && t.radius >= 20 && t.col !== 'rgba(0, 0, 0, 0)' && t.icons.join() === '3,3', `Comparativa ${w}px: tabla pequeña y centrada, en tarjeta blanca, con aspas, checks y la columna de VytalGroup resaltada`, JSON.stringify({ off: t.off, w: t.w, col: t.col, icons: t.icons }));
       await c3.close();
     }
     ok(before.armed && before.op === '0' && before.dash === '24px' && after.op === '1,1,1' && after.dash === '0px,0px,0px' && after.delays === '0s,0.22s,0.44s', 'Comparador: filas una a una y checks dibujados con stroke-dashoffset', JSON.stringify({ before, op: after.op, dash: after.dash, delays: after.delays }));
@@ -387,7 +397,8 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
           below: ph.top >= st.bottom - 2,
           stats: document.querySelectorAll('.why__list, #por-que [data-count]').length,
           // Medido sin las entradas al hacer scroll (que desplazan un poco la foto hasta que aparece)
-          gap: document.querySelector('.cmp').offsetTop - (document.querySelector('.why__grid').offsetTop + document.querySelector('.why__grid').offsetHeight),
+          gap: document.querySelector('.why__foot').offsetTop - (document.querySelector('.why__grid').offsetTop + document.querySelector('.why__grid').offsetHeight),
+          cmpInWhy: !!document.querySelector('#por-que .cmp'),
           between: [...document.querySelectorAll('#por-que .wrap > *')].map((e) => e.className.split(' ')[0]).join(','),
           ta: [getComputedStyle(document.querySelector('#why-title')).textAlign, getComputedStyle(story).textAlign],
           lines: story.innerHTML.split('<br>').map((x) => x.trim()),
@@ -396,7 +407,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       });
       if (m) ok(why.below && why.ta.join() === 'center,center', `Por qué ${w}px: titular e historia centrados y la foto debajo`, JSON.stringify(why));
       else ok(why.right && why.ta.join() === 'left,left', `Por qué ${w}px: titular e historia a la derecha de la foto, alineados a la izquierda`, JSON.stringify(why));
-      ok(!why.stats && why.between === 'why__grid,cmp,why__foot' && why.gap >= 24 && why.gap <= 64, `Por qué ${w}px: sin las cifras; de la foto se pasa directo a la tabla`, JSON.stringify({ stats: why.stats, between: why.between, gap: why.gap }));
+      ok(!why.stats && !why.cmpInWhy && why.between === 'why__grid,why__foot' && why.gap >= 40 && why.gap <= 72, `Por qué ${w}px: titular, historia, foto, firma y CTA (sin cifras ni tabla)`, JSON.stringify({ stats: why.stats, between: why.between, gap: why.gap }));
       ok(why.lines.length === 2 && why.lines[1] === 'Monté VytalGroup para que no te engañen.' && !why.borders, `Por qué ${w}px: historia en dos líneas y sin líneas separadoras en el comparador`, JSON.stringify({ lines: why.lines, borders: why.borders }));
       await ctx.close();
     }
@@ -445,6 +456,76 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const l = await p.evaluate(() => ({ hrefs: [...document.querySelectorAll('.ft a')].map((a) => a.getAttribute('href')).filter((h) => h.includes('#')), icons: [...document.querySelectorAll('.ft use')].every((u) => document.querySelector(u.getAttribute('href'))), done: [...document.querySelectorAll('.ft__word-in span')].every((x) => getComputedStyle(x).opacity === '1') }));
     ok(l.hrefs.join(',') === '/#equipos,/#mas-equipos,/#asesoramiento' && l.icons && l.done && !logs.length, 'Pie en las páginas legales: mismo pie, enlaces a la página principal, iconos y nombre animado', JSON.stringify(l));
     await ctx.close();
+  });
+
+  // Entre secciones (de Lo más pedido hacia abajo) el color pasa de una a otra con un degradado;
+  // el pie mantiene su corte recto
+  await block('Transiciones entre secciones', async () => {
+    for (const [w, h, m] of [[1440, 900, false], [390, 844, true]]) {
+      const { ctx, p } = await page(b, { width: w, height: h, mobile: m });
+      await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+      const r = await p.evaluate(() => {
+        const body = getComputedStyle(document.body).backgroundColor;
+        const bottomColor = (el) => { const c = getComputedStyle(el); const imgs = c.backgroundImage.match(/rgba?\([^)]*\)/g); if (c.backgroundImage.includes('linear-gradient') && imgs) return imgs[imgs.length - 1]; return c.backgroundColor === 'rgba(0, 0, 0, 0)' ? body : c.backgroundColor; };
+        const out = [];
+        for (const id of ['mas-equipos', 'por-que', 'comparativa', 'dudas', 'asesoramiento']) {
+          const sec = document.getElementById(id);
+          const a = getComputedStyle(sec, '::after');
+          const first = (a.backgroundImage.match(/rgba?\([^)]*\)/) || [''])[0];
+          const last = (a.backgroundImage.match(/rgba?\([^)]*\)/g) || ['']).pop();
+          const prev = bottomColor(sec.previousElementSibling);
+          out.push({ id, grad: a.backgroundImage.startsWith('linear-gradient'), first, prev, fades: /, 0\)$/.test(last), h: parseFloat(a.height), pad: parseFloat(getComputedStyle(sec).paddingTop), top: a.top, z: a.zIndex });
+        }
+        const full = ['por-que', 'comparativa'].map((id) => { const el = document.getElementById(id); const b = el.getBoundingClientRect(); return [id, Math.round(b.width), getComputedStyle(el).borderTopLeftRadius]; });
+        const ft = getComputedStyle(document.querySelector('.ft'), '::after').content;
+        return { out, full, vw: document.documentElement.clientWidth, ft, stats: getComputedStyle(document.getElementById('equipos'), '::after').content };
+      });
+      const bad = r.out.filter((x) => !x.grad || x.first.replace(/rgba?\((\d+), (\d+), (\d+).*/, '$1,$2,$3') !== x.prev.replace(/rgba?\((\d+), (\d+), (\d+).*/, '$1,$2,$3') || !x.fades || x.h > x.pad + 1 || x.h < 60 || x.top !== '0px' || x.z !== '-1');
+      ok(!bad.length, `Secciones ${w}px: de Lo más pedido al formulario, cada unión se funde del color de arriba al de abajo, dentro del margen (sin tapar titulares)`, JSON.stringify(bad.length ? bad : r.out.map((x) => `${x.id}:${x.h}px`)));
+      ok(r.full.every(([, wd, rad]) => wd === r.vw && rad === '0px'), `Secciones ${w}px: Por qué VytalGroup y la comparativa ocupan todo el ancho`, JSON.stringify(r.full));
+      ok(r.ft === 'none' && r.stats === 'none', `Secciones ${w}px: el pie y la unión garantías/Lo más pedido mantienen su corte`, `${r.ft} · ${r.stats}`);
+      await ctx.close();
+    }
+  });
+
+  // Panel de cookies: se abre y se cierra limpio, sin que asome ninguna barra de scroll
+  await block('Panel de cookies', async () => {
+    for (const [w, h, m] of [[1280, 720, false], [390, 844, true], [844, 390, true]]) {
+      const { ctx, p } = await page(b, { width: w, height: h, mobile: m, consent: null });
+      await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+      await p.waitForTimeout(1400);
+      await p.evaluate(() => {
+        window.__f = [];
+        const d = document.getElementById('cookie-panel');
+        const inn = d.querySelector('.cp__in');
+        const t0 = performance.now();
+        const tick = () => {
+          window.__f.push({ scroll: d.scrollTop + inn.scrollTop, box: getComputedStyle(d).overflow !== 'visible' && d.scrollHeight > d.clientHeight, inner: inn.scrollHeight > inn.clientHeight, y: scrollY });
+          if (performance.now() - t0 < 800) requestAnimationFrame(tick);
+        };
+        document.querySelector('#cookie-banner [data-cookie="config"]').addEventListener('click', () => requestAnimationFrame(tick), { once: true });
+      });
+      const y0 = await p.evaluate(() => scrollY);
+      await p.click('#cookie-banner [data-cookie="config"]');
+      await p.waitForTimeout(900);
+      const f = await p.evaluate(() => window.__f);
+      const st = await p.evaluate(() => { const d = document.getElementById('cookie-panel'); const r = d.querySelector('.cp__in').getBoundingClientRect(); return { open: d.open, focus: document.activeElement.matches('[data-consent="marketing"]'), top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight }; });
+      const dirty = f.filter((x) => x.scroll || x.box || x.inner || x.y !== y0).length;
+      ok(st.open && st.focus && !dirty && st.top >= 0 && st.bottom <= st.vh + 1 && (!m || w > h || Math.abs(st.bottom - st.vh) <= 1), `Cookies ${w}×${h}: el panel se abre limpio (sin barra de scroll ni saltos en ${f.length} fotogramas)${m && w < h ? ', como hoja desde abajo' : ''}`, JSON.stringify({ dirty, ...st }));
+      await p.keyboard.press('Escape');
+      await p.waitForTimeout(80);
+      const mid = await p.evaluate(() => ({ open: document.getElementById('cookie-panel').open, closing: document.getElementById('cookie-panel').classList.contains('is-closing') }));
+      await p.waitForTimeout(500);
+      const end = await p.evaluate(() => ({ open: document.getElementById('cookie-panel').open, closing: document.getElementById('cookie-panel').classList.contains('is-closing') }));
+      ok(mid.open && mid.closing && !end.open && !end.closing, `Cookies ${w}×${h}: Escape lo cierra con animación y queda cerrado`, JSON.stringify({ mid, end }));
+      // Reabrir tras cerrar: vuelve a abrirse y no se cierra solo
+      await p.click('#cookie-banner [data-cookie="config"]');
+      await p.waitForTimeout(700);
+      ok(await p.evaluate(() => document.getElementById('cookie-panel').open), `Cookies ${w}×${h}: se puede volver a abrir`);
+      await p.click('[data-cpanel-close]');
+      await p.waitForTimeout(500);
+      await ctx.close();
+    }
   });
 
   await block('Catálogo', async () => {

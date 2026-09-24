@@ -114,3 +114,14 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - [x] Footer con logo grande, columnas con título pequeño e iconos, y "VytalGroup" a todo el ancho con animación al final. También en las legales.
 - [x] Pruebas: Apps Script 17/17, formulario 102/102, interfaz 108/108, diseño 17/17. INP 128 ms. Lighthouse 100 en todo. HTML válido.
 
+## 10. v9: comparativa en su propia sección
+- [x] "Lo habitual frente a VytalGroup" como sección aparte bajo la de Javier: título, subtítulo, tabla pequeña y CTA, con fondo turquesa claro propio.
+- [x] Por qué VytalGroup: titular, historia, foto, firma y CTA.
+- [x] Pruebas: Apps Script 17/17, formulario 102/102, interfaz 112/112, diseño 17/17. INP 120 ms. Lighthouse 100. HTML válido.
+
+## 11. v10: panel de cookies limpio y secciones que se funden
+- [x] Panel de cookies: sin barra de scroll al abrir, foco sin desplazamiento, fundido del fondo, hoja en móvil y cierre animado (también con Escape).
+- [x] Degradados suaves entre secciones de Lo más pedido al formulario; el pie con su corte.
+- [x] Por qué VytalGroup y la comparativa a todo el ancho.
+- [x] Pruebas: Apps Script 17/17, formulario 102/102, interfaz 127/127, diseño 17/17. INP 96 ms. Lighthouse 100. HTML y CSS válidos.
+
