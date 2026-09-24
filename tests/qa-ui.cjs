@@ -49,7 +49,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       nav: document.querySelectorAll('nav').length,
       ids: [...document.querySelectorAll('main > section')].map((x) => x.id),
     }));
-    ok(s.ids.join(',') === 'inicio,garantias,equipos,mas-equipos,por-que,dudas,asesoramiento' && s.footers === 1, 'Estructura: hero, franja de garantías, 5 secciones y el footer', s.ids.join(', '));
+    ok(s.ids.join(',') === 'inicio,garantias,equipos,mas-equipos,por-que,comparativa,dudas,asesoramiento' && s.footers === 1, 'Estructura: hero, franja de garantías, 6 secciones (con "Lo habitual frente a VytalGroup" aparte) y el footer', s.ids.join(', '));
     ok(s.nav === 0, 'Minimalismo: sin menú de navegación');
     // Palabras visibles del contenido: sin cabecera, footer, respuestas del acordeón, formulario ni la línea de confianza
     const words = await p.evaluate(() => {
@@ -69,7 +69,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(words.main <= 260, 'Minimalismo: unas 250 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
     // Un CTA por sección con el mismo texto; el catálogo es la única excepción
     const perSec = await p.$$eval('main > section:not(#asesoramiento):not(#garantias)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
-    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento+Descargar catálogo', 'por-que:Quiero asesoramiento', 'dudas:Quiero asesoramiento'];
+    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento+Descargar catálogo', 'por-que:Quiero asesoramiento', 'comparativa:Quiero asesoramiento', 'dudas:Quiero asesoramiento'];
     ok(perSec.join('|') === want.join('|'), 'CTA: "Quiero asesoramiento" en cada sección y "Descargar catálogo" junto a él en Más equipos', perSec.join(' | '));
     const cta = await p.$$eval('[data-cta]', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
     ok(cta.length === 1 && cta[0] === 'Quiero asesoramiento', 'CTA: texto de asesoramiento idéntico en todas partes (cabecera, secciones y barra móvil)', cta.join(' | '));
@@ -312,14 +312,24 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       await q.goto(BASE + '/', { waitUntil: 'networkidle' });
       const t = await q.evaluate(() => {
         const vw = document.documentElement.clientWidth;
-        const box = document.querySelector('.cmp');
+        const sec = document.querySelector('#comparativa');
+        const box = sec.querySelector('.cmp');
         const r = box.getBoundingClientRect();
         const cs = getComputedStyle(box);
-        const col = getComputedStyle(document.querySelector('.cmp tbody td + td')).backgroundColor;
-        const ta = [...document.querySelectorAll('.cmp th, .cmp td')].map((c) => getComputedStyle(c).textAlign);
-        return { off: Math.round(Math.abs((r.left + r.right) / 2 - vw / 2)), w: Math.round(r.width), bg: cs.backgroundColor, radius: parseFloat(cs.borderTopLeftRadius), col, center: ta.every((x) => x === 'center') };
+        const bgOf = (el) => { const c = getComputedStyle(el); return c.backgroundImage !== 'none' ? c.backgroundImage : c.backgroundColor; };
+        const col = getComputedStyle(sec.querySelector('.cmp tbody td + td')).backgroundColor;
+        const title = sec.querySelector('h2');
+        const icons = [sec.querySelectorAll('.cmp__x').length, sec.querySelectorAll('.cmp__check').length];
+        return {
+          title: title.textContent.replace(/\s+/g, ' ').trim(), lead: sec.querySelector('.vs__lead').textContent.trim(), cta: sec.querySelector('[data-cta]').textContent.trim(),
+          bg: bgOf(sec), why: bgOf(document.querySelector('#por-que')), faq: bgOf(document.querySelector('#dudas')),
+          off: Math.round(Math.abs((r.left + r.right) / 2 - vw / 2)), w: Math.round(r.width), card: cs.backgroundColor, radius: parseFloat(cs.borderTopLeftRadius), col, icons,
+          after: sec.previousElementSibling.id, before: sec.nextElementSibling.id,
+        };
       });
-      ok(t.off <= 2 && t.bg !== 'rgba(0, 0, 0, 0)' && t.radius >= 20 && t.col !== 'rgba(0, 0, 0, 0)' && t.center, `Comparador ${w}px: tabla minimalista centrada, con fondo y la columna de VytalGroup resaltada`, JSON.stringify(t));
+      ok(t.title === 'Lo habitual frente a VytalGroup.' && t.lead === 'Lo que cambia cuando te asesoran fisioterapeutas.' && t.cta === 'Quiero asesoramiento' && t.after === 'por-que' && t.before === 'dudas', `Comparativa ${w}px: sección propia tras la de Javier, con título, subtítulo y CTA`, JSON.stringify({ title: t.title, after: t.after, before: t.before }));
+      ok(/gradient/.test(t.bg) && t.bg !== t.why && t.bg !== t.faq, `Comparativa ${w}px: fondo propio (turquesa claro), distinto del de Javier y del de Dudas`, t.bg.slice(0, 60));
+      ok(t.off <= 2 && t.w <= 720 && t.card === 'rgb(255, 255, 255)' && t.radius >= 20 && t.col !== 'rgba(0, 0, 0, 0)' && t.icons.join() === '3,3', `Comparativa ${w}px: tabla pequeña y centrada, en tarjeta blanca, con aspas, checks y la columna de VytalGroup resaltada`, JSON.stringify({ off: t.off, w: t.w, col: t.col, icons: t.icons }));
       await c3.close();
     }
     ok(before.armed && before.op === '0' && before.dash === '24px' && after.op === '1,1,1' && after.dash === '0px,0px,0px' && after.delays === '0s,0.22s,0.44s', 'Comparador: filas una a una y checks dibujados con stroke-dashoffset', JSON.stringify({ before, op: after.op, dash: after.dash, delays: after.delays }));
@@ -387,7 +397,8 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
           below: ph.top >= st.bottom - 2,
           stats: document.querySelectorAll('.why__list, #por-que [data-count]').length,
           // Medido sin las entradas al hacer scroll (que desplazan un poco la foto hasta que aparece)
-          gap: document.querySelector('.cmp').offsetTop - (document.querySelector('.why__grid').offsetTop + document.querySelector('.why__grid').offsetHeight),
+          gap: document.querySelector('.why__foot').offsetTop - (document.querySelector('.why__grid').offsetTop + document.querySelector('.why__grid').offsetHeight),
+          cmpInWhy: !!document.querySelector('#por-que .cmp'),
           between: [...document.querySelectorAll('#por-que .wrap > *')].map((e) => e.className.split(' ')[0]).join(','),
           ta: [getComputedStyle(document.querySelector('#why-title')).textAlign, getComputedStyle(story).textAlign],
           lines: story.innerHTML.split('<br>').map((x) => x.trim()),
@@ -396,7 +407,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       });
       if (m) ok(why.below && why.ta.join() === 'center,center', `Por qué ${w}px: titular e historia centrados y la foto debajo`, JSON.stringify(why));
       else ok(why.right && why.ta.join() === 'left,left', `Por qué ${w}px: titular e historia a la derecha de la foto, alineados a la izquierda`, JSON.stringify(why));
-      ok(!why.stats && why.between === 'why__grid,cmp,why__foot' && why.gap >= 24 && why.gap <= 64, `Por qué ${w}px: sin las cifras; de la foto se pasa directo a la tabla`, JSON.stringify({ stats: why.stats, between: why.between, gap: why.gap }));
+      ok(!why.stats && !why.cmpInWhy && why.between === 'why__grid,why__foot' && why.gap >= 40 && why.gap <= 72, `Por qué ${w}px: titular, historia, foto, firma y CTA (sin cifras ni tabla)`, JSON.stringify({ stats: why.stats, between: why.between, gap: why.gap }));
       ok(why.lines.length === 2 && why.lines[1] === 'Monté VytalGroup para que no te engañen.' && !why.borders, `Por qué ${w}px: historia en dos líneas y sin líneas separadoras en el comparador`, JSON.stringify({ lines: why.lines, borders: why.borders }));
       await ctx.close();
     }

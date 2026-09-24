@@ -3,7 +3,7 @@
 Landing de una sola página para las campañas de Instagram y Facebook de VytalGroup: equipos médicos de alta calidad para profesionales sanitarios, sin letra pequeña. Ecógrafos y diatermias como protagonistas y el resto del catálogo a un clic. Una acción principal: pedir asesoramiento.
 
 - HTML, CSS y JavaScript vanilla. Sin frameworks ni librerías en el navegador.
-- Hero, franja de garantías, 5 secciones y un footer (apartado 1).
+- Hero, franja de garantías, 6 secciones y un footer (apartado 1).
 - Imágenes solo en WebP. Carga inicial en móvil: unos 65 KB (presupuesto 250 KB). JS propio: 14,7 KB. CSS: unos 10 KB (gzip).
 - Lighthouse: 100 en todo, en móvil, escritorio y páginas legales.
 
@@ -19,9 +19,10 @@ Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", 
    **Franja de garantías** (sección propia, fondo blanco): en bucle infinito y con un icono para cada una: 2 años de garantía · CE / MDR certificados · UE, USA y LATAM envíos · Fisioterapeutas te asesoran · 0 sorpresas en mantenimiento · 53 páginas de catálogo.
 2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con "Lo quiero". En móvil y tableta se ve una tarjeta cada vez, centrada; se pasa deslizando, con puntos. CTA de sección.
 3. **Más equipos** ("Todo lo que tu clínica necesita."). 6 categorías del catálogo con descripción al pasar o tocar, "Y más de 50 páginas de equipos en el catálogo." y dos botones: "Quiero asesoramiento" y **"Descargar catálogo"** (oscuro, con icono, para que destaque).
-4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") alineados a la izquierda; en móvil y tableta, centrado y con la foto debajo. De la foto se pasa directo al comparador "Lo habitual" frente a "Con VytalGroup" como **tabla minimalista centrada**, con fondo y la columna de VytalGroup resaltada en turquesa suave; luego la firma y el CTA. Sin líneas separadoras.
-5. **Dudas** ("Lo que *nos preguntáis.*"). 6 preguntas: ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Escríbenos por WhatsApp".
-6. **Formulario** ("Cuéntanos qué *necesitas.*"). 4 preguntas, una por pantalla:
+4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") alineados a la izquierda; en móvil y tableta, centrado y con la foto debajo. Después, la firma de Javier y el CTA. Fondo marino.
+5. **Lo habitual frente a VytalGroup** (sección propia, "Lo habitual *frente a VytalGroup.*" y "Lo que cambia cuando te asesoran fisioterapeutas."). Fondo turquesa claro con una trama de puntos suave, distinto del marino de arriba y del claro de Dudas; en escritorio es una tarjeta redondeada como la de Javier. Una tabla pequeña y centrada en tarjeta blanca: aspas grises y texto tachado en "Lo habitual", checks blancos sobre turquesa en "Con VytalGroup" (columna resaltada). Sin líneas separadoras. CTA de sección.
+6. **Dudas** ("Lo que *nos preguntáis.*"). 6 preguntas: ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Escríbenos por WhatsApp".
+7. **Formulario** ("Cuéntanos qué *necesitas.*"). 4 preguntas, una por pantalla:
    1. ¿Qué equipo te interesa? Ecógrafo · Diatermia · Presoterapia · Ondas de choque · Otro equipo (desplegable con magnetoterapia, láser, electrólisis percutánea, camillas u otro).
    2. ¿Cuál es tu perfil? Clínica · Fisioterapeuta · Médico · Otro.
    3. ¿Cómo te llamas?
@@ -41,7 +42,12 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 
 ## 2. Cambios de las últimas rondas
 
-**v8 (esta ronda)**
+**v9 (esta ronda)**
+
+- **"Lo habitual frente a VytalGroup" en su propia sección**, debajo de la de Javier: título, subtítulo, tabla pequeña más cuidada (tarjeta blanca, aspas y checks en círculo, columna de VytalGroup resaltada) y CTA, sobre un fondo turquesa claro distinto del de arriba y del de abajo.
+- **Por qué VytalGroup** se queda con "Sin timos. *Sin letra pequeña.*", la historia, la foto, la firma de Javier y el CTA.
+
+**v8**
 
 - **Lo más pedido:** fuera las flechas; se pasa deslizando, con puntos.
 - **Por qué VytalGroup:** fuera las cifras de debajo de la foto (2 años de garantía, 0 sorpresas, fisioterapeutas te asesoran); de la foto de Javier se pasa directo a la tabla "Lo habitual" frente a "Con VytalGroup".
@@ -282,7 +288,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 
 ## 10. Historial
 
-- **v8 (esta ronda)**, **v7**, **v6** y **v5:** ver apartado 2.
+- **v9 (esta ronda)**, **v8**, **v7**, **v6** y **v5:** ver apartado 2.
 - **v4:** hero con fotos y vídeo de clientes y sin testimonios. Sustituido en la v5.
 - **v3:**
   - enfoque "equipos médicos sin letra pequeña";
@@ -316,7 +322,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - doble clic sin duplicar;
   - Lead único con `eventID` = `event_id`;
   - endpoint vacío, error del servidor y antispam.
-- **Interfaz (108):**
+- **Interfaz (112):**
   - hero, franja de garantías y 5 secciones;
   - 6 dudas, iguales en la web y en el JSON-LD;
   - sin "no comerciales";
@@ -330,7 +336,8 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - hero en móvil y escritorio (foto de fondo precargada según el ancho, a todo el hero, velo marino, sin filtro, titular y logo en blanco, sin equipo recortado, ondas ni vídeos);
   - segmentado;
   - carrusel de una tarjeta centrada, sin flechas;
-  - Por qué VytalGroup sin cifras: de la foto directo a la tabla;
+  - Por qué VytalGroup: titular, historia, foto, firma y CTA, sin cifras ni tabla;
+  - Lo habitual frente a VytalGroup: sección propia tras la de Javier, con título, subtítulo, CTA, fondo distinto del de arriba y del de abajo, y tabla pequeña centrada en tarjeta blanca;
   - pie: logo, columnas con título, enlaces, nombre en grande a todo el ancho con las letras animadas, y el mismo pie en las legales;
   - nada ensancha la página de 320 a 1024 px, con el texto al 100 y al 130 % y simulando un navegador sin `overflow: clip`: la cabecera y la barra fija nunca se cortan;
   - solo WebP;
@@ -338,7 +345,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - movimiento reducido;
   - CSP, caché, PDF, URLs limpias, metadatos y OG.
 - **Diseño (17 tamaños):** capturas de página completa de 320 a 1920 px, horizontal y páginas legales, con comprobación por código de desbordes, textos partidos, solapes y áreas táctiles. Revisadas una a una.
-- `node tests/inp.cjs`: interacción más lenta 128 ms con la CPU ×4 (INP < 200 ms), incluidas las 4 preguntas y "Prefiero por correo".
+- `node tests/inp.cjs`: interacción más lenta 120 ms con la CPU ×4 (INP < 200 ms), incluidas las 4 preguntas y "Prefiero por correo".
 
 | | Rendimiento | Accesibilidad | Buenas prácticas | SEO |
 |---|---|---|---|---|
