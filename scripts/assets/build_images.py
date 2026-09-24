@@ -1,4 +1,4 @@
-"""Genera las imágenes de la landing (AVIF + WebP, varios anchos).
+"""Genera las imágenes de la landing (solo WebP, varios anchos: decodifica rápido en cualquier móvil).
 
 Fuentes:
   * Catálogo ADC Global Tech | VytalGroup 2026 (imágenes extraídas con `pdfimages -all -p`)
@@ -23,19 +23,16 @@ from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
 
 PDF, PHOTOS, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
 os.makedirs(OUT, exist_ok=True)
-AVIF_Q, WEBP_Q = 60, 80
+WEBP_Q = 80
 CW, CH = 640, 480  # lienzo de producto (4:3)
 
 
-def save(im, name, widths, alpha=False, formats=('avif', 'webp')):
+def save(im, name, widths, alpha=False):
     im = im.convert('RGBA' if alpha else 'RGB')
     for w in widths:
         w = min(w, im.width)
         r = im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
-        if 'avif' in formats:
-            r.save(os.path.join(OUT, f'{name}-{w}.avif'), quality=AVIF_Q, speed=4)
-        if 'webp' in formats:
-            r.save(os.path.join(OUT, f'{name}-{w}.webp'), quality=WEBP_Q, method=6)
+        r.save(os.path.join(OUT, f'{name}-{w}.webp'), quality=WEBP_Q, method=6)
     print(name, im.size, widths)
 
 
@@ -281,7 +278,7 @@ dark.putalpha(sh)
 hero = Image.alpha_composite(hero, dark)
 hero.alpha_composite(vytamed, (20, 20))
 # El recorte de la diatermia solo se usa en la imagen OG
-save(hero, 'hero-vytamed', [760], alpha=True, formats=('webp',))
+save(hero, 'hero-vytamed', [760], alpha=True)
 
 # ---------------------------------------------------------------- hero: foto de clínica difuminada (fondo)
 # Foto real de la diatermia VytalGroup en una clínica (catálogo). El difuminado va horneado en la imagen:
@@ -289,11 +286,9 @@ save(hero, 'hero-vytamed', [760], alpha=True, formats=('webp',))
 clinica = Image.open(pdf('i-004-016.png')).convert('RGB')
 for w, rad in ((960, 9), (1600, 14)):
     x = clinica.resize((w, round(clinica.height * w / clinica.width)), Image.LANCZOS).filter(ImageFilter.GaussianBlur(rad))
-    x.save(os.path.join(OUT, f'hero-fondo-{w}.avif'), quality=50, speed=4)
     x.save(os.path.join(OUT, f'hero-fondo-{w}.webp'), quality=72, method=6)
 m = clinica.crop((80, 0, 80 + int(952 * 0.62), 952))  # recorte vertical para móvil
 m = m.resize((600, round(m.height * 600 / m.width)), Image.LANCZOS).filter(ImageFilter.GaussianBlur(9))
-m.save(os.path.join(OUT, 'hero-fondo-m-600.avif'), quality=50, speed=4)
 m.save(os.path.join(OUT, 'hero-fondo-m-600.webp'), quality=72, method=6)
 
 # ---------------------------------------------------------------- Javier

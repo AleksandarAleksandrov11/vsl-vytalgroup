@@ -39,9 +39,14 @@
 /* ---------- Base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: calc(var(--hd) + 12px); }
+/* Nada puede ensanchar la página en horizontal: si pasara, en algunos móviles la cabecera y la
+   barra fija se alargan y su botón derecho queda cortado. */
+html { overflow-x: clip; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: calc(var(--hd) + 12px); }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+/* Respaldo para navegadores sin overflow: clip (Safari < 16 y navegadores internos antiguos) */
+@supports not (overflow: clip) { html { overflow-x: hidden; } }
 body {
+  min-height: 100vh;
   min-height: 100svh;
   background: var(--bg);
   color: var(--ink);
@@ -124,19 +129,23 @@ ul[class], ol[class] { list-style: none; padding: 0; }
 .hd { position: fixed; inset: 0 0 auto; z-index: 50; height: var(--hd); transition: transform .5s var(--ease); }
 .hd::before { content: ""; position: absolute; inset: 0; background: rgba(250, 251, 252, .78); -webkit-backdrop-filter: saturate(1.8) blur(16px); backdrop-filter: saturate(1.8) blur(16px); box-shadow: 0 1px 0 var(--line); opacity: 0; transform-origin: top; transition: opacity .4s ease, transform .5s var(--ease); }
 .hd__bar { position: relative; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: transform .5s var(--ease); }
-.hd__logo { display: flex; align-items: center; min-height: 44px; border-radius: 8px; }
+/* El logo cede espacio antes que el botón: nunca se monta ni se corta, aunque el texto del sistema sea grande */
+.hd__logo { display: flex; align-items: center; flex: 0 1 144px; min-width: 84px; min-height: 44px; border-radius: 8px; }
+.hd__logo .logo { width: 100%; height: auto; }
+.hd .btn--sm { flex: none; }
 .hd.is-scrolled::before { opacity: 1; transform: scaleY(.875); }
 .hd.is-scrolled .hd__bar { transform: translateY(-4px); }
 @media (min-width: 1024px) {
   .hd.is-scrolled::before { transform: scaleY(.833); }
   .hd.is-scrolled .hd__bar { transform: translateY(-6px); }
   .logo { height: 24px; }
+  .hd__logo { flex-basis: 157px; }
 }
 .hd .btn--sm { white-space: nowrap; }
 @media (max-width: 374px) {
   .hd__bar { gap: 10px; }
-  .hd .logo { height: 17px; }
-  .hd .btn--sm { padding: 0 12px; font-size: .8125rem; }
+  .hd__logo { flex-basis: 111px; }
+  .hd .btn--sm { padding: 0 14px; font-size: .8125rem; }
 }
 
 /* ---------- Pie ---------- */

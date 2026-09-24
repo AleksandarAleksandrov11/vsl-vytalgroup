@@ -1,6 +1,8 @@
-// Formulario corto, solo lo imprescindible (2 pasos):
-//   1. ¿Qué equipo buscas? (desde "Lo quiero" el modelo ya viene elegido y se salta este paso)
-//   2. Nombre + WhatsApp + consentimiento.
+// Formulario corto de 4 preguntas, una por pantalla:
+//   1. ¿Qué equipo te interesa? (desde "Lo quiero" el modelo ya viene elegido y se salta este paso)
+//   2. ¿Cuál es tu perfil? Clínica, fisioterapeuta, médico u otro.
+//   3. ¿Cómo te llamas?
+//   4. ¿A qué WhatsApp te escribimos? + consentimiento.
 // · Avance automático al elegir una opción con el dedo o el ratón; con teclado, Enter.
 // · Validación en línea, datos conservados al volver atrás, prefijo con buscador.
 // · Antispam: campo trampa, tiempo mínimo de 3 s y bloqueo de doble envío.
@@ -12,7 +14,7 @@ import { createSelect } from './select.js';
 import { getAttribution } from './attribution.js';
 import { lead } from './tracking.js';
 
-const TOTAL = 2;
+const TOTAL = 4;
 const MIN_MS = 3000;
 const WA = 'https://wa.me/34616372644?text=';
 const WHAT = {
@@ -138,13 +140,15 @@ function problem(n) {
     if (!state.equipo) return 'Elige una opción.';
     return state.equipo === 'Otro equipo' && !state.otro ? 'Elige qué equipo buscas.' : '';
   }
-  return nameProblem() || telProblem();
+  if (n === 2) return state.perfil ? '' : 'Elige una opción.';
+  if (n === 3) return nameProblem();
+  return telProblem();
 }
-// Errores del paso 1 (opciones)
-function setError(msg) {
-  stepEl(1).querySelector('[data-error]').textContent = msg;
+// Errores de los pasos de opciones (1 y 2)
+function setError(n, msg) {
+  stepEl(n).querySelector('[data-error]').textContent = msg;
 }
-// Errores de los campos del paso 2, cada uno bajo su campo
+// Errores de los campos (nombre y WhatsApp), cada uno bajo su campo
 function fieldError(which, msg) {
   const f = which === 'name' ? ui.name : ui.tel;
   const e = which === 'name' ? ui.nameErr : ui.telErr;
@@ -152,14 +156,12 @@ function fieldError(which, msg) {
   e.textContent = msg;
   f.setAttribute('aria-invalid', String(!!msg));
 }
-function checkContact() {
-  const n = nameProblem();
-  const t = telProblem();
-  fieldError('name', n);
-  fieldError('tel', t);
-  if (n) { ui.name.focus({ preventScroll: true }); return false; }
-  if (t) { ui.tel.focus({ preventScroll: true }); return false; }
-  return true;
+// Muestra el error del paso n donde toca y devuelve si el paso está bien
+function check(n) {
+  const msg = problem(n);
+  if (n <= 2) setError(n, msg);
+  else fieldError(n === 3 ? 'name' : 'tel', msg);
+  return !msg;
 }
 function consentOk(show) {
   const ok = ui.consent.checked;
@@ -178,8 +180,9 @@ function update() {
   ui.bar.setAttribute('aria-valuetext', `Paso ${n} de ${TOTAL}`);
   ui.count.textContent = `${n}/${TOTAL}`;
   ui.back.hidden = n === 1 || finished;
-  // En el paso de opciones el botón "Siguiente" solo aparece si ya hay respuesta
+  // En los pasos de opciones el botón "Siguiente" solo aparece si ya hay respuesta
   stepEl(1).querySelector('[data-next]').classList.toggle('is-shown', !!state.equipo);
+  stepEl(2).querySelector('[data-next]').classList.toggle('is-shown', !!state.perfil);
   // En el paso 2 se recuerda qué equipo se ha elegido, con la opción de cambiarlo
   const what = state.modelo ? shortModel(state.modelo) : equipoFinal();
   ui.pickedBox.hidden = !what;
@@ -225,18 +228,14 @@ function goTo(n, dir = 'fwd') {
 }
 function next() {
   if (finished) return;
-  if (state.step === 1) {
-    const msg = problem(1);
-    setError(msg);
-    if (msg) {
-      const f = stepEl(1).querySelector('input');
-      if (f) f.focus({ preventScroll: true });
-      return;
-    }
-    goTo(2);
-  } else {
-    submit();
+  const n = state.step;
+  if (n === TOTAL) { submit(); return; }
+  if (!check(n)) {
+    const f = stepEl(n).querySelector('.field, input');
+    if (f) f.focus({ preventScroll: true });
+    return;
   }
+  goTo(n + 1);
 }
 function back() {
   if (state.step > 1 && !finished) goTo(state.step - 1, 'back');
@@ -261,8 +260,8 @@ function applyPreselect(model, equipo) {
   showOther(false);
   const r = form.querySelector(`input[name="equipo"][value="${equipo}"]`);
   if (r) r.checked = true;
-  setError('');
-  if (state.step !== 2) goTo(2);
+  setError(1, '');
+  if (state.step === 1) goTo(2);
   else update();
 }
 
@@ -281,12 +280,9 @@ function payload() {
   return {
     nombre: ui.name.value.trim(),
     telefono: phoneFull(),
-    email: '',
+    perfil: state.perfil,
     equipo: equipoFinal(),
     modelo: state.modelo || (WITH_MODELS.includes(state.equipo) ? 'Sin decidir' : ''),
-    // Columnas que se mantienen en la hoja aunque ya no se pregunten (formulario corto)
-    perfil: '',
-    plazo: '',
     consentimiento: `Sí · ${new Date().toISOString()}`,
     utm_source: a.utm_source || '',
     utm_medium: a.utm_medium || '',
@@ -316,13 +312,16 @@ function setLoading(on) {
 }
 async function submit() {
   if (busy || finished) return;
-  const msg1 = problem(1);
-  if (msg1) {
-    goTo(1, 'back');
-    setError(msg1);
-    return;
+  // Si falta algo de un paso anterior se vuelve a ese paso con su aviso
+  for (let n = 1; n <= TOTAL; n++) {
+    if (problem(n)) {
+      if (n !== state.step) goTo(n, 'back');
+      check(n);
+      const f = stepEl(n).querySelector('.field, input');
+      if (f) f.focus({ preventScroll: true });
+      return;
+    }
   }
-  if (!checkContact()) return;
   if (!consentOk(true)) { ui.consent.focus(); return; }
   busy = true;
   setLoading(true);
@@ -420,7 +419,7 @@ export function initForm() {
     failWa: $('[data-fail-wa]'),
     live: $('[data-live]'),
   };
-  state = { step: 1, equipo: '', modelo: '', otro: '', country: COUNTRIES[0], eventId: uuid(), t0: performance.now() };
+  state = { step: 1, equipo: '', modelo: '', otro: '', perfil: '', country: COUNTRIES[0], eventId: uuid(), t0: performance.now() };
 
   prefix = createSelect($('[data-prefix]'), {
     id: 'pf',
@@ -450,7 +449,7 @@ export function initForm() {
     options: OTHER.map((v) => ({ value: v, label: v })),
     onChange: (x) => {
       state.otro = x.value;
-      setError('');
+      setError(1, '');
       update();
       setTimeout(next, reduced() ? 0 : 280);
     },
@@ -466,8 +465,11 @@ export function initForm() {
         state.modelo = '';
         wait = t.value === 'Otro equipo';
         showOther(wait);
+        setError(1, '');
+      } else if (t.name === 'perfil') {
+        state.perfil = t.value;
+        setError(2, '');
       }
-      setError('');
       update();
       if (wait) {
         // Con "Otro equipo" no se avanza: se abre el desplegable para elegir cuál
@@ -490,14 +492,6 @@ export function initForm() {
     if (e.key !== 'Enter' || e.isComposing) return;
     const t = e.target;
     if (t.closest('.sel')) return; // los desplegables gestionan su propio Enter
-    if (t === ui.name) {
-      // Enter en el nombre pasa al WhatsApp
-      e.preventDefault();
-      const msg = nameProblem();
-      fieldError('name', msg);
-      if (!msg) ui.tel.focus();
-      return;
-    }
     if (t.matches('input:not([type=checkbox]), .opt input')) {
       e.preventDefault();
       next();
