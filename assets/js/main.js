@@ -1,7 +1,7 @@
 // VytalGroup · landing
 // Cabecera y barra de progreso, entradas al hacer scroll
 // (bloques, titulares por líneas e imágenes), parallax y halo en escritorio, control segmentado,
-// carrusel, categorías, conteo, comparador, marquesina, acordeón, barra fija
+// carrusel con flechas, categorías, conteo, comparador, marquesina, acordeón, barra fija
 // en móvil, botones magnéticos, carga diferida del formulario y eventos del píxel.
 // Solo se animan transform, opacity y variables CSS. Con prefers-reduced-motion quedan los fundidos.
 
@@ -171,20 +171,40 @@ tabs.forEach((t, i) => {
   });
 });
 
+// Carrusel de móvil y tableta: puntos y flechas a los lados de la foto de la tarjeta visible
 $$('[data-carousel]').forEach((track) => {
-  const dots = $$('span', track.parentElement.querySelector('.dots'));
+  const panel = track.closest('.panel');
+  const cards = [...track.children];
+  const dots = $$('.dots span', panel);
+  const prev = $('[data-dir="-1"]', panel);
+  const next = $('[data-dir="1"]', panel);
+  const mid = (el) => { const r = el.getBoundingClientRect(); return r.left + r.width / 2; };
+  const current = () => {
+    const c = mid(track);
+    let best = 0;
+    cards.forEach((card, i) => { if (Math.abs(mid(card) - c) < Math.abs(mid(cards[best]) - c)) best = i; });
+    return best;
+  };
+  const paint = () => {
+    const i = current();
+    dots.forEach((d, j) => d.classList.toggle('is-on', j === i));
+    [[prev, i === 0], [next, i === cards.length - 1]].forEach(([btn, off]) => {
+      if (!btn || btn.disabled === off) return;
+      // Si la flecha con el foco se apaga, el foco pasa a la otra
+      if (off && document.activeElement === btn) (btn === prev ? next : prev).focus();
+      btn.disabled = off;
+    });
+  };
   let raf = 0;
   track.addEventListener('scroll', () => {
     cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(() => {
-      const cards = [...track.children];
-      const x = track.scrollLeft;
-      let best = 0;
-      cards.forEach((c, i) => { if (Math.abs(c.offsetLeft - track.offsetLeft - x) < Math.abs(cards[best].offsetLeft - track.offsetLeft - x)) best = i; });
-      if (x + track.clientWidth >= track.scrollWidth - 4) best = cards.length - 1;
-      dots.forEach((d, i) => d.classList.toggle('is-on', i === best));
-    });
+    raf = requestAnimationFrame(paint);
   }, { passive: true });
+  [prev, next].forEach((btn) => btn && btn.addEventListener('click', () => {
+    const i = Math.max(0, Math.min(cards.length - 1, current() + Number(btn.dataset.dir)));
+    track.scrollTo({ left: track.scrollLeft + mid(cards[i]) - mid(track), behavior: reduced ? 'instant' : 'smooth' });
+  }));
+  paint();
 });
 
 // ------------------------------------------------------------------ más equipos: descripción al tocar

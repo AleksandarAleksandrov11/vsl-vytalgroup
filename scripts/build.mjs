@@ -139,7 +139,7 @@ writeFileSync(join(DIST, 'robots.txt'), `User-agent: *\nAllow: /\n\nSitemap: ${S
 // ---------------------------------------------------------------- informe y presupuestos
 const file = (p) => readFileSync(join(DIST, p.replace(/^\//, '')));
 // Fondo del hero en móvil (foto difuminada: pesa muy poco)
-const heroMobile = map.get('/assets/img/hero-fondo-m-600.avif');
+const heroMobile = map.get('/assets/img/hero-fondo-m-600.webp');
 const initial = [
   ['index.html (con CSS inline)', gz(file('index.html'))],
   ['config.js', gz(file('config.js'))],

@@ -94,3 +94,16 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - [x] Por qué VytalGroup en escritorio: historia y cifras a la derecha de la foto, alineadas a la izquierda. Móvil sin cambios (centrado).
 - [x] Sin líneas separadoras en las cifras ni en el comparador.
 - [x] Pruebas: formulario 81/81, interfaz 89/89, diseño 17/17. INP 120 ms. Lighthouse 100 en todo (móvil ×3 y escritorio). HTML válido.
+
+## 8. v7: garantías aparte, formulario de 4 preguntas y móvil sin cortes
+- [x] Garantías en sección propia bajo el hero, más grande, textos mayores e icono en cada una (bucle infinito).
+- [x] Comparador como tabla minimalista centrada con fondo.
+- [x] Dudas: fuera "¿Solo vendéis...?"; nuevas "¿Qué garantía tienen?" y "¿Qué pasa cuando envío el formulario?".
+- [x] Formulario de 4 preguntas: qué te interesa, perfil, nombre y WhatsApp. Apps Script con Perfil y enlace de WhatsApp.
+- [x] "Fisioterapeutas te asesoran" sin "no comerciales".
+- [x] Flechas en el carrusel de móvil y tableta.
+- [x] Cabecera y barra móvil cortadas: causa (desbordes horizontales) corregida y probada sin overflow: clip y con texto al 130 %.
+- [x] Solo WebP.
+- [x] Revisión por pantallas en 360, 390, 768, 1024, 1440 y horizontal.
+- [x] Pruebas: Apps Script 13/13, formulario 88/88, interfaz 102/102, diseño 17/17. INP 112 ms. Lighthouse móvil 99-100, escritorio y legales 100. HTML válido.
+

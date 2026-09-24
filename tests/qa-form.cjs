@@ -37,14 +37,21 @@ const fb = (p) => p.evaluate(() => window.__fb || []);
 const step = (p) => p.evaluate(() => document.querySelector('#qf .qf__step.is-active')?.dataset.step || null);
 const toForm = async (p) => { await p.evaluate(() => document.querySelector('#asesoramiento').scrollIntoView()); await p.waitForTimeout(700); };
 
-async function fillToEnd(p, { mobile, name = 'Laura Gómez', tel = '612345678' } = {}) {
+async function fillToEnd(p, { mobile, name = 'Laura Gómez', tel = '612345678', perfil = 'Fisioterapeuta' } = {}) {
   const tap = (sel) => (mobile ? p.tap(sel) : p.click(sel));
   if ((await step(p)) === '1') {
     await tap('.qf__step.is-active label.opt:has(input[value="Ecógrafo"])');
     await p.waitForTimeout(700);
   }
-  await p.fill('#f-name', name);
-  await p.press('#f-name', 'Enter');
+  if ((await step(p)) === '2') {
+    await tap(`.qf__step.is-active label.opt:has(input[value="${perfil}"])`);
+    await p.waitForTimeout(700);
+  }
+  if ((await step(p)) === '3') {
+    await p.fill('#f-name', name);
+    await p.press('#f-name', 'Enter');
+    await p.waitForTimeout(500);
+  }
   await p.fill('#f-tel', tel);
   await p.check('input[name="consent"]');
 }
@@ -126,14 +133,16 @@ async function block(name, fn) {
     await p.waitForTimeout(600);
     await p.click('[data-want="Acclarix AX8 (EDAN)"]');
     await p.waitForTimeout(1600);
-    ok((await step(p)) === '2' && (await p.textContent('[data-picked]')) === 'Acclarix AX8', 'Formulario: "Lo quiero" salta al paso de contacto con el modelo elegido', await p.textContent('[data-picked]'));
+    ok((await step(p)) === '2' && (await p.textContent('[data-picked]')) === 'Acclarix AX8', 'Formulario: "Lo quiero" salta al perfil con el modelo elegido', await p.textContent('[data-picked]'));
     const inView = await p.evaluate(() => { const r = document.querySelector('.fcard').getBoundingClientRect(); return r.top >= 0 && r.top < innerHeight * 0.5; });
     ok(inView, 'Formulario: "Lo quiero" lleva al formulario');
-    ok(await p.evaluate(() => document.activeElement.id === 'f-name'), 'Formulario: foco en el nombre tras llegar');
-    ok((await p.getAttribute('.qf__bar', 'aria-valuetext')) === 'Paso 2 de 2' && await p.isVisible('[data-back]'), 'Formulario: solo 2 pasos (equipo y contacto)');
+    ok(await p.evaluate(() => document.activeElement.name === 'perfil'), 'Formulario: foco en la primera opción de perfil tras llegar');
+    ok((await p.getAttribute('.qf__bar', 'aria-valuetext')) === 'Paso 2 de 4' && (await p.textContent('[data-count-step]')) === '2/4' && await p.isVisible('[data-back]'), 'Formulario: 4 pasos con progreso (2/4)');
     const qs = await p.$$eval('.qf__step', (els) => els.map((e) => e.querySelector('.qf__q').textContent.trim()));
     const fields = await p.$$eval('#qf input[name]:not([type=hidden]):not([name=website])', (els) => [...new Set(els.map((e) => e.name))]);
-    ok(qs.join('|') === '¿Qué equipo buscas?|¿Dónde te escribimos?' && fields.join(',') === 'equipo,nombre,telefono,consent', 'Formulario: solo lo imprescindible (equipo, nombre, WhatsApp y consentimiento)', `${qs.join(' / ')} · ${fields.join(', ')}`);
+    ok(qs.join('|') === '¿Qué equipo te interesa?|¿Cuál es tu perfil?|¿Cómo te llamas?|¿A qué WhatsApp te escribimos?' && fields.join(',') === 'equipo,perfil,nombre,telefono,consent', 'Formulario: 4 preguntas (qué te interesa, perfil, nombre y WhatsApp) y el consentimiento', `${qs.join(' / ')} · ${fields.join(', ')}`);
+    const perfiles = await p.$$eval('input[name="perfil"]', (els) => els.map((e) => e.value));
+    ok(perfiles.join('|') === 'Clínica|Fisioterapeuta|Médico|Otro', 'Perfil: Clínica, Fisioterapeuta, Médico u Otro', perfiles.join(', '));
     // "Cambiar" vuelve al paso 1 con el equipo marcado y conserva el modelo si no se cambia
     await p.click('[data-change]');
     await p.waitForTimeout(500);
@@ -141,6 +150,20 @@ async function block(name, fn) {
     await p.click('.qf__step.is-active [data-next]');
     await p.waitForTimeout(600);
     ok((await step(p)) === '2' && (await p.textContent('[data-picked]')) === 'Acclarix AX8', 'Formulario: "Siguiente" mantiene el modelo de la tarjeta');
+    // Perfil: con teclado, Enter sin elegir avisa; al elegir con el ratón avanza solo
+    ok(await p.isHidden('.qf__step.is-active [data-next]'), 'Perfil: "Siguiente" oculto hasta elegir');
+    await p.focus('input[name="perfil"][value="Clínica"]');
+    await p.keyboard.press('Enter');
+    ok((await step(p)) === '2' && (await p.textContent('.qf__step.is-active [data-error]')) === 'Elige una opción.', 'Perfil: pide elegir antes de seguir');
+    await p.click('.qf__step.is-active label.opt:has(input[value="Fisioterapeuta"])');
+    await p.waitForTimeout(700);
+    ok((await step(p)) === '3' && await p.evaluate(() => document.activeElement.id === 'f-name') && (await p.textContent('[data-count-step]')) === '3/4', 'Perfil: al elegir avanza solo al nombre (3/4)');
+    // Volver atrás conserva la respuesta
+    await p.click('[data-back]');
+    await p.waitForTimeout(500);
+    ok((await step(p)) === '2' && await p.isChecked('input[name="perfil"][value="Fisioterapeuta"]') && await p.isVisible('.qf__step.is-active [data-next]'), 'Perfil: al volver sigue marcado');
+    await p.click('.qf__step.is-active [data-next]');
+    await p.waitForTimeout(500);
     // Validación del nombre
     await p.press('#f-name', 'Enter');
     ok((await p.textContent('#e-name')) === 'Escribe tu nombre.' && (await p.getAttribute('#f-name', 'aria-invalid')) === 'true', 'Validación: nombre obligatorio');
@@ -150,7 +173,8 @@ async function block(name, fn) {
     await p.fill('#f-name', 'Laura Gómez');
     ok((await p.textContent('#e-name')) === '', 'Validación: el error se borra al escribir');
     await p.press('#f-name', 'Enter');
-    ok(await p.evaluate(() => document.activeElement.id === 'f-tel'), 'Formulario: Enter en el nombre pasa al WhatsApp');
+    await p.waitForTimeout(500);
+    ok((await step(p)) === '4' && await p.evaluate(() => document.activeElement.id === 'f-tel') && (await p.textContent('[data-count-step]')) === '4/4', 'Formulario: Enter en el nombre pasa al WhatsApp (4/4)');
     // Teléfono
     ok((await p.textContent('.sel--prefix .sel__btn')).includes('+34'), 'Teléfono: +34 por defecto');
     await p.fill('#f-tel', '51234567');
@@ -171,7 +195,7 @@ async function block(name, fn) {
     await p.waitForTimeout(300);
     ok((await p.textContent('.sel--prefix .sel__btn')).includes('+351') && await p.evaluate(() => document.activeElement.id === 'f-tel'), 'Prefijo: Enter elige y vuelve al número');
     await p.click('[data-submit]');
-    ok((await step(p)) === '2' && (await p.textContent('#e-tel')).startsWith('Revisa'), 'Validación: el número se valida con las reglas del país');
+    ok((await step(p)) === '4' && (await p.textContent('#e-tel')).startsWith('Revisa'), 'Validación: el número se valida con las reglas del país');
     await p.click('.sel--prefix .sel__btn');
     await p.keyboard.type('34');
     await p.keyboard.press('Enter');
@@ -200,11 +224,14 @@ async function block(name, fn) {
     ok(sent.length === 1, 'Envío: doble clic no duplica', `${sent.length} POST`);
     const d = sent[0] ? JSON.parse(sent[0].body) : {};
     ok(sent[0] && sent[0].ct.startsWith('text/plain'), 'Envío: Content-Type text/plain;charset=utf-8', sent[0] && sent[0].ct);
-    const expect = { nombre: 'Laura Gómez', telefono: '+34 612 345 678', email: '', equipo: 'Ecógrafo', modelo: 'Acclarix AX8 (EDAN)', perfil: '', plazo: '', utm_source: 'facebook', utm_campaign: 'test', fbclid: 'abc123', website: '' };
+    const expect = { nombre: 'Laura Gómez', telefono: '+34 612 345 678', perfil: 'Fisioterapeuta', equipo: 'Ecógrafo', modelo: 'Acclarix AX8 (EDAN)', utm_source: 'facebook', utm_campaign: 'test', fbclid: 'abc123', website: '' };
     const wrong = Object.entries(expect).filter(([k, v]) => d[k] !== v).map(([k]) => `${k}=${d[k]}`);
-    ok(!wrong.length, 'Envío: campos del formulario y UTM correctos', wrong.join(', '));
-    const keys = ['nombre', 'telefono', 'email', 'equipo', 'modelo', 'perfil', 'plazo', 'consentimiento', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'fbc', 'fbp', 'referrer', 'landing_url', 'dispositivo', 'idioma', 'event_id'];
-    ok(keys.every((k) => k in d), 'Envío: están todas las columnas de la hoja', keys.filter((k) => !(k in d)).join(', '));
+    ok(!wrong.length, 'Envío: campos del formulario (con el perfil) y UTM correctos', wrong.join(', '));
+    // Mismas claves que las columnas del Apps Script (menos las que pone el servidor)
+    const gs = fs.readFileSync('integrations/google-sheets.gs', 'utf8');
+    const cols = [...gs.match(/const COLUMNS = \[([\s\S]*?)\n\];/)[1].matchAll(/\['(\w+)',/g)].map((m) => m[1]).filter((k) => !['fecha', 'whatsapp', 'estado'].includes(k));
+    const keys = Object.keys(d).filter((k) => k !== 'website');
+    ok(cols.join(',') === keys.join(',') && !('email' in d) && !('plazo' in d), 'Envío: las mismas columnas que la hoja de Google, sin email ni plazo', `${keys.join(', ')}`);
     ok(/^fb\.1\.\d{13}\.abc123$/.test(d.fbc) && d.fbp === 'fb.1.1700000000000.987654321', 'Envío: fbc construido desde fbclid y fbp de la cookie', `${d.fbc} / ${d.fbp}`);
     ok(d.consentimiento && d.consentimiento.startsWith('Sí') && /^[0-9a-f-]{36}$/.test(d.event_id) && d.landing_url.includes('utm_source=facebook') && d.idioma && d.dispositivo.startsWith('Escritorio'), 'Envío: consentimiento, event_id, URL de entrada, idioma y dispositivo', `${d.dispositivo} · ${d.idioma}`);
     ok(await p.isVisible('[data-done]') && (await p.textContent('[data-done-title]')) === 'Gracias, Laura. Te escribimos muy pronto.', 'Éxito: "Gracias, Laura. Te escribimos muy pronto."');
@@ -227,11 +254,17 @@ async function block(name, fn) {
     const { ctx, p, logs } = await open(b, { consent: false, width: 390, height: 844, mobile: true });
     await p.tap('.hero__cta');
     await p.waitForTimeout(1400);
-    ok((await step(p)) === '1' && await p.isVisible('[data-opts]') && (await p.getAttribute('.qf__bar', 'aria-valuetext')) === 'Paso 1 de 2', 'Móvil: el CTA del hero lleva al paso 1 de 2');
+    ok((await step(p)) === '1' && await p.isVisible('.qf__step.is-active [data-opts]') && (await p.getAttribute('.qf__bar', 'aria-valuetext')) === 'Paso 1 de 4', 'Móvil: el CTA del hero lleva al paso 1 de 4');
     await p.tap('.qf__step.is-active label.opt:has(input[value="Diatermia"])');
     await p.waitForTimeout(800);
     ok((await step(p)) === '2' && (await p.textContent('[data-picked]')) === 'Diatermia', 'Móvil: avance automático al tocar y resumen del equipo');
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Clínica"])');
+    await p.waitForTimeout(800);
+    ok((await step(p)) === '3', 'Móvil: el perfil también avanza al tocar');
     await p.fill('#f-name', 'Marta');
+    await p.tap('.qf__step.is-active [data-next]');
+    await p.waitForTimeout(700);
+    ok((await step(p)) === '4', 'Móvil: "Siguiente" en el nombre lleva al WhatsApp');
     await p.tap('.sel--prefix .sel__btn');
     await p.waitForTimeout(700);
     const sheet = await p.evaluate(() => { const r = document.querySelector('.sel--prefix .sel__panel').getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, focus: document.activeElement.className }; });
@@ -245,7 +278,7 @@ async function block(name, fn) {
     await p.tap('[data-submit]');
     await p.waitForTimeout(1600);
     const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
-    ok(d.telefono === '+33 6 12 34 56 78' && d.equipo === 'Diatermia' && d.modelo === 'Sin decidir' && d.dispositivo === 'Móvil · iOS · Instagram', 'Móvil: envío correcto (navegador de Instagram)', `${d.telefono} · ${d.modelo} · ${d.dispositivo}`);
+    ok(d.telefono === '+33 6 12 34 56 78' && d.equipo === 'Diatermia' && d.perfil === 'Clínica' && d.modelo === 'Sin decidir' && d.dispositivo === 'Móvil · iOS · Instagram', 'Móvil: envío correcto (navegador de Instagram)', `${d.telefono} · ${d.perfil} · ${d.modelo} · ${d.dispositivo}`);
     ok(await p.isVisible('[data-done]'), 'Móvil: pantalla de gracias');
     ok(!logs.length, 'Consola limpia (móvil)', logs.join(' / '));
     await ctx.close();
@@ -313,7 +346,7 @@ async function block(name, fn) {
     await p.tap('[data-submit]');
     await p.waitForTimeout(1600);
     const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
-    ok(d.equipo === 'Presoterapia' && d.modelo === '', 'Presoterapia: equipo en la hoja y sin modelo', `${d.equipo} · "${d.modelo}"`);
+    ok(d.equipo === 'Presoterapia' && d.modelo === '' && d.perfil === 'Fisioterapeuta', 'Presoterapia: equipo en la hoja y sin modelo', `${d.equipo} · "${d.modelo}" · ${d.perfil}`);
     await ctx.close();
   });
 

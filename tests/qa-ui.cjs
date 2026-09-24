@@ -49,7 +49,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       nav: document.querySelectorAll('nav').length,
       ids: [...document.querySelectorAll('main > section')].map((x) => x.id),
     }));
-    ok(s.ids.join(',') === 'inicio,equipos,mas-equipos,por-que,dudas,asesoramiento' && s.footers === 1, 'Estructura: 6 secciones (sin testimonios ni sección de catálogo) y el footer', s.ids.join(', '));
+    ok(s.ids.join(',') === 'inicio,garantias,equipos,mas-equipos,por-que,dudas,asesoramiento' && s.footers === 1, 'Estructura: hero, franja de garantías, 5 secciones y el footer', s.ids.join(', '));
     ok(s.nav === 0, 'Minimalismo: sin menú de navegación');
     // Palabras visibles del contenido: sin cabecera, footer, respuestas del acordeón, formulario ni la línea de confianza
     const words = await p.evaluate(() => {
@@ -68,7 +68,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     });
     ok(words.main <= 260, 'Minimalismo: unas 250 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
     // Un CTA por sección con el mismo texto; el catálogo es la única excepción
-    const perSec = await p.$$eval('main > section:not(#asesoramiento)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
+    const perSec = await p.$$eval('main > section:not(#asesoramiento):not(#garantias)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
     const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento+Descargar catálogo', 'por-que:Quiero asesoramiento', 'dudas:Quiero asesoramiento'];
     ok(perSec.join('|') === want.join('|'), 'CTA: "Quiero asesoramiento" en cada sección y "Descargar catálogo" junto a él en Más equipos', perSec.join(' | '));
     const cta = await p.$$eval('[data-cta]', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
@@ -81,7 +81,9 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const gone = ['Ver ficha', 'También te equipamos', 'Cómo trabajamos', 'wa-float', 'Testimonio de ejemplo', 'tsts', 'data-ejemplo', 'Me interesa', 'Habla con Javier', 'No sé cuál elegir', 'ISO 13485', 'FDA', 'veterinari'].filter((x) => html.includes(x));
     ok(!gone.length, 'Contenido: nada de lo eliminado ni prohibido (ISO, FDA, veterinaria)', gone.join(', '));
     const qs = await p.$$eval('.acc__btn', (els) => els.map((e) => e.textContent.trim()));
-    ok(qs.length === 5 && qs.includes('¿Solo vendéis ecógrafos y diatermias?'), 'Dudas: 5 preguntas, con "¿Solo vendéis ecógrafos y diatermias?"', qs.join(' · '));
+    ok(qs.join('|') === '¿Cuál me conviene?|¿Qué garantía tienen?|¿Y el mantenimiento?|¿Están certificados?|¿Enviáis fuera de España?|¿Qué pasa cuando envío el formulario?', 'Dudas: 6 preguntas, sin "¿Solo vendéis...?" y con garantía y qué pasa al enviar', qs.join(' · '));
+    const nc = await p.evaluate(() => [...document.querySelectorAll('body *:not(script):not(style)')].filter((e) => e.children.length === 0 && /no comerciales/i.test(e.textContent)).length + (/no comerciales/i.test(document.head.innerHTML) ? 1 : 0));
+    ok(nc === 0, 'Texto: "Fisioterapeutas te asesoran" sin "no comerciales" (web y metadatos)', `${nc}`);
     ok(!logs.length, 'Consola limpia (inicio)', logs.join(' / '));
     await ctx.close();
   });
@@ -97,6 +99,54 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await scrollTo(p, 900); await p.waitForTimeout(200);
     await scrollTo(p, 1800); await p.waitForTimeout(700);
     ok(await p.evaluate(() => { const h = document.querySelector('[data-header]'); const r = h.getBoundingClientRect(); return r.top === 0 && r.bottom > 40 && getComputedStyle(h).position === 'fixed' && h.classList.contains('is-scrolled') && getComputedStyle(h, '::before').opacity === '1'; }), 'Cabecera móvil: fija y siempre visible al bajar, con fondo y desenfoque');
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ móvil: nada ensancha la página (cabecera y barra nunca se cortan)
+  // Se simula un navegador sin overflow: clip (Safari < 16 y algunos navegadores internos) y el texto
+  // del sistema al 130 %: si algo se saliera por la derecha, la cabecera y la barra fija se alargarían
+  // y su botón derecho quedaría cortado.
+  await block('Sin desbordes horizontales', async () => {
+    const bad = [];
+    for (const w of [320, 360, 375, 390, 412, 430, 768, 1024]) {
+      for (const zoom of [100, 130]) {
+        const { ctx, p } = await page(b, { width: w, height: 800, mobile: w < 1024 });
+        await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+        if (zoom !== 100) await p.addStyleTag({ content: `html { font-size: ${zoom}% !important; }` });
+        await p.evaluate(() => document.querySelectorAll('*').forEach((el) => { const c = getComputedStyle(el); if (c.overflowX === 'clip' || c.overflowY === 'clip') el.style.overflow = 'visible'; }));
+        // Interacciones que mueven cosas en horizontal: pestañas, flechas del carrusel y acordeón
+        await p.evaluate(() => { document.querySelector('#tab-dia').click(); });
+        await p.waitForTimeout(250);
+        await p.evaluate(() => { document.querySelector('#tab-eco').click(); document.querySelector('#panel-eco .carousel__btn--next').click(); document.querySelector('#q6').click(); });
+        await p.waitForTimeout(900);
+        await p.evaluate(() => window.scrollTo({ top: document.querySelector('#por-que').offsetTop, behavior: 'instant' }));
+        await p.waitForTimeout(700);
+        const r = await p.evaluate(() => {
+          const vw = document.documentElement.clientWidth;
+          const btn = document.querySelector('.hd .btn').getBoundingClientRect();
+          const logo = document.querySelector('.hd__logo').getBoundingClientRect();
+          const bar = document.querySelector('[data-mbar]');
+          const wa = bar.querySelector('.mbar__wa').getBoundingClientRect();
+          const cta = bar.querySelector('.mbar__cta');
+          const barOn = getComputedStyle(bar).display !== 'none' && bar.classList.contains('is-on');
+          return { sw: document.documentElement.scrollWidth, vw, hdR: Math.round(btn.right), gap: Math.round(btn.left - logo.right), txtFits: document.querySelector('.hd .btn').scrollWidth <= Math.ceil(btn.width) + 1, barOn, waR: Math.round(wa.right), ctaFits: cta.scrollWidth <= cta.clientWidth + 1 };
+        });
+        const fine = r.sw <= r.vw && r.hdR <= r.vw && r.gap >= 8 && r.txtFits && (!r.barOn || (r.waR <= r.vw && r.ctaFits));
+        if (!fine) bad.push(`${w}px ${zoom}% ${JSON.stringify(r)}`);
+        await ctx.close();
+      }
+    }
+    ok(!bad.length, 'Móvil: nada ensancha la página (320 a 1024 px, texto al 100 y 130 %, sin overflow: clip); cabecera y barra fija nunca se cortan', bad.join(' | ') || '16 casos');
+  });
+
+  await block('Solo WebP', async () => {
+    const { ctx, p } = await page(b, { width: 390, height: 844, mobile: true });
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 500) { window.scrollTo({ top: y, behavior: 'instant' }); await new Promise((r) => setTimeout(r, 60)); } });
+    await p.waitForTimeout(600);
+    const r = await p.evaluate(() => ({ imgs: [...document.querySelectorAll('img')].flatMap((i) => [i.currentSrc || i.src, ...(i.srcset || '').split(',').map((x) => x.trim().split(' ')[0]).filter(Boolean)]).map((u) => u.split('/').pop()), avif: document.documentElement.outerHTML.includes('avif') }));
+    const files = fs.readdirSync(path.resolve('dist/assets/img'));
+    ok(!r.avif && r.imgs.length >= 14 && r.imgs.every((x) => /\.webp$/.test(x)) && files.every((x) => /\.webp$/.test(x)), 'Imágenes: todas en WebP (fotos de producto, categorías, hero y Javier)', `${new Set(r.imgs).size} archivos usados · ${files.length} en dist`);
     await ctx.close();
   });
 
@@ -143,7 +193,34 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await p.focus('#panel-eco .card:nth-child(3) .btn');
     await p.waitForTimeout(600);
     ok(await p.evaluate(() => { const r = document.querySelector('#panel-eco .card:nth-child(3)').getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth + 1; }), 'Carrusel: con teclado, la tarjeta enfocada entra en pantalla');
+    // Flechas a los lados de la foto
+    await p.evaluate(() => { const t = document.querySelector('#panel-eco .cards'); t.scrollTo({ left: 0, behavior: 'instant' }); });
+    await p.waitForTimeout(400);
+    const arrows = () => p.evaluate(() => {
+      const card = [...document.querySelectorAll('#panel-eco .card')].find((c) => { const r = c.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth + 1; });
+      const img = card.querySelector('picture').getBoundingClientRect();
+      const box = (s) => { const b = document.querySelector(s); const r = b.getBoundingClientRect(); return { l: Math.round(r.left), r: Math.round(r.right), cy: Math.round(r.top + r.height / 2), w: Math.round(r.width), op: getComputedStyle(b).opacity, dis: b.disabled, label: b.getAttribute('aria-label') }; };
+      return { img: { l: Math.round(img.left), r: Math.round(img.right), cy: Math.round(img.top + img.height / 2) }, prev: box('#panel-eco .carousel__btn--prev'), next: box('#panel-eco .carousel__btn--next'), dot: [...document.querySelectorAll('#panel-eco .dots span')].findIndex((d) => d.classList.contains('is-on')), name: card.querySelector('.card__name').textContent };
+    });
+    const a0 = await arrows();
+    const onPhoto = (b, img) => b.l >= img.l && b.r <= img.r && Math.abs(b.cy - img.cy) <= 2 && b.w >= 44;
+    ok(a0.prev.dis && a0.prev.op === '0' && !a0.next.dis && a0.next.op === '1' && onPhoto(a0.next, a0.img) && a0.next.r > a0.img.r - 60 && a0.next.label === 'Equipo siguiente', 'Carrusel: flecha "siguiente" a la derecha de la foto, centrada en altura; sin "anterior" en la primera', JSON.stringify(a0));
+    await p.tap('#panel-eco .carousel__btn--next'); await p.waitForTimeout(900);
+    const a1 = await arrows();
+    ok(a1.name === 'Acclarix AX8' && a1.dot === 1 && !a1.prev.dis && a1.prev.op === '1' && onPhoto(a1.prev, a1.img) && a1.prev.l < a1.img.l + 60 && !a1.next.dis, 'Carrusel: la flecha pasa a la siguiente tarjeta y aparecen las dos flechas', JSON.stringify(a1));
+    await p.tap('#panel-eco .carousel__btn--next'); await p.waitForTimeout(900);
+    const a2 = await arrows();
+    ok(a2.name === 'Acclarix LX9' && a2.dot === 2 && a2.next.dis && a2.next.op === '0', 'Carrusel: en la última tarjeta se oculta "siguiente"', JSON.stringify({ name: a2.name, dot: a2.dot, next: a2.next }));
+    await p.tap('#panel-eco .carousel__btn--prev'); await p.waitForTimeout(900);
+    ok((await arrows()).name === 'Acclarix AX8', 'Carrusel: "anterior" vuelve a la tarjeta de antes');
+    await p.tap('#tab-dia'); await p.waitForTimeout(900);
+    const d0 = await p.evaluate(() => ({ prev: document.querySelector('#panel-dia .carousel__btn--prev').disabled, next: document.querySelector('#panel-dia .carousel__btn--next').disabled, vis: getComputedStyle(document.querySelector('#panel-dia .carousel__btn--next')).visibility }));
+    ok(d0.prev && !d0.next && d0.vis === 'visible', 'Carrusel: las diatermias también tienen flechas', JSON.stringify(d0));
     await ctx.close();
+    const { ctx: c2, p: d } = await page(b, {});
+    await d.goto(BASE + '/', { waitUntil: 'networkidle' });
+    ok(await d.evaluate(() => [...document.querySelectorAll('.carousel__nav')].every((n) => getComputedStyle(n).display === 'none')), 'Carrusel: sin flechas en escritorio (se ven las 3 tarjetas)');
+    await c2.close();
   });
 
   // ------------------------------------------------------------ acordeón, conteo, barra móvil y WhatsApp único
@@ -194,10 +271,14 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       const lists = document.querySelectorAll('.ticker__list');
       const tr = document.querySelector('.ticker__track');
       const hero = document.querySelector('#inicio').getBoundingClientRect();
-      const tk = document.querySelector('.ticker').getBoundingClientRect();
-      return { halfW: Math.round(tr.scrollWidth / 2), vw: innerWidth, lists: lists.length, dup: lists[1] && lists[1].getAttribute('aria-hidden'), same: lists[0].textContent === lists[1].textContent, anim: getComputedStyle(tr).animationName, inHero: tk.bottom <= hero.bottom + 1, items: [...lists[0].children].map((li) => li.textContent.trim().replace(/\s+/g, ' ')) };
+      const sec = document.querySelector('#garantias');
+      const tk = sec.getBoundingClientRect();
+      const li = lists[0].children[0];
+      return { halfW: Math.round(tr.scrollWidth / 2), vw: innerWidth, lists: lists.length, dup: lists[1] && lists[1].getAttribute('aria-hidden'), same: lists[0].textContent === lists[1].textContent, anim: getComputedStyle(tr).animationName, own: !sec.closest('#inicio') && sec.tagName === 'SECTION' && !!sec.getAttribute('aria-label'), below: Math.abs(tk.top - hero.bottom) <= 1, fold: tk.bottom <= innerHeight + 1, bg: getComputedStyle(sec).backgroundColor, h: Math.round(tk.height), strong: parseFloat(getComputedStyle(li.querySelector('strong')).fontSize), txt: parseFloat(getComputedStyle(li).fontSize), icons: [...lists[0].querySelectorAll('.ticker__ico use')].map((u) => u.getAttribute('href')), items: [...lists[0].children].map((x) => x.textContent.trim().replace(/\s+/g, ' ')) };
     });
-    ok(t.lists === 4 && t.dup === 'true' && t.same && t.anim === 'marquee' && t.inHero && t.halfW >= t.vw, 'Línea de confianza: bajo el hero, en bucle infinito sin huecos (media pista ≥ ancho de pantalla) y con las copias ocultas a lectores', `${t.items.join(' · ')} · media pista ${t.halfW}px`);
+    ok(t.own && t.below && t.fold && t.bg === 'rgb(255, 255, 255)', 'Garantías: sección propia bajo el hero, con fondo propio, visible en la primera pantalla', JSON.stringify({ own: t.own, below: t.below, fold: t.fold, bg: t.bg, h: t.h }));
+    ok(t.icons.length === 6 && new Set(t.icons).size === 6 && t.strong >= 18 && t.txt >= 16 && t.h >= 84, 'Garantías: más grande, textos más grandes y un icono distinto en cada una', JSON.stringify({ icons: t.icons, strong: t.strong, txt: t.txt, h: t.h }));
+    ok(t.lists === 4 && t.dup === 'true' && t.same && t.anim === 'marquee' && t.halfW >= t.vw, 'Garantías: en bucle infinito sin huecos (media pista ≥ ancho de pantalla) y con las copias ocultas a lectores', `${t.items.join(' · ')} · media pista ${t.halfW}px`);
     const p0 = await p.evaluate(() => getComputedStyle(document.querySelector('.progress span')).transform);
     await scrollToSel(p, '#por-que'); await p.waitForTimeout(400);
     const p1 = await p.evaluate(() => { const s = document.querySelector('.progress span'); const r = s.getBoundingClientRect(); const hd = document.querySelector('[data-header]'); const h = hd.getBoundingClientRect(); const k = new DOMMatrix(getComputedStyle(hd, '::before').transform).d; return { w: Math.round(r.width), h: Math.round(r.height), top: Math.round(r.top), head: Math.round(h.top + h.height * k), bg: getComputedStyle(s).backgroundColor }; });
@@ -252,6 +333,21 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       delays: [...document.querySelectorAll('.cmp tbody tr')].map((tr) => getComputedStyle(tr).transitionDelay.split(',')[0]).join(','),
     }));
     ok(after.head === 'Lo habitual | Con VytalGroup' && after.rows.length === 3, 'Comparador: 3 filas "Lo habitual" frente a "Con VytalGroup"', after.rows.join(' · '));
+    for (const [w, h, m] of [[1440, 900, false], [390, 844, true]]) {
+      const { ctx: c3, p: q } = await page(b, { width: w, height: h, mobile: m });
+      await q.goto(BASE + '/', { waitUntil: 'networkidle' });
+      const t = await q.evaluate(() => {
+        const vw = document.documentElement.clientWidth;
+        const box = document.querySelector('.cmp');
+        const r = box.getBoundingClientRect();
+        const cs = getComputedStyle(box);
+        const col = getComputedStyle(document.querySelector('.cmp tbody td + td')).backgroundColor;
+        const ta = [...document.querySelectorAll('.cmp th, .cmp td')].map((c) => getComputedStyle(c).textAlign);
+        return { off: Math.round(Math.abs((r.left + r.right) / 2 - vw / 2)), w: Math.round(r.width), bg: cs.backgroundColor, radius: parseFloat(cs.borderTopLeftRadius), col, center: ta.every((x) => x === 'center') };
+      });
+      ok(t.off <= 2 && t.bg !== 'rgba(0, 0, 0, 0)' && t.radius >= 20 && t.col !== 'rgba(0, 0, 0, 0)' && t.center, `Comparador ${w}px: tabla minimalista centrada, con fondo y la columna de VytalGroup resaltada`, JSON.stringify(t));
+      await c3.close();
+    }
     ok(before.armed && before.op === '0' && before.dash === '24px' && after.op === '1,1,1' && after.dash === '0px,0px,0px' && after.delays === '0s,0.22s,0.44s', 'Comparador: filas una a una y checks dibujados con stroke-dashoffset', JSON.stringify({ before, op: after.op, dash: after.dash, delays: after.delays }));
     await ctx.close();
   });
@@ -279,7 +375,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
           logo: getComputedStyle(document.querySelector('.hd .logo')).getPropertyValue('--logo-a').trim(),
           media: document.querySelectorAll('#inicio video, .reel, .stage, .hero__visual').length,
           anim: [...document.querySelectorAll('#inicio *')].map((e) => getComputedStyle(e).animationName).filter((n) => n !== 'none' && n !== 'word-up' && n !== 'fade-up' && n !== 'marquee'),
-          tall: Math.round(hb.height) >= Math.min(innerHeight, 980) - 2,
+          tall: Math.round(hb.height) >= Math.min(innerHeight, 980) - document.querySelector('#garantias').offsetHeight - 2,
         };
       });
       ok(r.alt === '' && r.hidden === 'true' && r.prio === 'high' && r.loaded && /hero-fondo-(m-600|960|1600)/.test(r.src) && r.preload === '(max-width: 899px) | (min-width: 900px)', `Hero ${w}px: foto de clínica de fondo (decorativa), prioritaria y precargada por tamaño`, r.src);
@@ -415,7 +511,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(home.status === 200 && /default-src 'self'/.test(h['content-security-policy'] || '') && h['strict-transport-security'] && h['x-frame-options'] === 'SAMEORIGIN' && h['x-content-type-options'] === 'nosniff' && h['permissions-policy'], 'Cabeceras: seguridad y CSP de vercel.json');
     ok(/max-age=0, must-revalidate/.test(h['cache-control']), 'Caché: HTML sin caché (must-revalidate)', h['cache-control']);
     const html = home.body.toString();
-    const img = html.match(/\/assets\/img\/[\w-]+\.[a-f0-9]{8}\.avif/)[0];
+    const img = html.match(/\/assets\/img\/[\w-]+\.[a-f0-9]{8}\.webp/)[0];
     const font = html.match(/\/assets\/fonts\/geist\.[a-f0-9]{8}\.woff2/)[0];
     const js = html.match(/\/assets\/js\/main\.[\w]+\.js/)[0];
     const hs = await Promise.all([img, font, js].map(get));
@@ -450,7 +546,8 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     const faq = ld['@graph'].find((x) => x['@type'] === 'FAQPage');
     const org = ld['@graph'].find((x) => x['@type'] === 'Organization');
-    ok(org && org.url === `${SITE_URL}/` && faq && faq.mainEntity.length === 5, 'Metadatos: JSON-LD Organization y FAQPage con 5 preguntas');
+    const visibleQs = [...html.matchAll(/class="acc__btn"[^>]*>([^<]+)</g)].map((x) => x[1]);
+    ok(org && org.url === `${SITE_URL}/` && faq && faq.mainEntity.length === 6 && faq.mainEntity.map((q) => q.name).join('|') === visibleQs.join('|'), 'Metadatos: JSON-LD Organization y FAQPage con las mismas 6 preguntas que la web');
     const sitemap = (await get('/sitemap.xml')).body.toString();
     const robots = (await get('/robots.txt')).body.toString();
     ok(sitemap.includes(`<loc>${SITE_URL}/</loc>`) && sitemap.includes(`${SITE_URL}/privacidad`) && robots.includes(`Sitemap: ${SITE_URL}/sitemap.xml`), 'Metadatos: sitemap y robots con SITE_URL');
