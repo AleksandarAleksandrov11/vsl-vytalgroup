@@ -458,6 +458,76 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await ctx.close();
   });
 
+  // Entre secciones (de Lo más pedido hacia abajo) el color pasa de una a otra con un degradado;
+  // el pie mantiene su corte recto
+  await block('Transiciones entre secciones', async () => {
+    for (const [w, h, m] of [[1440, 900, false], [390, 844, true]]) {
+      const { ctx, p } = await page(b, { width: w, height: h, mobile: m });
+      await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+      const r = await p.evaluate(() => {
+        const body = getComputedStyle(document.body).backgroundColor;
+        const bottomColor = (el) => { const c = getComputedStyle(el); const imgs = c.backgroundImage.match(/rgba?\([^)]*\)/g); if (c.backgroundImage.includes('linear-gradient') && imgs) return imgs[imgs.length - 1]; return c.backgroundColor === 'rgba(0, 0, 0, 0)' ? body : c.backgroundColor; };
+        const out = [];
+        for (const id of ['mas-equipos', 'por-que', 'comparativa', 'dudas', 'asesoramiento']) {
+          const sec = document.getElementById(id);
+          const a = getComputedStyle(sec, '::after');
+          const first = (a.backgroundImage.match(/rgba?\([^)]*\)/) || [''])[0];
+          const last = (a.backgroundImage.match(/rgba?\([^)]*\)/g) || ['']).pop();
+          const prev = bottomColor(sec.previousElementSibling);
+          out.push({ id, grad: a.backgroundImage.startsWith('linear-gradient'), first, prev, fades: /, 0\)$/.test(last), h: parseFloat(a.height), pad: parseFloat(getComputedStyle(sec).paddingTop), top: a.top, z: a.zIndex });
+        }
+        const full = ['por-que', 'comparativa'].map((id) => { const el = document.getElementById(id); const b = el.getBoundingClientRect(); return [id, Math.round(b.width), getComputedStyle(el).borderTopLeftRadius]; });
+        const ft = getComputedStyle(document.querySelector('.ft'), '::after').content;
+        return { out, full, vw: document.documentElement.clientWidth, ft, stats: getComputedStyle(document.getElementById('equipos'), '::after').content };
+      });
+      const bad = r.out.filter((x) => !x.grad || x.first.replace(/rgba?\((\d+), (\d+), (\d+).*/, '$1,$2,$3') !== x.prev.replace(/rgba?\((\d+), (\d+), (\d+).*/, '$1,$2,$3') || !x.fades || x.h > x.pad + 1 || x.h < 60 || x.top !== '0px' || x.z !== '-1');
+      ok(!bad.length, `Secciones ${w}px: de Lo más pedido al formulario, cada unión se funde del color de arriba al de abajo, dentro del margen (sin tapar titulares)`, JSON.stringify(bad.length ? bad : r.out.map((x) => `${x.id}:${x.h}px`)));
+      ok(r.full.every(([, wd, rad]) => wd === r.vw && rad === '0px'), `Secciones ${w}px: Por qué VytalGroup y la comparativa ocupan todo el ancho`, JSON.stringify(r.full));
+      ok(r.ft === 'none' && r.stats === 'none', `Secciones ${w}px: el pie y la unión garantías/Lo más pedido mantienen su corte`, `${r.ft} · ${r.stats}`);
+      await ctx.close();
+    }
+  });
+
+  // Panel de cookies: se abre y se cierra limpio, sin que asome ninguna barra de scroll
+  await block('Panel de cookies', async () => {
+    for (const [w, h, m] of [[1280, 720, false], [390, 844, true], [844, 390, true]]) {
+      const { ctx, p } = await page(b, { width: w, height: h, mobile: m, consent: null });
+      await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+      await p.waitForTimeout(1400);
+      await p.evaluate(() => {
+        window.__f = [];
+        const d = document.getElementById('cookie-panel');
+        const inn = d.querySelector('.cp__in');
+        const t0 = performance.now();
+        const tick = () => {
+          window.__f.push({ scroll: d.scrollTop + inn.scrollTop, box: getComputedStyle(d).overflow !== 'visible' && d.scrollHeight > d.clientHeight, inner: inn.scrollHeight > inn.clientHeight, y: scrollY });
+          if (performance.now() - t0 < 800) requestAnimationFrame(tick);
+        };
+        document.querySelector('#cookie-banner [data-cookie="config"]').addEventListener('click', () => requestAnimationFrame(tick), { once: true });
+      });
+      const y0 = await p.evaluate(() => scrollY);
+      await p.click('#cookie-banner [data-cookie="config"]');
+      await p.waitForTimeout(900);
+      const f = await p.evaluate(() => window.__f);
+      const st = await p.evaluate(() => { const d = document.getElementById('cookie-panel'); const r = d.querySelector('.cp__in').getBoundingClientRect(); return { open: d.open, focus: document.activeElement.matches('[data-consent="marketing"]'), top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight }; });
+      const dirty = f.filter((x) => x.scroll || x.box || x.inner || x.y !== y0).length;
+      ok(st.open && st.focus && !dirty && st.top >= 0 && st.bottom <= st.vh + 1 && (!m || w > h || Math.abs(st.bottom - st.vh) <= 1), `Cookies ${w}×${h}: el panel se abre limpio (sin barra de scroll ni saltos en ${f.length} fotogramas)${m && w < h ? ', como hoja desde abajo' : ''}`, JSON.stringify({ dirty, ...st }));
+      await p.keyboard.press('Escape');
+      await p.waitForTimeout(80);
+      const mid = await p.evaluate(() => ({ open: document.getElementById('cookie-panel').open, closing: document.getElementById('cookie-panel').classList.contains('is-closing') }));
+      await p.waitForTimeout(500);
+      const end = await p.evaluate(() => ({ open: document.getElementById('cookie-panel').open, closing: document.getElementById('cookie-panel').classList.contains('is-closing') }));
+      ok(mid.open && mid.closing && !end.open && !end.closing, `Cookies ${w}×${h}: Escape lo cierra con animación y queda cerrado`, JSON.stringify({ mid, end }));
+      // Reabrir tras cerrar: vuelve a abrirse y no se cierra solo
+      await p.click('#cookie-banner [data-cookie="config"]');
+      await p.waitForTimeout(700);
+      ok(await p.evaluate(() => document.getElementById('cookie-panel').open), `Cookies ${w}×${h}: se puede volver a abrir`);
+      await p.click('[data-cpanel-close]');
+      await p.waitForTimeout(500);
+      await ctx.close();
+    }
+  });
+
   await block('Catálogo', async () => {
     const { ctx, p } = await page(b, {});
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });

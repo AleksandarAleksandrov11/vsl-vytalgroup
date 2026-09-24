@@ -119,3 +119,9 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - [x] Por qué VytalGroup: titular, historia, foto, firma y CTA.
 - [x] Pruebas: Apps Script 17/17, formulario 102/102, interfaz 112/112, diseño 17/17. INP 120 ms. Lighthouse 100. HTML válido.
 
+## 11. v10: panel de cookies limpio y secciones que se funden
+- [x] Panel de cookies: sin barra de scroll al abrir, foco sin desplazamiento, fundido del fondo, hoja en móvil y cierre animado (también con Escape).
+- [x] Degradados suaves entre secciones de Lo más pedido al formulario; el pie con su corte.
+- [x] Por qué VytalGroup y la comparativa a todo el ancho.
+- [x] Pruebas: Apps Script 17/17, formulario 102/102, interfaz 127/127, diseño 17/17. INP 96 ms. Lighthouse 100. HTML y CSS válidos.
+

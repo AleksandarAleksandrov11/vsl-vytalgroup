@@ -19,8 +19,8 @@ Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", 
    **Franja de garantías** (sección propia, fondo blanco): en bucle infinito y con un icono para cada una: 2 años de garantía · CE / MDR certificados · UE, USA y LATAM envíos · Fisioterapeutas te asesoran · 0 sorpresas en mantenimiento · 53 páginas de catálogo.
 2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con "Lo quiero". En móvil y tableta se ve una tarjeta cada vez, centrada; se pasa deslizando, con puntos. CTA de sección.
 3. **Más equipos** ("Todo lo que tu clínica necesita."). 6 categorías del catálogo con descripción al pasar o tocar, "Y más de 50 páginas de equipos en el catálogo." y dos botones: "Quiero asesoramiento" y **"Descargar catálogo"** (oscuro, con icono, para que destaque).
-4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") alineados a la izquierda; en móvil y tableta, centrado y con la foto debajo. Después, la firma de Javier y el CTA. Fondo marino.
-5. **Lo habitual frente a VytalGroup** (sección propia, "Lo habitual *frente a VytalGroup.*" y "Lo que cambia cuando te asesoran fisioterapeutas."). Fondo turquesa claro con una trama de puntos suave, distinto del marino de arriba y del claro de Dudas; en escritorio es una tarjeta redondeada como la de Javier. Una tabla pequeña y centrada en tarjeta blanca: aspas grises y texto tachado en "Lo habitual", checks blancos sobre turquesa en "Con VytalGroup" (columna resaltada). Sin líneas separadoras. CTA de sección.
+4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") alineados a la izquierda; en móvil y tableta, centrado y con la foto debajo. Después, la firma de Javier y el CTA. Fondo marino a todo el ancho.
+5. **Lo habitual frente a VytalGroup** (sección propia, "Lo habitual *frente a VytalGroup.*" y "Lo que cambia cuando te asesoran fisioterapeutas."). Fondo turquesa claro con una trama de puntos suave, distinto del marino de arriba y del claro de Dudas; a todo el ancho. Una tabla pequeña y centrada en tarjeta blanca: aspas grises y texto tachado en "Lo habitual", checks blancos sobre turquesa en "Con VytalGroup" (columna resaltada). Sin líneas separadoras. CTA de sección.
 6. **Dudas** ("Lo que *nos preguntáis.*"). 6 preguntas: ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Escríbenos por WhatsApp".
 7. **Formulario** ("Cuéntanos qué *necesitas.*"). 4 preguntas, una por pantalla:
    1. ¿Qué equipo te interesa? Ecógrafo · Diatermia · Presoterapia · Ondas de choque · Otro equipo (desplegable con magnetoterapia, láser, electrólisis percutánea, camillas u otro).
@@ -42,7 +42,13 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 
 ## 2. Cambios de las últimas rondas
 
-**v9 (esta ronda)**
+**v10 (esta ronda)**
+
+- **Panel de cookies:** al abrirse asomaba un instante una barra de scroll (el diálogo tenía `overflow: auto` y la animación de entrada desbordaba su caja) y el foco inicial podía desplazarlo. Ahora el diálogo no hace scroll (solo su contenido, si no cabe), el foco no mueve nada, el fondo aparece con un fundido, en móvil sube como hoja desde abajo y se cierra con la misma suavidad (también con Escape).
+- **Transiciones entre secciones:** de Lo más pedido hacia abajo, cada sección empieza con el color de la anterior y se funde con el suyo en su margen superior, con una curva suave (sin línea recta ni bandas): Lo más pedido → Más equipos → Por qué VytalGroup → Lo habitual frente a VytalGroup → Dudas → Formulario. El pie mantiene su corte recto; de la cabecera a las garantías y de las garantías a Lo más pedido, como estaba.
+- **Por qué VytalGroup y la comparativa a todo el ancho** (antes eran tarjetas con margen en escritorio).
+
+**v9**
 
 - **"Lo habitual frente a VytalGroup" en su propia sección**, debajo de la de Javier: título, subtítulo, tabla pequeña más cuidada (tarjeta blanca, aspas y checks en círculo, columna de VytalGroup resaltada) y CTA, sobre un fondo turquesa claro distinto del de arriba y del de abajo.
 - **Por qué VytalGroup** se queda con "Sin timos. *Sin letra pequeña.*", la historia, la foto, la firma de Javier y el CTA.
@@ -267,6 +273,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 - El botón de descarga del catálogo es marino con el icono en turquesa: destaca junto al CTA sin competir con él.
 - El titular del hero se ajusta al ancho de pantalla para salir siempre en 3 líneas.
 - La foto del hero va difuminada en el propio archivo: pesa muy poco y no hay que difuminarla en el navegador.
+- Entre secciones, degradados con curva suave (varios pasos de opacidad) en el margen superior de cada sección: el color cambia sin línea recta y sin tapar el contenido.
 - Imágenes solo en WebP (decodificación rápida en cualquier móvil). La imagen OG sigue en JPG y los iconos de la web en PNG, porque Facebook, WhatsApp e iOS los piden así.
 - Nada puede salirse por la derecha: en móvil y tableta el cambio de pestaña se anima en vertical y el carrusel se recorta dentro de su sección.
 
@@ -288,7 +295,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 
 ## 10. Historial
 
-- **v9 (esta ronda)**, **v8**, **v7**, **v6** y **v5:** ver apartado 2.
+- **v10 (esta ronda)**, **v9**, **v8**, **v7**, **v6** y **v5:** ver apartado 2.
 - **v4:** hero con fotos y vídeo de clientes y sin testimonios. Sustituido en la v5.
 - **v3:**
   - enfoque "equipos médicos sin letra pequeña";
@@ -322,7 +329,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - doble clic sin duplicar;
   - Lead único con `eventID` = `event_id`;
   - endpoint vacío, error del servidor y antispam.
-- **Interfaz (112):**
+- **Interfaz (127):**
   - hero, franja de garantías y 5 secciones;
   - 6 dudas, iguales en la web y en el JSON-LD;
   - sin "no comerciales";
@@ -337,6 +344,8 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - segmentado;
   - carrusel de una tarjeta centrada, sin flechas;
   - Por qué VytalGroup: titular, historia, foto, firma y CTA, sin cifras ni tabla;
+  - transiciones: cada unión de Lo más pedido al formulario se funde del color de arriba al de abajo dentro del margen de la sección, sin tapar titulares; Javier y la comparativa a todo el ancho; el pie con su corte;
+  - panel de cookies en escritorio, móvil y horizontal: se abre sin barra de scroll ni saltos (medido fotograma a fotograma), como hoja en móvil, se cierra con animación (también con Escape) y se puede volver a abrir;
   - Lo habitual frente a VytalGroup: sección propia tras la de Javier, con título, subtítulo, CTA, fondo distinto del de arriba y del de abajo, y tabla pequeña centrada en tarjeta blanca;
   - pie: logo, columnas con título, enlaces, nombre en grande a todo el ancho con las letras animadas, y el mismo pie en las legales;
   - nada ensancha la página de 320 a 1024 px, con el texto al 100 y al 130 % y simulando un navegador sin `overflow: clip`: la cabecera y la barra fija nunca se cortan;
@@ -345,7 +354,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - movimiento reducido;
   - CSP, caché, PDF, URLs limpias, metadatos y OG.
 - **Diseño (17 tamaños):** capturas de página completa de 320 a 1920 px, horizontal y páginas legales, con comprobación por código de desbordes, textos partidos, solapes y áreas táctiles. Revisadas una a una.
-- `node tests/inp.cjs`: interacción más lenta 120 ms con la CPU ×4 (INP < 200 ms), incluidas las 4 preguntas y "Prefiero por correo".
+- `node tests/inp.cjs`: interacción más lenta 96 ms con la CPU ×4 (INP < 200 ms), incluidas las 4 preguntas y "Prefiero por correo".
 
 | | Rendimiento | Accesibilidad | Buenas prácticas | SEO |
 |---|---|---|---|---|

@@ -149,7 +149,6 @@
   .why__foot { margin-top: 64px; }
 }
 @media (min-width: 1024px) {
-  .why { margin-inline: 16px; border-radius: 32px; }
   .why__grid { grid-template-columns: 400px minmax(0, 1fr); column-gap: clamp(56px, 7vw, 112px); }
 }
 
@@ -157,6 +156,7 @@
    4 · Dudas
    ========================================================================== */
 .wrap--narrow { max-width: calc(760px + var(--g) * 2); }
+.faq { position: relative; isolation: isolate; }
 .faq .h2 { margin-bottom: 36px; }
 .acc { border-top: 1px solid var(--line-2); }
 .acc__item { position: relative; background: var(--bg); border-bottom: 1px solid var(--line-2); }
@@ -174,7 +174,7 @@
 /* ==========================================================================
    5 · Formulario
    ========================================================================== */
-.lead { position: relative; background: radial-gradient(70% 45% at 50% 0%, rgba(72, 160, 168, .09), transparent 70%), #FFF; }
+.lead { position: relative; isolation: isolate; background: radial-gradient(70% 45% at 50% 0%, rgba(72, 160, 168, .09), transparent 70%), #FFF; }
 .wrap--form { max-width: calc(600px + var(--g) * 2); text-align: center; }
 .fcard { position: relative; margin-top: 36px; padding: 18px 18px 24px; border-radius: 28px; background: #FFF; text-align: left; box-shadow: inset 0 0 0 1px var(--line), 0 30px 70px -40px rgba(11, 25, 41, .3); }
 @media (min-width: 640px) { .fcard { padding: 28px 40px 40px; } }
@@ -304,6 +304,21 @@
 .hp { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); opacity: 0; pointer-events: none; }
 
 /* ==========================================================================
+   Transición entre secciones (de Lo más pedido hacia abajo): cada sección empieza con el color
+   de la anterior y se funde con el suyo en su margen superior, con una curva suave (sin línea
+   recta ni bandas). El pie queda separado con su corte recto.
+   ========================================================================== */
+.more::after, .why::after, .vs::after, .faq::after, .lead::after {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; z-index: -1; height: var(--blend, var(--sec)); pointer-events: none;
+  background: linear-gradient(180deg, rgb(var(--from)) 0%, rgb(var(--from) / .976) 10%, rgb(var(--from) / .905) 20%, rgb(var(--from) / .794) 30%, rgb(var(--from) / .655) 40%, rgb(var(--from) / .5) 50%, rgb(var(--from) / .345) 60%, rgb(var(--from) / .206) 70%, rgb(var(--from) / .095) 80%, rgb(var(--from) / .024) 90%, rgb(var(--from) / 0) 100%);
+}
+.more { --from: 250 251 252; }  /* de Lo más pedido (#FAFBFC) */
+.why { --from: 238 242 245; }   /* de Más equipos (#EEF2F5) */
+.vs { --from: 11 25 41; --blend: clamp(72px, 2.5rem + 5vw, 120px); } /* de Por qué VytalGroup (marino) */
+.faq { --from: 210 235 235; }   /* del final de la comparativa (#D2EBEB) */
+.lead { --from: 250 251 252; }  /* de Dudas (#FAFBFC) */
+
+/* ==========================================================================
    Barra fija en móvil
    ========================================================================== */
 .mbar { position: fixed; z-index: 60; left: 0; right: 0; bottom: 0; display: flex; gap: 10px; padding: 10px max(12px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); background: rgba(250, 251, 252, .86); -webkit-backdrop-filter: saturate(1.8) blur(16px); backdrop-filter: saturate(1.8) blur(16px); box-shadow: 0 -1px 0 var(--line); transform: translateY(110%); transition: transform .55s var(--ease); }
@@ -417,7 +432,6 @@ html.has-cookie-banner .mbar { transform: translateY(110%); }
 .vs::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background-image: radial-gradient(rgba(43, 125, 134, .2) 1px, transparent 1.5px); background-size: 20px 20px; -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 10%, transparent 75%); mask-image: radial-gradient(ellipse 75% 65% at 50% 35%, #000 10%, transparent 75%); }
 .vs .sec__head { gap: 14px; }
 .vs__lead { max-width: 46ch; font-size: clamp(1.0625rem, 1rem + .4vw, 1.25rem); line-height: 1.45; color: var(--ink-2); }
-@media (min-width: 1024px) { .vs { margin: 16px 16px 0; border-radius: 32px; } }
 @media (max-width: 639px) { #vs-title em { display: block; } }
 
 .cmp { max-width: 720px; margin: 0 auto; padding: 8px; border-radius: 24px; background: #FFF; box-shadow: 0 1px 2px rgba(11, 25, 41, .05), 0 28px 56px -32px rgba(11, 25, 41, .35); }
