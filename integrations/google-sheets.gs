@@ -28,9 +28,8 @@ const COLUMNS = [
   ['nombre', 'Nombre'],
   ['telefono', 'Teléfono'],
   ['email', 'Email'],
-  ['ubicacion', 'Ubicación'],
-  ['productos', 'Productos'],
-  ['modelos', 'Modelos'],
+  ['equipo', 'Equipo'],
+  ['modelo', 'Modelo'],
   ['perfil', 'Perfil'],
   ['plazo', 'Plazo'],
   ['consentimiento', 'Consentimiento'],
@@ -45,11 +44,11 @@ const COLUMNS = [
   ['referrer', 'Referrer'],
   ['landing_url', 'URL de entrada'],
   ['dispositivo', 'Dispositivo'],
-  ['navegador_idioma', 'Navegador e idioma'],
+  ['idioma', 'Idioma'],
   ['event_id', 'event_id'],
   ['estado', 'Estado'],
 ];
-const REQUIRED = ['nombre', 'telefono', 'email', 'ubicacion', 'productos', 'perfil', 'plazo', 'consentimiento', 'event_id'];
+const REQUIRED = ['nombre', 'telefono', 'email', 'equipo', 'perfil', 'plazo', 'consentimiento', 'event_id'];
 
 // ------------------------------------------------------------------ entrada
 function doPost(e) {
@@ -71,7 +70,7 @@ function doPost(e) {
     if (isDuplicate_(sheet, String(data.event_id))) return json_({ ok: true, duplicate: true });
 
     data.fecha = Utilities.formatDate(new Date(), TIMEZONE, 'dd/MM/yyyy HH:mm:ss');
-    data.estado = '';
+    data.estado = 'Nuevo'; // Javier lo cambia a mano: Contactado, Presupuesto, Venta...
     const row = COLUMNS.map(function (c) { return clean_(data[c[0]]); });
     sheet.appendRow(row);
     SpreadsheetApp.flush();
@@ -141,9 +140,8 @@ function notify_(d) {
     'Nombre: ' + d.nombre,
     'Teléfono: ' + d.telefono,
     'Email: ' + d.email,
-    'Ubicación: ' + d.ubicacion,
-    'Productos: ' + d.productos,
-    'Modelos: ' + (d.modelos || 'Sin preferencia'),
+    'Equipo: ' + d.equipo,
+    'Modelo: ' + (d.modelo || 'Sin decidir'),
     'Perfil: ' + d.perfil,
     'Plazo: ' + d.plazo,
     'Campaña: ' + [d.utm_source, d.utm_medium, d.utm_campaign].filter(String).join(' / '),
@@ -151,7 +149,7 @@ function notify_(d) {
   ];
   MailApp.sendEmail({
     to: NOTIFY_EMAIL,
-    subject: 'Nuevo lead: ' + d.nombre + ' (' + d.productos + ')',
+    subject: 'Nuevo lead: ' + d.nombre + ' (' + (d.modelo || d.equipo) + ')',
     body: lines.join('\n'),
     replyTo: d.email,
   });

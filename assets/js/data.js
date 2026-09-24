@@ -1,45 +1,10 @@
-// Datos del formulario: modelos por tipo de equipo, prefijos telefónicos y provincias.
-// Solo contiene modelos que aparecen en el catálogo ADC Global Tech | VytalGroup 2026.
-
-export const UNSURE = 'Aún no lo sé, quiero asesoramiento';
-
-export const MODELS = {
-  'Ecógrafo': [
-    'Eco Wireless (VytaMeD)',
-    'Acclarix AX8',
-    'Acclarix AX3',
-    'Acclarix LX9',
-    'Acclarix AX2',
-    'Acclarix AX9',
-    'Acclarix LX3',
-    'Acclarix LX25',
-    'Acclarix GX9',
-    'Acclarix LX85',
-  ],
-  'Diatermia / Tecar': [
-    'Diatermia Multifunción (VytaMeD)',
-    'Reatherm (I-Tech)',
-    'Reacare (I-Tech)',
-    'HR Tek / HR Tek SP (EME)',
-  ],
-  'Presoterapia': ['I-Press (I-Tech)'],
-  'Otro equipo del catálogo': [
-    'Physio Invasiva 2.0 (EasyTech)',
-    'Superinductiva (VytaMeD)',
-    'Ondas de choque (EME Shock Med / LiKAWAVE)',
-    'Láser de alta potencia',
-    'Camillas de fisioterapia',
-  ],
-};
-
-export const PRODUCT_OF_MODEL = Object.fromEntries(
-  Object.entries(MODELS).flatMap(([product, list]) => list.map((m) => [m, product]))
-);
+// Datos del formulario: prefijos telefónicos (con validación por país) y dominios de email
+// frecuentes para sugerir correcciones ("gmial.com" → "gmail.com").
 
 // ---------------------------------------------------------------- banderas
 // Banderas simplificadas en SVG (sin emojis), lienzo 30 × 20.
 const R = (x, y, w, h, c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
-const svg = (body) => `<svg class="dd__flag" viewBox="0 0 30 20" aria-hidden="true" preserveAspectRatio="none">${body}</svg>`;
+const svg = (body) => `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true" preserveAspectRatio="none">${body}</svg>`;
 const h3 = (a, b, c) => svg(R(0, 0, 30, 7, a) + R(0, 6.66, 30, 7, b) + R(0, 13.33, 30, 6.67, c));
 const v3 = (a, b, c) => svg(R(0, 0, 10.2, 20, a) + R(10, 0, 10.2, 20, b) + R(20, 0, 10, 20, c));
 
@@ -104,24 +69,6 @@ export const COUNTRIES = [
   { iso: 'PA', name: 'Panamá', dial: '507', min: 7, max: 8, groups: [4, 4], ph: '6123 4567' },
   { iso: 'XX', name: 'Otro país', dial: '', min: 7, max: 15, groups: [3, 3, 3, 3, 3], ph: '+ prefijo y número' },
 ].map((c) => ({ ...c, flag: FLAGS[c.iso] }));
-
-export const PROVINCES = [
-  'A Coruña', 'Álava', 'Albacete', 'Alicante', 'Almería', 'Asturias', 'Ávila', 'Badajoz', 'Barcelona',
-  'Bizkaia', 'Burgos', 'Cáceres', 'Cádiz', 'Cantabria', 'Castellón', 'Ceuta', 'Ciudad Real', 'Córdoba',
-  'Cuenca', 'Gipuzkoa', 'Girona', 'Granada', 'Guadalajara', 'Huelva', 'Huesca', 'Illes Balears', 'Jaén',
-  'La Rioja', 'Las Palmas', 'León', 'Lleida', 'Lugo', 'Madrid', 'Málaga', 'Melilla', 'Murcia', 'Navarra',
-  'Ourense', 'Palencia', 'Pontevedra', 'Salamanca', 'Santa Cruz de Tenerife', 'Segovia', 'Sevilla', 'Soria',
-  'Tarragona', 'Teruel', 'Toledo', 'Valencia', 'Valladolid', 'Zamora', 'Zaragoza',
-];
-// Nombres alternativos habituales para el buscador y el autocompletado del navegador
-export const PROVINCE_ALIASES = {
-  'A Coruña': 'la coruna coruna', 'Álava': 'araba', 'Alicante': 'alacant', 'Bizkaia': 'vizcaya',
-  'Castellón': 'castello', 'Gipuzkoa': 'guipuzcoa', 'Girona': 'gerona', 'Illes Balears': 'baleares islas mallorca',
-  'Lleida': 'lerida', 'Ourense': 'orense', 'Navarra': 'nafarroa', 'Valencia': 'valencia', 'Las Palmas': 'gran canaria canarias',
-  'Santa Cruz de Tenerife': 'tenerife canarias', 'Asturias': 'oviedo', 'Cantabria': 'santander', 'La Rioja': 'logrono',
-  'Murcia': 'region de murcia', 'Madrid': 'comunidad de madrid',
-};
-export const OUTSIDE_SPAIN = 'Fuera de España';
 
 export const EMAIL_DOMAINS = [
   'gmail.com', 'hotmail.com', 'hotmail.es', 'outlook.com', 'outlook.es', 'yahoo.com', 'yahoo.es',

@@ -1,23 +1,27 @@
-// QA del formulario, consentimiento y tracking contra dist/ (puerto 8081) y el mock de Apps Script (8090).
+// QA del formulario, el consentimiento y el píxel contra dist/ y el Apps Script simulado (puerto 8090).
+// El script de Meta se sustituye por un doble que registra las llamadas a fbq (no sale a internet).
 const { chromium } = require('playwright');
 const fs = require('fs');
-const BASE = process.env.BASE || 'http://localhost:' + (process.env.PORT || 8081);
+
+const BASE = process.env.BASE || `http://localhost:${process.env.PORT || 8081}`;
 const MOCK = 'http://localhost:8090';
 const LOG = process.argv[2];
 const results = [];
-const ok = (cond, name, extra = '') => { results.push(`${cond ? 'PASS' : 'FAIL'}  ${name}${extra ? `  · ${extra}` : ''}`); };
+const ok = (cond, name, extra = '') => results.push(`${cond ? 'PASS' : 'FAIL'}  ${name}${extra ? `  · ${extra}` : ''}`);
 const readLog = () => (fs.existsSync(LOG) ? fs.readFileSync(LOG, 'utf8').trim().split('\n').filter(Boolean).map((l) => JSON.parse(l)) : []);
+const posts = () => readLog().filter((r) => r.method === 'POST');
 const PIXEL_STUB = `(function(){var c=window.__fb=window.__fb||[];var f=window.fbq;function cm(){c.push(Array.prototype.slice.call(arguments).map(function(x){return JSON.parse(JSON.stringify(x))}))}f.callMethod=cm;(f.queue||[]).forEach(function(a){cm.apply(null,a)});f.queue=[];document.cookie='_fbp=fb.1.1700000000000.987654321; path=/';})();`;
+const UTM = '?utm_source=facebook&utm_campaign=test&fbclid=abc123';
 
-async function newPage(b, { width, height, mobile, endpoint = `${MOCK}/exec`, pixel = '1234567890', consent = null, intro = false, nowPatch = false }) {
-  const ctx = await b.newContext({ viewport: { width, height }, isMobile: mobile, hasTouch: mobile, acceptDownloads: true });
-  await ctx.addInitScript(({ consent, intro, nowPatch }) => {
-    try {
-      if (!intro) sessionStorage.setItem('vg_intro', '1');
-      if (consent) localStorage.setItem('vg_consent', JSON.stringify({ v: 1, date: new Date().toISOString(), necessary: true, ...consent }));
-    } catch (e) {}
-    if (nowPatch) { const real = performance.now.bind(performance); performance.now = () => Math.min(real(), 1500); }
-  }, { consent, intro, nowPatch });
+async function open(b, { width = 1280, height = 900, mobile = false, endpoint = `${MOCK}/exec`, pixel = '1234567890', consent = null, query = '', slow = false }) {
+  // En móvil se simula el navegador interno de Instagram en un iPhone
+  const userAgent = mobile ? 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 330.0.0.0' : undefined;
+  const ctx = await b.newContext({ viewport: { width, height }, isMobile: mobile, hasTouch: mobile, acceptDownloads: true, userAgent });
+  await ctx.addInitScript(({ consent, slow }) => {
+    try { if (consent !== null) localStorage.setItem('vg_consent', JSON.stringify({ v: 2, date: new Date().toISOString(), necessary: true, marketing: consent })); } catch (e) { /* */ }
+    // Simula un bot que envía en menos de 3 s
+    if (slow) { const real = performance.now.bind(performance); performance.now = () => Math.min(real(), 1000); }
+  }, { consent, slow });
   await ctx.route('**/config.js', (r) => r.fulfill({ contentType: 'text/javascript', body: `window.VG_CONFIG={SHEETS_ENDPOINT:${JSON.stringify(endpoint)},META_PIXEL_ID:${JSON.stringify(pixel)}};` }));
   const fbReq = [];
   await ctx.route(/facebook\.(net|com)/, (r) => { fbReq.push(r.request().url()); r.fulfill({ contentType: 'text/javascript', body: PIXEL_STUB }); });
@@ -26,308 +30,327 @@ async function newPage(b, { width, height, mobile, endpoint = `${MOCK}/exec`, pi
   const logs = [];
   p.on('console', (m) => { if (['error', 'warning'].includes(m.type())) logs.push(`${m.type()}: ${m.text()}`); });
   p.on('pageerror', (e) => logs.push(`pageerror: ${e.message}`));
+  await p.goto(BASE + '/' + query, { waitUntil: 'networkidle' });
   return { ctx, p, fbReq, logs };
 }
-const fbCalls = (p) => p.evaluate(() => window.__fb || []);
-const step = (p) => p.evaluate(() => document.querySelector('#qform .qstep.is-active')?.dataset.step);
+const fb = (p) => p.evaluate(() => window.__fb || []);
+const step = (p) => p.evaluate(() => document.querySelector('#qf .qf__step.is-active')?.dataset.step || null);
+const toForm = async (p) => { await p.evaluate(() => document.querySelector('#asesoramiento').scrollIntoView()); await p.waitForTimeout(700); };
 
-async function flow(p, { mobile, label }) {
-  await p.evaluate(() => document.querySelector('#asesoramiento').scrollIntoView());
+async function fillToEnd(p, { mobile, name = 'Laura Gómez', tel = '612345678', email = 'laura@gmail.com' } = {}) {
+  const tap = (sel) => (mobile ? p.tap(sel) : p.click(sel));
+  if ((await step(p)) === '1') {
+    if (await p.isVisible('[data-picked-box]')) await p.click('.qf__step.is-active [data-next]');
+    else await tap('.qf__step.is-active label.opt:has(input[value="Ecógrafo"])');
+    await p.waitForTimeout(700);
+  }
+  await tap('.qf__step.is-active label.opt:has(input[value="Fisioterapeuta"])');
+  await p.waitForTimeout(800);
+  await tap('.qf__step.is-active label.opt:has(input[value="Lo antes posible"])');
+  await p.waitForTimeout(800);
+  await p.fill('#f-name', name);
+  await p.press('#f-name', 'Enter');
   await p.waitForTimeout(600);
-  ok(await p.isDisabled('[data-next]'), `${label}: Siguiente deshabilitado en paso 1 sin elegir`);
-  ok(await p.isHidden('[data-back]'), `${label}: sin botón Atrás en paso 1`);
-  await p.click('label.opt:has(input[value="Ecógrafo"])');
-  await p.click('label.opt:has(input[value="Diatermia / Tecar"])');
-  ok(await p.isEnabled('[data-next]'), `${label}: Siguiente habilitado tras elegir`);
-  await p.click('[data-next]');
-  await p.waitForTimeout(450);
-  ok((await step(p)) === '2', `${label}: avanza al paso 2`);
-  ok((await p.textContent('[data-step-now]')).includes('Paso 2'), `${label}: contador "Paso 2 de 9"`);
-  // Atrás conserva datos
-  await p.click('[data-back]');
-  await p.waitForTimeout(450);
-  ok((await step(p)) === '1' && await p.isChecked('input[value="Ecógrafo"]') && await p.isChecked('input[value="Diatermia / Tecar"]'), `${label}: Atrás conserva las opciones`);
-  await p.click('[data-next]');
-  await p.waitForTimeout(450);
-  // Paso 2: dropdown de modelos agrupado por producto
-  await p.click('.qstep[data-step="2"] .dd__trigger');
-  await p.waitForTimeout(400);
-  const groups = await p.$$eval('.dd.is-open .dd__panel .dd__group, .dd__panel.is-sheet .dd__group', (els) => els.map((e) => e.textContent));
-  ok(groups.includes('Ecógrafo') && groups.includes('Diatermia / Tecar') && !groups.includes('Presoterapia'), `${label}: modelos filtrados por el paso 1`, groups.join(' | '));
-  if (mobile) {
-    const sheet = await p.evaluate(() => { const el = document.querySelector('.dd__panel.is-sheet'); if (!el) return null; const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, vh: innerHeight }; });
-    ok(!!sheet && sheet.bottom <= sheet.vh + 1 && sheet.top >= 0, `${label}: dropdown en hoja inferior dentro de pantalla`, JSON.stringify(sheet));
-  }
-  const PANEL = mobile ? '.dd__panel.is-sheet' : '.dd.is-open .dd__panel';
-  await p.click(`${PANEL} .dd__opt:has-text("Acclarix AX8")`);
-  await p.click(`${PANEL} .dd__opt:has-text("Reatherm (I-Tech)")`);
-  if (mobile) await p.click(`${PANEL} .dd__done`); else await p.keyboard.press('Escape');
-  await p.waitForTimeout(500);
-  const pills = await p.$$eval('.qstep[data-step="2"] .dd__pill', (els) => els.map((e) => e.textContent.trim()));
-  ok(pills.length === 2, `${label}: selección múltiple de modelos`, pills.join(', '));
-  await p.click('[data-next]');
-  await p.waitForTimeout(450);
-  // Paso 3 y 4: avance automático
-  await p.click('label.opt:has(input[value="Fisioterapeuta"])');
-  await p.waitForTimeout(900);
-  ok((await step(p)) === '4', `${label}: avance automático tras elegir perfil`);
-  await p.click('label.opt:has(input[value="Lo antes posible"])');
-  await p.waitForTimeout(900);
-  ok((await step(p)) === '5', `${label}: avance automático tras elegir plazo`);
-  // Paso 5: nombre
-  ok(await p.evaluate(() => document.activeElement && document.activeElement.id === 'f-nombre'), `${label}: foco automático en el nombre`);
-  await p.fill('#f-nombre', 'A');
-  await p.press('#f-nombre', 'Enter');
-  await p.waitForTimeout(200);
-  ok((await p.textContent('.qstep[data-step="5"] [data-error]')).length > 5 && (await step(p)) === '5', `${label}: validación de nombre corto`);
-  await p.fill('#f-nombre', 'Ana López');
-  await p.press('#f-nombre', 'Enter');
-  await p.waitForTimeout(450);
-  ok((await step(p)) === '6', `${label}: Enter avanza al teléfono`);
-  // Paso 6: teléfono
-  await p.fill('#f-tel', '12345');
+  await p.fill('#f-tel', tel);
   await p.press('#f-tel', 'Enter');
-  await p.waitForTimeout(200);
-  ok((await step(p)) === '6' && (await p.textContent('.qstep[data-step="6"] [data-error]')).includes('9'), `${label}: validación de longitud del teléfono (ES)`);
-  await p.fill('#f-tel', '');
-  await p.type('#f-tel', '612345678');
-  ok((await p.inputValue('#f-tel')) === '612 345 678', `${label}: formateo visual del teléfono`, await p.inputValue('#f-tel'));
-  // Prefijo con buscador
-  await p.click('.dd--prefix .dd__trigger');
-  await p.waitForTimeout(350);
-  if (!mobile) {
-    await p.keyboard.type('portu');
-    await p.waitForTimeout(150);
-    const vis = await p.$$eval('.dd--prefix .dd__opt', (els) => els.filter((e) => !e.hidden).map((e) => e.textContent.trim()));
-    ok(vis.length === 1 && vis[0].includes('Portugal'), `${label}: buscador de prefijos`, vis.join(','));
-    await p.keyboard.press('Enter');
-  } else {
-    await p.fill('.dd__panel.is-sheet .dd__search input', 'portu');
-    await p.click('.dd__panel.is-sheet .dd__opt:not([hidden])');
-  }
-  await p.waitForTimeout(500);
-  ok((await p.textContent('.dd--prefix .dd__trigger')).includes('+351'), `${label}: prefijo Portugal seleccionado`);
-  ok(await p.isDisabled('[data-next]'), `${label}: 612 no vale para Portugal (debe empezar por 2 o 9)`);
-  // Volver a España pegando un número internacional
-  await p.fill('#f-tel', '+34 612 345 678');
-  await p.dispatchEvent('#f-tel', 'input');
-  await p.waitForTimeout(150);
-  ok((await p.textContent('.dd--prefix .dd__trigger')).includes('+34') && (await p.inputValue('#f-tel')) === '612 345 678', `${label}: detecta el prefijo al pegar +34`);
-  await p.click('[data-next]');
-  await p.waitForTimeout(450);
-  // Paso 7: email con sugerencia
-  await p.fill('#f-email', 'ana@gmial.com');
-  await p.waitForTimeout(150);
-  ok(await p.isVisible('[data-suggest] button'), `${label}: sugiere corrección de gmial.com`, await p.textContent('[data-suggest]'));
-  await p.click('[data-suggest] button');
-  ok((await p.inputValue('#f-email')) === 'ana@gmail.com', `${label}: corrige el dominio`);
-  await p.press('#f-email', 'Enter');
-  await p.waitForTimeout(450);
-  // Paso 8: provincias
-  ok((await step(p)) === '8', `${label}: paso 8 ubicación`);
-  const provCount = await p.$$eval('.qstep[data-step="8"] .dd__opt, body > .dd__panel .dd__opt', (els) => els.length);
-  await p.click('.qstep[data-step="8"] .dd__trigger');
-  await p.waitForTimeout(400);
-  const count = await p.$$eval('.dd__panel .dd__opt', (els) => els.filter((e) => e.closest('.dd__panel').offsetParent || e.closest('.is-sheet')).length);
-  if (!mobile) {
-    await p.keyboard.type('mala');
-    await p.waitForTimeout(120);
-    await p.keyboard.press('ArrowDown');
-    await p.keyboard.press('Enter');
-  } else {
-    await p.fill('.dd__panel.is-sheet .dd__search input', 'Málaga');
-    await p.waitForTimeout(150);
-    await p.click('.dd__panel.is-sheet .dd__opt:not([hidden])');
-  }
-  await p.waitForTimeout(500);
-  ok((await p.textContent('.qstep[data-step="8"] .dd__trigger')).includes('Málaga'), `${label}: provincia elegida con buscador`, `${provCount} opciones en DOM`);
-  await p.click('[data-next]');
-  await p.waitForTimeout(450);
-  // Paso 9: resumen y consentimiento
-  const summary = await p.textContent('[data-summary]');
-  ok(summary.includes('Ana López') && summary.includes('+34 612 345 678') && summary.includes('Málaga') && summary.includes('Acclarix AX8'), `${label}: resumen completo`);
-  ok(await p.isDisabled('[data-submit]'), `${label}: Enviar deshabilitado sin consentimiento`);
-  ok(!(await p.isChecked('input[name="consentimiento"]')), `${label}: consentimiento sin premarcar`);
-  await p.click('label.consent');
-  ok(await p.isEnabled('[data-submit]'), `${label}: Enviar habilitado con consentimiento`);
+  await p.waitForTimeout(600);
+  await p.fill('#f-email', email);
+  await p.check('input[name="consent"]');
+}
+
+async function block(name, fn) {
+  try { await fn(); } catch (err) { ok(false, `${name}: error en la prueba`, String(err.message).split('\n')[0]); }
 }
 
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME_PATH || undefined });
 
-  // ---------------------------------------------------------------- 1. Sin consentimiento no se carga nada de Meta
-  {
-    const { ctx, p, fbReq } = await newPage(b, { width: 1280, height: 860, mobile: false });
-    await p.goto(`${BASE}/?utm_source=facebook&utm_campaign=test&fbclid=abc123`, { waitUntil: 'networkidle' });
-    await p.waitForTimeout(1500);
-    ok(fbReq.length === 0, 'Sin decisión de cookies no se pide fbevents.js');
-    ok(await p.isVisible('#cookie-banner'), 'Banner de cookies visible en la primera visita');
-    const btns = await p.$$eval('#cookie-banner .btn', (els) => els.map((e) => { const r = e.getBoundingClientRect(); const s = getComputedStyle(e); return [e.textContent.trim(), Math.round(r.width), Math.round(r.height), s.backgroundColor, s.color]; }));
-    const sameStyle = btns.every((x) => x[3] === btns[0][3] && x[4] === btns[0][4] && x[2] === btns[0][2]);
-    ok(btns.length === 3 && sameStyle, 'Aceptar, Rechazar y Configurar con el mismo peso visual', JSON.stringify(btns.map((x) => x.slice(0, 3))));
-    await p.click('[data-cookie="reject"]');
-    await p.waitForTimeout(800);
-    ok(fbReq.length === 0 && !(await p.isVisible('#cookie-banner')), 'Rechazar: banner cerrado y sin píxel');
-    // Cambiar desde el footer
-    await p.click('[data-cookie-settings]');
-    await p.waitForTimeout(300);
-    ok(await p.isVisible('#cookie-panel'), 'Configurar cookies desde el footer abre el panel');
-    await p.click('#cookie-panel label.switch:has([data-consent="marketing"])');
-    await p.click('#cookie-panel [data-cookie="save"]');
-    await p.waitForTimeout(800);
-    const calls = await fbCalls(p);
-    ok(fbReq.length === 1 && calls.some((c) => c[0] === 'track' && c[1] === 'PageView'), 'Aceptar marketing después: se carga el píxel y envía PageView', `${fbReq.length} petición(es)`);
-    const stored = await p.evaluate(() => JSON.parse(localStorage.getItem('vg_consent')));
-    ok(stored && stored.marketing === true && !!stored.date, 'Elección guardada con fecha');
-    // Retirar consentimiento
-    await p.click('[data-cookie-settings]');
-    await p.waitForTimeout(300);
-    await p.click('#cookie-panel label.switch:has([data-consent="marketing"])');
-    await p.click('#cookie-panel [data-cookie="save"]');
-    await p.waitForTimeout(400);
-    const before = (await fbCalls(p)).length;
-    await p.click('.hero [data-catalog]');
-    await p.waitForTimeout(400);
-    const after = await fbCalls(p);
-    ok(after.some((c) => c[0] === 'consent' && c[1] === 'revoke') && !after.slice(before).some((c) => c[0] === 'trackCustom'), 'Retirar marketing: revoca y deja de enviar eventos');
+  // ------------------------------------------------------------ 1. Sin consentimiento no se carga nada de Meta
+  await block('Sin consentimiento no se carga nada de Meta', async () => {
+    const { ctx, p, fbReq, logs } = await open(b, { consent: null, width: 390, height: 844, mobile: true });
+    await p.waitForTimeout(1200);
+    ok(await p.isVisible('#cookie-banner'), 'Cookies: aparece el aviso en la primera visita');
+    const btns = await p.$$eval('#cookie-banner button', (els) => els.map((e) => ({ t: e.textContent.trim(), c: e.className, w: Math.round(e.getBoundingClientRect().width), h: Math.round(e.getBoundingClientRect().height) })));
+    ok(btns.length === 3 && btns.map((x) => x.t).join('|') === 'Aceptar|Rechazar|Configurar' && new Set(btns.map((x) => `${x.c}${x.w}${x.h}`)).size === 1, 'Cookies: tres botones de igual peso', JSON.stringify(btns));
+    ok(await p.evaluate(() => getComputedStyle(document.querySelector('[data-mbar]')).transform !== 'none' || !document.querySelector('[data-mbar]').classList.contains('is-on')), 'Cookies: la barra móvil no se muestra con el aviso abierto');
+    for (let y = 0; y < 6000; y += 500) { await p.evaluate((y) => window.scrollTo(0, y), y); await p.waitForTimeout(80); }
+    await p.click('.equipos__more [data-catalog]').catch(() => {});
+    await p.waitForTimeout(500);
+    ok(fbReq.length === 0 && !(await p.evaluate(() => typeof window.fbq === 'function')), 'Tracking: nada de Facebook antes de aceptar (red interceptada)', fbReq.join(', '));
+    // Configurar: el panel se abre con interruptor de marketing apagado; rechazar
+    await p.evaluate(() => window.scrollTo(0, 0));
+    await p.click('#cookie-banner [data-cookie="config"]');
+    await p.waitForTimeout(500);
+    ok(await p.evaluate(() => document.getElementById('cookie-panel').open) && !(await p.isChecked('[data-consent="marketing"]')), 'Cookies: panel con interruptor de marketing apagado');
+    await p.click('[data-cookie="save"]');
+    await p.waitForTimeout(700);
+    const saved = await p.evaluate(() => JSON.parse(localStorage.getItem('vg_consent')));
+    ok(saved && saved.marketing === false && fbReq.length === 0, 'Cookies: guardar sin marketing no carga el píxel');
+    ok(await p.isHidden('#cookie-banner'), 'Cookies: el aviso se cierra tras decidir');
+    ok(!logs.length, 'Consola limpia (sin consentimiento)', logs.join(' / '));
     await ctx.close();
-  }
+  });
 
-  // ---------------------------------------------------------------- 2. Recorrido completo con éxito (escritorio) + eventos
-  for (const vp of [{ width: 1280, height: 860, mobile: false, label: 'Escritorio' }, { width: 390, height: 844, mobile: true, label: 'Móvil' }]) {
+  // ------------------------------------------------------------ 2. Aceptar: PageView, ViewContent, DescargaCatalogo, Contact
+  await block('Aceptar: PageView, ViewContent, DescargaCatalogo', async () => {
+    const { ctx, p, fbReq, logs } = await open(b, { consent: null });
+    await p.waitForTimeout(1300);
+    await p.click('#cookie-banner [data-cookie="accept"]');
+    await p.waitForTimeout(600);
+    ok(fbReq.some((u) => u.includes('fbevents.js')), 'Tracking: el píxel se carga al aceptar');
+    let calls = await fb(p);
+    ok(calls.some((c) => c[0] === 'init' && c[1] === '1234567890') && calls.filter((c) => c[0] === 'track' && c[1] === 'PageView').length === 1, 'Tracking: init + PageView una vez');
+    ok(!calls.some((c) => c[1] === 'ViewContent'), 'Tracking: sin ViewContent antes de ver los equipos');
+    await p.click('#tab-dia');
+    await p.evaluate(() => document.querySelector('#equipos').scrollIntoView());
+    await p.waitForTimeout(900);
+    await p.evaluate(() => window.scrollTo(0, 0));
+    await p.waitForTimeout(300);
+    await p.evaluate(() => document.querySelector('#equipos').scrollIntoView());
+    await p.waitForTimeout(700);
+    calls = await fb(p);
+    const vc = calls.filter((c) => c[1] === 'ViewContent');
+    ok(vc.length === 1 && vc[0][2].content_category === 'Diatermias', 'Tracking: ViewContent una vez, con la categoría activa', JSON.stringify(vc));
+    const [dl] = await Promise.all([p.waitForEvent('download'), p.click('.equipos__more [data-catalog]')]);
+    ok(dl.suggestedFilename() === 'catalogo-vytalgroup-2026.pdf', 'Catálogo: se descarga el PDF', dl.suggestedFilename());
+    await p.waitForTimeout(300);
+    calls = await fb(p);
+    ok(calls.filter((c) => c[0] === 'trackCustom' && c[1] === 'DescargaCatalogo').length === 1 && !calls.some((c) => c[1] === 'Lead'), 'Tracking: DescargaCatalogo (personalizado) y no es Lead');
+    await p.evaluate(() => document.querySelector('[data-faq-wa]').scrollIntoView({ block: 'center' }));
+    const [popup] = await Promise.all([p.context().waitForEvent('page'), p.click('[data-faq-wa]')]);
+    await popup.close();
+    calls = await fb(p);
+    const contact = calls.filter((c) => c[1] === 'Contact');
+    ok(contact.length === 1 && contact[0][2].content_category === 'dudas', 'Tracking: Contact al pulsar WhatsApp', JSON.stringify(contact));
+    ok(!logs.length, 'Consola limpia (con consentimiento)', logs.join(' / '));
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ 3. Escritorio: "Lo quiero" + recorrido completo + UTM + doble clic
+  await block('Escritorio: "Lo quiero" + recorrido completo + U', async () => {
     fs.writeFileSync(LOG, '');
-    const { ctx, p, fbReq, logs } = await newPage(b, { ...vp, consent: { analytics: false, marketing: true } });
-    await p.goto(`${BASE}/?utm_source=facebook&utm_campaign=test&fbclid=abc123`, { waitUntil: 'networkidle' });
-    await p.waitForTimeout(800);
-    ok(fbReq.length === 1, `${vp.label}: con marketing aceptado se carga el píxel`);
-    // ViewContent una vez por sección
-    for (const id of ['ecografos', 'diatermias', 'ecografos', 'diatermias']) {
-      await p.evaluate((id) => document.getElementById(id).scrollIntoView(), id);
-      await p.waitForTimeout(500);
-    }
-    let calls = await fbCalls(p);
-    const vc = calls.filter((c) => c[1] === 'ViewContent').map((c) => c[2].content_category);
-    ok(vc.length === 2 && vc.includes('Ecógrafos') && vc.includes('Diatermias'), `${vp.label}: ViewContent una vez por sección`, vc.join(','));
-    // DescargaCatalogo
-    const dl = p.waitForEvent('download', { timeout: 5000 }).catch(() => null);
-    await p.evaluate(() => document.getElementById('catalogo').scrollIntoView());
-    await p.waitForTimeout(500);
-    await p.click('#catalogo [data-catalog]');
-    const d = await dl;
-    calls = await fbCalls(p);
-    ok(calls.some((c) => c[0] === 'trackCustom' && c[1] === 'DescargaCatalogo') && !calls.some((c) => c[1] === 'Lead'), `${vp.label}: DescargaCatalogo (no es Lead)`, d ? d.suggestedFilename() : 'sin descarga');
-    // Contact
-    const pop = p.context().waitForEvent('page', { timeout: 4000 }).catch(() => null);
-    await p.click('#preguntas [data-whatsapp]');
-    const popup = await pop;
-    calls = await fbCalls(p);
-    ok(calls.some((c) => c[1] === 'Contact'), `${vp.label}: Contact al pulsar WhatsApp`, popup ? decodeURIComponent(popup.url()).slice(0, 90) : '');
-    if (popup) await popup.close();
-    // "Me interesa" preselecciona el modelo
-    await p.evaluate(() => document.getElementById('ecografos').scrollIntoView());
-    await p.waitForTimeout(500);
-    if (vp.mobile) {
-      await p.evaluate(() => { const t = document.querySelector('#ecografos .carousel__track'); t.scrollLeft = t.children[1].offsetLeft; });
-      await p.waitForTimeout(400);
-    }
-    await p.click('#ecografos button[data-model="Acclarix AX8"].btn--primary');
+    const { ctx, p, logs } = await open(b, { consent: true, query: UTM });
+    await p.evaluate(() => document.querySelector('#equipos').scrollIntoView());
+    await p.waitForTimeout(600);
+    await p.click('[data-want="Acclarix AX8 (EDAN)"]');
+    await p.waitForTimeout(1600);
+    ok((await step(p)) === '1' && (await p.textContent('[data-picked]')) === 'Acclarix AX8' && await p.isHidden('[data-opts]'), 'Formulario: "Lo quiero" preselecciona el modelo en el paso 1', await p.textContent('[data-picked]'));
+    const inView = await p.evaluate(() => { const r = document.querySelector('.fcard').getBoundingClientRect(); return r.top >= 0 && r.top < innerHeight * 0.5; });
+    ok(inView, 'Formulario: "Lo quiero" lleva al formulario');
+    ok(await p.evaluate(() => document.activeElement.matches('.qf__step.is-active [data-next]')), 'Formulario: foco en "Siguiente" tras llegar');
+    ok(await p.isHidden('[data-back]'), 'Formulario: sin botón Atrás en el paso 1');
+    ok((await p.getAttribute('.qf__bar', 'aria-valuetext')) === 'Paso 1 de 6', 'Formulario: 6 pasos (barra de progreso)');
+    // "Cambiar" muestra las opciones
+    await p.click('[data-change]');
+    ok(await p.isVisible('[data-opts]') && await p.isChecked('input[name="equipo"][value="Ecógrafo"]'), 'Formulario: "Cambiar" vuelve a mostrar las opciones');
+    await p.click('[data-want="Acclarix AX8 (EDAN)"]').catch(async () => { await p.evaluate(() => document.querySelector('[data-want="Acclarix AX8 (EDAN)"]').click()); });
     await p.waitForTimeout(1400);
-    ok((await step(p)) === '2' && await p.isChecked('input[value="Ecógrafo"]'), `${vp.label}: "Me interesa" lleva al paso 2 con Ecógrafo`);
-    const pill = await p.$$eval('.qstep[data-step="2"] .dd__pill', (els) => els.map((e) => e.textContent.trim()));
-    ok(pill.join() === 'Acclarix AX8', `${vp.label}: modelo AX8 preseleccionado`, pill.join());
-    const toast = await p.textContent('#toast');
-    ok(toast.includes('Acclarix AX8'), `${vp.label}: aviso "Añadido"`, toast);
-    // Reiniciar la selección y hacer el recorrido completo
-    await p.evaluate(() => document.querySelectorAll('.qstep[data-step="2"] .dd__pill button').forEach((b) => b.click()));
+    await p.click('.qf__step.is-active [data-next]');
+    await p.waitForTimeout(600);
+    ok((await step(p)) === '2', 'Formulario: avanza al paso 2');
+    // Enter sin elegir → error
+    await p.focus('.qf__step.is-active input[type=radio]');
+    await p.keyboard.press('Enter');
+    ok((await p.textContent('.qf__step.is-active [data-error]')) === 'Elige una opción.', 'Formulario: error si no se elige opción');
+    // Teclado: espacio elige, Enter avanza (sin avance automático con flechas)
+    await p.keyboard.press('Space');
+    await p.waitForTimeout(400);
+    ok((await step(p)) === '2', 'Formulario: con teclado no avanza solo');
+    await p.keyboard.press('Enter');
+    await p.waitForTimeout(600);
+    ok((await step(p)) === '3', 'Formulario: Enter avanza');
     await p.click('[data-back]');
-    await p.waitForTimeout(450);
-    await p.click('label.opt:has(input[value="Ecógrafo"])');
-    await flow(p, { mobile: vp.mobile, label: vp.label });
-    // Doble clic en Enviar
+    await p.waitForTimeout(600);
+    ok((await step(p)) === '2' && await p.isChecked('input[name="perfil"][value="Fisioterapeuta"]') && await p.isVisible('.qf__step.is-active [data-next]'), 'Formulario: Atrás conserva la respuesta');
+    await p.click('.qf__step.is-active label.opt:has(input[value="Clínica o centro"])');
+    await p.waitForTimeout(800);
+    ok((await step(p)) === '3', 'Formulario: avance automático al elegir con el ratón');
+    await p.click('.qf__step.is-active label.opt:has(input[value="En 1 a 3 meses"])');
+    await p.waitForTimeout(800);
+    ok((await step(p)) === '4' && await p.evaluate(() => document.activeElement.id === 'f-name'), 'Formulario: paso 4 con foco en el nombre');
+    await p.press('#f-name', 'Enter');
+    ok((await p.textContent('#e-name')) === 'Escribe tu nombre.' && (await p.getAttribute('#f-name', 'aria-invalid')) === 'true', 'Validación: nombre obligatorio');
+    await p.fill('#f-name', 'L');
+    await p.press('#f-name', 'Enter');
+    ok((await p.textContent('#e-name')) === 'Revisa tu nombre.', 'Validación: nombre demasiado corto');
+    await p.fill('#f-name', 'Laura Gómez');
+    ok((await p.textContent('#e-name')) === '', 'Validación: el error se borra al escribir');
+    await p.press('#f-name', 'Enter');
+    await p.waitForTimeout(600);
+    ok((await step(p)) === '5', 'Formulario: Enter en el nombre avanza');
+    // Teléfono
+    ok((await p.textContent('.pf__btn')).includes('+34'), 'Teléfono: +34 por defecto');
+    await p.fill('#f-tel', '51234567');
+    await p.press('#f-tel', 'Enter');
+    ok((await p.textContent('#e-tel')).startsWith('Revisa el número'), 'Validación: número español incorrecto');
+    await p.fill('#f-tel', '612345678');
+    ok((await p.inputValue('#f-tel')) === '612 345 678', 'Teléfono: formato por grupos al escribir', await p.inputValue('#f-tel'));
+    // Buscador de prefijos
+    await p.click('.pf__btn');
+    await p.waitForTimeout(400);
+    ok(await p.evaluate(() => document.activeElement.matches('.pf__search input')), 'Prefijo: el buscador recibe el foco');
+    await p.keyboard.type('portu');
+    await p.waitForTimeout(200);
+    const opts = await p.$$eval('.pf__opt', (els) => els.map((e) => e.textContent.trim()));
+    ok(opts[0].startsWith('Portugal'), 'Prefijo: búsqueda por país', opts.join(' | '));
+    await p.keyboard.press('Enter');
+    await p.waitForTimeout(300);
+    ok((await p.textContent('.pf__btn')).includes('+351') && await p.evaluate(() => document.activeElement.id === 'f-tel'), 'Prefijo: Enter elige y vuelve al número');
+    ok((await p.textContent('#e-tel')) === '' || !(await p.isVisible('#e-tel')), 'Teléfono: sin error visible tras cambiar de país');
+    await p.press('#f-tel', 'Enter');
+    ok((await step(p)) === '5' && (await p.textContent('#e-tel')).startsWith('Revisa'), 'Validación: el número se valida con las reglas del país');
+    await p.click('.pf__btn');
+    await p.keyboard.type('34');
+    await p.keyboard.press('Enter');
+    await p.waitForTimeout(300);
+    ok((await p.textContent('.pf__btn')).includes('+34'), 'Prefijo: búsqueda por número');
+    await p.click('.pf__btn');
+    await p.keyboard.press('Escape');
+    ok(await p.evaluate(() => !document.querySelector('.pf').classList.contains('is-open') && document.activeElement.matches('.pf__btn')), 'Prefijo: Escape cierra y devuelve el foco');
+    await p.press('#f-tel', 'Enter');
+    await p.waitForTimeout(600);
+    ok((await step(p)) === '6', 'Formulario: paso 6 (email)');
+    // Email
+    await p.fill('#f-email', 'laura@gmial.com');
+    await p.waitForTimeout(150);
+    ok(await p.isVisible('[data-fix-email]'), 'Email: sugerencia de dominio (gmial → gmail)');
+    await p.click('[data-fix-email]');
+    ok((await p.inputValue('#f-email')) === 'laura@gmail.com', 'Email: la sugerencia corrige el dominio');
+    await p.fill('#f-email', 'laura@');
+    await p.click('[data-submit]');
+    ok((await p.textContent('#e-email')) === 'Revisa el email.', 'Validación: email incorrecto');
+    await p.fill('#f-email', 'laura@gmail.com');
+    await p.click('[data-submit]');
+    ok((await p.textContent('#e-consent')).startsWith('Necesito tu permiso') && !(await p.isChecked('input[name="consent"]')), 'Validación: casilla RGPD obligatoria y sin premarcar');
+    ok(posts().length === 0 && !(await fb(p)).some((c) => c[1] === 'Lead'), 'Sin envío ni Lead antes de completar');
+    await p.check('input[name="consent"]');
+    // Doble clic rápido
     await p.dblclick('[data-submit]');
-    await p.waitForTimeout(2500);
-    const posts = readLog().filter((r) => r.method === 'POST');
-    const preflight = readLog().filter((r) => r.method === 'OPTIONS');
-    ok(posts.length === 1, `${vp.label}: doble clic genera un solo envío`, `${posts.length} POST`);
-    ok(preflight.length === 0 && posts[0] && posts[0].ct.startsWith('text/plain'), `${vp.label}: sin preflight CORS (text/plain)`);
-    const body = posts[0] ? JSON.parse(posts[0].body) : {};
-    const need = ['nombre', 'telefono', 'email', 'ubicacion', 'productos', 'modelos', 'perfil', 'plazo', 'consentimiento', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'fbc', 'fbp', 'referrer', 'landing_url', 'dispositivo', 'navegador_idioma', 'event_id'];
-    const missingKeys = need.filter((k) => !(k in body));
-    ok(missingKeys.length === 0, `${vp.label}: el envío incluye todas las columnas`, missingKeys.join(','));
-    ok(body.utm_source === 'facebook' && body.utm_campaign === 'test' && body.fbclid === 'abc123' && /^fb\.1\.\d+\.abc123$/.test(body.fbc) && body.fbp.startsWith('fb.1.'), `${vp.label}: UTM, fbclid, fbc y fbp correctos`, `${body.fbc} | ${body.fbp}`);
-    ok(body.telefono === '+34 612 345 678' && body.ubicacion === 'Málaga' && body.productos === 'Ecógrafo, Diatermia / Tecar' && body.modelos.includes('Acclarix AX8'), `${vp.label}: datos del lead`, `${body.modelos}`);
-    ok(body.landing_url.includes('utm_source=facebook'), `${vp.label}: URL de entrada con UTM`);
-    ok(await p.isVisible('[data-done]') && (await p.textContent('[data-done-title]')).includes('Gracias, Ana.'), `${vp.label}: pantalla de gracias con el nombre`);
-    const waHref = await p.getAttribute('[data-done-wa]', 'href');
-    ok(decodeURIComponent(waHref).includes('Acclarix AX8'), `${vp.label}: WhatsApp prellenado con el producto`, decodeURIComponent(waHref).slice(0, 110));
-    calls = await fbCalls(p);
+    await p.click('[data-submit]').catch(() => {});
+    await p.waitForTimeout(1800);
+    const sent = posts();
+    ok(sent.length === 1, 'Envío: doble clic no duplica', `${sent.length} POST`);
+    const d = sent[0] ? JSON.parse(sent[0].body) : {};
+    ok(sent[0] && sent[0].ct.startsWith('text/plain'), 'Envío: Content-Type text/plain;charset=utf-8', sent[0] && sent[0].ct);
+    const expect = { nombre: 'Laura Gómez', telefono: '+34 612 345 678', email: 'laura@gmail.com', equipo: 'Ecógrafo', modelo: 'Acclarix AX8 (EDAN)', perfil: 'Clínica o centro', plazo: 'En 1 a 3 meses', utm_source: 'facebook', utm_campaign: 'test', fbclid: 'abc123', website: '' };
+    const wrong = Object.entries(expect).filter(([k, v]) => d[k] !== v).map(([k]) => `${k}=${d[k]}`);
+    ok(!wrong.length, 'Envío: campos del formulario y UTM correctos', wrong.join(', '));
+    const keys = ['nombre', 'telefono', 'email', 'equipo', 'modelo', 'perfil', 'plazo', 'consentimiento', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'fbc', 'fbp', 'referrer', 'landing_url', 'dispositivo', 'idioma', 'event_id'];
+    ok(keys.every((k) => k in d), 'Envío: están todas las columnas de la hoja', keys.filter((k) => !(k in d)).join(', '));
+    ok(/^fb\.1\.\d{13}\.abc123$/.test(d.fbc) && d.fbp === 'fb.1.1700000000000.987654321', 'Envío: fbc construido desde fbclid y fbp de la cookie', `${d.fbc} / ${d.fbp}`);
+    ok(d.consentimiento && d.consentimiento.startsWith('Sí') && /^[0-9a-f-]{36}$/.test(d.event_id) && d.landing_url.includes('utm_source=facebook') && d.idioma && d.dispositivo.startsWith('Escritorio'), 'Envío: consentimiento, event_id, URL de entrada, idioma y dispositivo', `${d.dispositivo} · ${d.idioma}`);
+    ok(await p.isVisible('[data-done]') && (await p.textContent('[data-done-title]')) === 'Gracias, Laura. Te escribo muy pronto.', 'Éxito: "Gracias, Laura. Te escribo muy pronto."');
+    const wa = decodeURIComponent(await p.getAttribute('[data-done-wa]', 'href'));
+    ok(wa.includes('soy Laura') && wa.includes('Acclarix AX8'), 'Éxito: WhatsApp con mensaje y producto', wa);
+    ok(await p.isVisible('[data-done] [data-catalog]') && (await p.$$('[data-done] .btn')).length === 1, 'Éxito: un único botón y enlace al catálogo');
+    const calls = await fb(p);
     const leads = calls.filter((c) => c[1] === 'Lead');
-    ok(leads.length === 1 && leads[0][3] && leads[0][3].eventID === body.event_id && leads[0][2].content_name === 'Ecógrafo, Diatermia / Tecar', `${vp.label}: Lead una sola vez con eventID = event_id`, leads.length ? JSON.stringify(leads[0].slice(2)) : 'sin Lead');
-    await p.click('[data-done] [data-catalog]').catch(() => {});
-    await p.waitForTimeout(300);
-    ok((await fbCalls(p)).filter((c) => c[1] === 'Lead').length === 1, `${vp.label}: el Lead no se repite`);
-    ok(logs.length === 0, `${vp.label}: consola sin errores ni avisos`, logs.join(' / '));
+    ok(leads.length === 1 && leads[0][3] && leads[0][3].eventID === d.event_id, 'Tracking: Lead una vez tras el éxito, con eventID = event_id', JSON.stringify(leads));
+    await p.click('[data-done-wa]').catch(() => {});
+    await p.waitForTimeout(400);
+    ok((await fb(p)).filter((c) => c[1] === 'Lead').length === 1, 'Tracking: Lead no se repite');
+    ok(!logs.length, 'Consola limpia (envío correcto)', logs.join(' / '));
     await ctx.close();
-  }
+  });
 
-  // ---------------------------------------------------------------- 3. Endpoint vacío: error amable
-  {
+  // ------------------------------------------------------------ 4. Móvil: avance táctil, hoja inferior de prefijos, éxito
+  await block('Móvil: avance táctil, hoja inferior de prefijos,', async () => {
     fs.writeFileSync(LOG, '');
-    const { ctx, p, logs } = await newPage(b, { width: 1280, height: 860, mobile: false, endpoint: '', consent: { analytics: false, marketing: false } });
-    await p.goto(`${BASE}/`, { waitUntil: 'networkidle' });
-    await p.click('#asesoramiento .fcard').catch(() => {});
-    await p.waitForTimeout(300);
-    await flow(p, { mobile: false, label: 'Endpoint vacío' });
+    const { ctx, p, logs } = await open(b, { consent: false, width: 390, height: 844, mobile: true });
+    await p.tap('.hero__cta');
+    await p.waitForTimeout(1400);
+    ok((await step(p)) === '1' && await p.isVisible('[data-opts]'), 'Móvil: el CTA del hero lleva al paso 1');
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Diatermia"])');
+    await p.waitForTimeout(800);
+    ok((await step(p)) === '2', 'Móvil: avance automático al tocar');
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Médico"])');
+    await p.waitForTimeout(800);
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Solo miro"])');
+    await p.waitForTimeout(800);
+    await p.fill('#f-name', 'Marta');
+    await p.tap('.qf__step.is-active [data-next]');
+    await p.waitForTimeout(600);
+    await p.tap('.pf__btn');
+    await p.waitForTimeout(700);
+    const sheet = await p.evaluate(() => { const r = document.querySelector('.pf__panel').getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, focus: document.activeElement.className }; });
+    ok(sheet.bottom <= sheet.vh + 1 && sheet.top > 0 && sheet.focus.includes('pf__list'), 'Móvil: prefijos en hoja inferior, sin abrir el teclado', JSON.stringify(sheet));
+    await p.tap('.pf__opt[data-iso="FR"]');
+    await p.waitForTimeout(600);
+    ok((await p.textContent('.pf__btn')).includes('+33'), 'Móvil: elegir Francia en la hoja');
+    await p.fill('#f-tel', '0612345678');
+    ok((await p.inputValue('#f-tel')) === '6 12 34 56 78', 'Teléfono: Francia quita el 0 y agrupa', await p.inputValue('#f-tel'));
+    await p.tap('.qf__step.is-active [data-next]');
+    await p.waitForTimeout(600);
+    await p.fill('#f-email', 'marta@clinica.fr');
+    await p.tap('input[name="consent"]');
+    await p.tap('[data-submit]');
+    await p.waitForTimeout(1600);
+    const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
+    ok(d.telefono === '+33 6 12 34 56 78' && d.equipo === 'Diatermia' && d.modelo === 'Sin decidir' && d.dispositivo === 'Móvil · iOS · Instagram', 'Móvil: envío correcto (navegador de Instagram)', `${d.telefono} · ${d.modelo} · ${d.dispositivo}`);
+    ok(await p.isVisible('[data-done]'), 'Móvil: pantalla de gracias');
+    ok(!logs.length, 'Consola limpia (móvil)', logs.join(' / '));
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ 5. Endpoint vacío: falla con elegancia y conserva los datos
+  await block('Endpoint vacío: falla con elegancia y conserva l', async () => {
+    const { ctx, p, logs } = await open(b, { consent: true, endpoint: '' });
+    await toForm(p);
+    await p.waitForTimeout(3100);
+    await fillToEnd(p, {});
     await p.click('[data-submit]');
-    await p.waitForTimeout(1200);
-    ok(await p.isVisible('[data-fail]'), 'Endpoint vacío: mensaje de error amable');
-    ok(logs.some((l) => l.includes('SHEETS_ENDPOINT')), 'Endpoint vacío: aviso claro en consola', logs.find((l) => l.includes('SHEETS_ENDPOINT'))?.slice(0, 80));
-    // Reintentar conserva los datos
+    await p.waitForTimeout(800);
+    ok(await p.isVisible('[data-fail]') && await p.isHidden('[data-done]'), 'Endpoint vacío: mensaje de error amable');
+    ok(logs.some((l) => l.includes('SHEETS_ENDPOINT')), 'Endpoint vacío: aviso en consola');
+    ok(!(await fb(p)).some((c) => c[1] === 'Lead'), 'Endpoint vacío: sin Lead');
+    const wa = decodeURIComponent(await p.getAttribute('[data-fail-wa]', 'href'));
+    ok(wa.includes('soy Laura'), 'Endpoint vacío: WhatsApp como alternativa');
     await p.click('[data-retry]');
-    await p.waitForTimeout(1200);
-    ok(await p.isVisible('[data-fail]') && (await p.inputValue('#f-nombre')) === 'Ana López', 'Reintentar conserva los datos');
+    await p.waitForTimeout(800);
+    ok(await p.isVisible('[data-fail]') && (await p.inputValue('#f-email')) === 'laura@gmail.com' && (await p.inputValue('#f-name')) === 'Laura Gómez', 'Endpoint vacío: reintento sin perder los datos');
     await ctx.close();
-  }
+  });
 
-  // ---------------------------------------------------------------- 4. Error del servidor
-  {
+  // ------------------------------------------------------------ 6. Error del servidor
+  await block('Error del servidor', async () => {
     fs.writeFileSync(LOG, '');
-    const { ctx, p } = await newPage(b, { width: 1280, height: 860, mobile: false, endpoint: `${MOCK}/exec?mode=fail`, consent: { analytics: false, marketing: true } });
-    await p.goto(`${BASE}/`, { waitUntil: 'networkidle' });
-    await flow(p, { mobile: false, label: 'Error servidor' });
+    const { ctx, p } = await open(b, { consent: true, endpoint: `${MOCK}/exec?mode=fail` });
+    await toForm(p);
+    await p.waitForTimeout(3100);
+    await fillToEnd(p, {});
     await p.click('[data-submit]');
     await p.waitForTimeout(1500);
-    ok(await p.isVisible('[data-fail]') && !(await fbCalls(p)).some((c) => c[1] === 'Lead'), 'Respuesta { ok:false }: error y sin evento Lead');
+    ok(posts().length === 1 && await p.isVisible('[data-fail]') && !(await fb(p)).some((c) => c[1] === 'Lead'), 'Error del servidor: aviso, sin gracias y sin Lead');
     await ctx.close();
-  }
+  });
 
-  // ---------------------------------------------------------------- 5. Honeypot
-  {
+  // ------------------------------------------------------------ 7. Antispam: campo trampa y tiempo mínimo
+  await block('Antispam: campo trampa y tiempo mínimo', async () => {
     fs.writeFileSync(LOG, '');
-    const { ctx, p } = await newPage(b, { width: 1280, height: 860, mobile: false, consent: { analytics: false, marketing: true } });
-    await p.goto(`${BASE}/`, { waitUntil: 'networkidle' });
-    await flow(p, { mobile: false, label: 'Honeypot' });
-    await p.evaluate(() => { document.querySelector('input[name="website"]').value = 'spam.com'; });
+    const { ctx, p } = await open(b, { consent: true });
+    await toForm(p);
+    await p.waitForTimeout(3100);
+    await fillToEnd(p, {});
+    await p.evaluate(() => { document.querySelector('input[name="website"]').value = 'http://spam.example'; });
     await p.click('[data-submit]');
     await p.waitForTimeout(1500);
-    ok(readLog().filter((r) => r.method === 'POST').length === 0 && !(await fbCalls(p)).some((c) => c[1] === 'Lead'), 'Honeypot relleno: no se envía ni se registra Lead');
+    ok(posts().length === 0 && !(await fb(p)).some((c) => c[1] === 'Lead'), 'Antispam: con el campo trampa relleno no se envía ni hay Lead');
     await ctx.close();
-  }
-
-  // ---------------------------------------------------------------- 6. Tiempo mínimo de 3 s
-  {
+  });
+  await block('Antispam: campo trampa y tiempo mínimo', async () => {
     fs.writeFileSync(LOG, '');
-    const { ctx, p } = await newPage(b, { width: 1280, height: 860, mobile: false, consent: { analytics: false, marketing: true }, nowPatch: true });
-    await p.goto(`${BASE}/`, { waitUntil: 'networkidle' });
-    await flow(p, { mobile: false, label: 'Tiempo mínimo' });
+    const { ctx, p } = await open(b, { consent: true, slow: true });
+    await toForm(p);
+    await fillToEnd(p, {});
     await p.click('[data-submit]');
     await p.waitForTimeout(1500);
-    ok(readLog().filter((r) => r.method === 'POST').length === 0, 'Envío antes de 3 s: bloqueado');
+    ok(posts().length === 0, 'Antispam: un envío en menos de 3 s se descarta');
     await ctx.close();
-  }
+  });
 
   await b.close();
   console.log(results.join('\n'));
-  console.log(`\n${results.filter((r) => r.startsWith('PASS')).length}/${results.length} OK`);
-  if (results.some((r) => r.startsWith("FAIL"))) process.exitCode = 1;
+  const fails = results.filter((r) => r.startsWith('FAIL')).length;
+  console.log(`\n${results.length - fails}/${results.length} OK`);
+  process.exit(fails ? 1 : 0);
 })();

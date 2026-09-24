@@ -1,5 +1,6 @@
-// Consentimiento de cookies: banner, panel de configuración y almacenamiento (12 meses).
-// Emite el evento `vg:consent` con { necessary, analytics, marketing } cuando cambia.
+// Consentimiento de cookies: aviso, panel de configuración y almacenamiento (12 meses).
+// Solo hay una categoría opcional: marketing (píxel de Meta). Las necesarias siempre están activas.
+// Emite el evento `vg:consent` con { necessary, marketing } cuando cambia.
 
 const KEY = 'vg_consent';
 const MAX_AGE = 365 * 24 * 60 * 60 * 1000;
@@ -14,27 +15,24 @@ export function getConsent() {
   }
 }
 
-function save(analytics, marketing) {
-  const c = { v: 1, date: new Date().toISOString(), necessary: true, analytics: !!analytics, marketing: !!marketing };
+let current = null;
+export const consentState = () => current || getConsent();
+
+function save(marketing) {
+  const c = { v: 2, date: new Date().toISOString(), necessary: true, marketing: !!marketing };
   try { localStorage.setItem(KEY, JSON.stringify(c)); } catch { /* sin almacenamiento: vale para esta visita */ }
   current = c;
   window.dispatchEvent(new CustomEvent('vg:consent', { detail: c }));
   return c;
 }
 
-let current = null;
-export const consentState = () => current || getConsent();
-
-export function initConsent({ delay = 600 } = {}) {
+export function initConsent({ delay = 900 } = {}) {
   current = getConsent();
   const banner = document.getElementById('cookie-banner');
   const panel = document.getElementById('cookie-panel');
   if (!banner || !panel) return;
   const html = document.documentElement;
-  const toggles = {
-    analytics: panel.querySelector('[data-consent="analytics"]'),
-    marketing: panel.querySelector('[data-consent="marketing"]'),
-  };
+  const toggle = panel.querySelector('[data-consent="marketing"]');
 
   function showBanner() {
     banner.hidden = false;
@@ -42,23 +40,23 @@ export function initConsent({ delay = 600 } = {}) {
     requestAnimationFrame(() => requestAnimationFrame(() => banner.classList.add('is-visible')));
   }
   function hideBanner() {
+    if (banner.hidden) return;
     banner.classList.remove('is-visible');
     html.classList.remove('has-cookie-banner');
-    setTimeout(() => { banner.hidden = true; }, 560);
+    setTimeout(() => { banner.hidden = true; }, 600);
   }
   function openPanel() {
     const c = consentState();
-    toggles.analytics.checked = !!(c && c.analytics);
-    toggles.marketing.checked = !!(c && c.marketing);
+    toggle.checked = !!(c && c.marketing);
     if (typeof panel.showModal === 'function') panel.showModal();
     else panel.setAttribute('open', '');
-    toggles.analytics.focus();
+    toggle.focus();
   }
   function closePanel() {
     if (panel.open) panel.close();
   }
-  function decide(analytics, marketing) {
-    save(analytics, marketing);
+  function decide(marketing) {
+    save(marketing);
     closePanel();
     hideBanner();
   }
@@ -69,12 +67,13 @@ export function initConsent({ delay = 600 } = {}) {
     if (b.hasAttribute('data-cookie-settings')) { openPanel(); return; }
     if (b.hasAttribute('data-cpanel-close')) { closePanel(); return; }
     switch (b.dataset.cookie) {
-      case 'accept': decide(true, true); break;
-      case 'reject': decide(false, false); break;
+      case 'accept': decide(true); break;
+      case 'reject': decide(false); break;
       case 'config': openPanel(); break;
-      case 'save': decide(toggles.analytics.checked, toggles.marketing.checked); break;
+      case 'save': decide(toggle.checked); break;
     }
   });
+  // Clic en el fondo del diálogo: cierra sin decidir
   panel.addEventListener('click', (e) => { if (e.target === panel) closePanel(); });
 
   if (!current) setTimeout(showBanner, delay);
