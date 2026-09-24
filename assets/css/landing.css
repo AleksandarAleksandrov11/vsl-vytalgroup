@@ -16,10 +16,9 @@
    1 · Hero
    ========================================================================== */
 .hero { position: relative; isolation: isolate; padding: calc(var(--hd) + 24px) 0 0; overflow: clip; }
-/* Textura del hero: rejilla de puntos muy suave detrás del equipo */
-.hero::after { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; background-image: radial-gradient(rgba(11, 25, 41, .09) 1px, transparent 1.3px); background-size: 22px 22px; -webkit-mask-image: radial-gradient(ellipse 60% 55% at 72% 48%, #000, transparent 72%); mask-image: radial-gradient(ellipse 60% 55% at 72% 48%, #000, transparent 72%); }
-.hero::before { content: ""; position: absolute; z-index: -1; right: -20%; top: 30%; width: 90vw; max-width: 900px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, #FFF, rgba(255, 255, 255, 0)); pointer-events: none; }
-.hero__grid { display: grid; gap: 32px; align-items: center; }
+/* Fondo limpio: un único halo muy suave detrás de la tarjeta de clientes */
+.hero::before { content: ""; position: absolute; z-index: -1; right: -30%; top: 38%; width: 110vw; max-width: 980px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(72, 160, 168, .14), rgba(72, 160, 168, 0)); pointer-events: none; }
+.hero__grid { display: grid; gap: 40px; align-items: center; }
 .hero__copy { max-width: 660px; }
 /* Titular a medida de su columna: "Equipos médicos" siempre en una línea (mide 7,44 em).
    Tope = 13,1 % del ancho de la columna de texto, calculado con vw para cada rejilla. */
@@ -32,20 +31,17 @@
 .hero__more .icon { width: 16px; height: 16px; transition: transform .45s var(--ease); }
 .hero__more:hover .icon { transform: translateX(4px); }
 [data-magnetic] { translate: var(--mx, 0) var(--my, 0); transition: transform .5s var(--ease), translate .6s var(--ease), background-color .3s ease, box-shadow .3s ease; }
-.hero__visual { position: relative; width: 100%; max-width: 540px; justify-self: center; }
-.hero__img { width: 100%; }
+.hero__visual { position: relative; display: flex; justify-content: center; padding: 4px 0 8px; perspective: 1400px; }
 @media (min-width: 900px) {
   .hero { display: flex; flex-direction: column; min-height: min(100svh, 980px); padding: calc(var(--hd) + 32px) 0 0; }
   .hero > .wrap { flex: 1; align-content: center; }
   .hero__grid { grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 56px; }
-  .hero__visual { justify-self: end; }
-  .hero::before { right: -10%; top: 10%; width: 60vw; }
+  .hero::before { right: -18%; top: 4%; width: 64vw; }
 }
-/* Móvil en horizontal: texto y equipo en dos columnas para que quepan en la primera pantalla */
+/* Móvil en horizontal: texto y tarjeta en dos columnas para que quepan en la primera pantalla */
 @media (min-width: 640px) and (max-width: 899px) and (max-height: 520px) {
   .hero__grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; }
   .h1 { font-size: clamp(2.125rem, 1rem + 3.2vw, 2.75rem); }
-  .hero__visual { max-width: 360px; }
 }
 
 /* Titular: "Sin letra pequeña." siempre en su propia línea */
@@ -54,11 +50,52 @@
 .h1 .w { display: inline-block; vertical-align: top; padding: 0 .08em .14em; margin: 0 -.08em -.14em; clip-path: inset(-.4em 0 0 0); }
 .h1 .w > span { display: inline-block; }
 
-/* Barrido de ecografía: un sector en abanico que recorre el equipo como una sonda */
-.scan { position: absolute; left: 5%; right: 5%; top: 4%; bottom: 11%; border-radius: 6% / 6.5%; overflow: hidden; pointer-events: none; mix-blend-mode: screen; opacity: .9; }
-.scan__fan { position: absolute; left: 50%; top: -6%; width: 200%; aspect-ratio: 1; translate: -50% -50%; background: conic-gradient(from 150deg, rgba(92, 200, 200, 0) 0deg, rgba(92, 200, 200, .05) 18deg, rgba(92, 200, 200, .22) 54deg, rgba(170, 240, 240, .6) 59.4deg, rgba(92, 200, 200, 0) 60deg); -webkit-mask-image: radial-gradient(closest-side, #000 18%, rgba(0, 0, 0, .6) 60%, transparent 96%); mask-image: radial-gradient(closest-side, #000 18%, rgba(0, 0, 0, .6) 60%, transparent 96%); }
-
-.scan__fan::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 21px, rgba(190, 245, 245, .5) 22px, transparent 23.5px); -webkit-mask-image: conic-gradient(from 150deg, transparent 0deg, #000 10deg, #000 56deg, transparent 60deg); mask-image: conic-gradient(from 150deg, transparent 0deg, #000 10deg, #000 56deg, transparent 60deg); }
+/* ---------- Tarjeta "Clientes": baraja de fotos y vídeo reales en formato historia ----------
+   --p = posición en la baraja (0 delante). La tarjeta que se va sale hacia la izquierda y vuelve al fondo. */
+.reel { --w: min(290px, 70vw); --r: 26px; position: relative; width: var(--w); aspect-ratio: 4 / 5; translate: -6% 0; transform-style: preserve-3d; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .9s var(--ease); }
+.reel.is-tilting { transition-duration: .3s; }
+.reel__deck { position: absolute; inset: 0; transform-style: preserve-3d; }
+.reel__card { --p: 0; position: absolute; inset: 0; z-index: calc(3 - var(--p)); margin: 0; overflow: hidden; border-radius: var(--r); background: #0B1929; box-shadow: 0 1px 2px rgba(11, 25, 41, .1), 0 34px 60px -30px rgba(11, 25, 41, .5); transform: translate3d(calc(var(--p) * 8%), calc(var(--p) * 3%), calc(var(--p) * -40px)) rotate(calc(var(--p) * 4deg)) scale(calc(1 - var(--p) * .06)); transition: transform .8s var(--ease), opacity .5s ease; }
+.reel__card[data-slide]:nth-child(2) { --p: 1; }
+.reel__card[data-slide]:nth-child(3) { --p: 2; }
+.reel__card.is-out { z-index: 4; opacity: 0; transform: translate3d(-26%, 2%, 40px) rotate(-10deg) scale(.96); }
+.reel__card.is-hidden { opacity: 0; }
+.reel__card.no-anim { transition: none; }
+/* Las tarjetas de atrás se oscurecen un poco (capa con opacidad, sin filtros) */
+.reel__card::after { content: ""; position: absolute; inset: 0; z-index: 3; background: #0B1929; opacity: calc(var(--p) * .16); transition: opacity .6s ease; pointer-events: none; }
+/* Degradados para leer la cabecera y la etiqueta sobre cualquier foto */
+.reel__card::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(11, 25, 41, .5), rgba(11, 25, 41, 0) 26%, rgba(11, 25, 41, 0) 68%, rgba(11, 25, 41, .45)); pointer-events: none; }
+.reel__card picture { display: block; height: 100%; }
+.reel__img { width: 100%; height: 100%; object-fit: cover; }
+.reel__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .8s ease; }
+.reel__card.is-playing .reel__video { opacity: 1; }
+.reel__cap { position: absolute; z-index: 2; left: 16px; right: 16px; bottom: 14px; font-size: .9375rem; font-weight: 560; line-height: 1.25; letter-spacing: -.01em; color: #FFF; text-shadow: 0 1px 10px rgba(11, 25, 41, .45); }
+.reel__ui { position: absolute; z-index: 5; inset: 0 0 auto; padding: 12px 14px 0; color: #FFF; pointer-events: none; transform: translateZ(1px); }
+.reel__bars { display: flex; gap: 4px; }
+.reel__bars span { flex: 1; height: 3px; overflow: hidden; border-radius: 3px; background: rgba(255, 255, 255, .38); }
+.reel__bars i { display: block; height: 100%; background: #FFF; transform-origin: left; transform: scaleX(var(--t, 0)); }
+.reel__head { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: .8125rem; line-height: 1.2; text-shadow: 0 1px 8px rgba(11, 25, 41, .35); }
+.reel__who { display: grid; gap: 1px; padding-right: 40px; }
+.reel__who strong { font-weight: 600; white-space: nowrap; }
+.reel__who small { font-size: .75rem; opacity: .85; white-space: nowrap; }
+.reel__avatar { --logo-m: url(#vgl); --logo-a: #102850; --logo-b: #48A0A8; flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #FFF; box-shadow: 0 0 0 2px #FFF, 0 0 0 3.5px #48A0A8; }
+.reel__avatar svg { width: 19px; height: auto; margin-left: 1px; }
+.reel__nav { position: absolute; z-index: 4; top: 0; bottom: 0; padding: 0; border: 0; background: none; cursor: pointer; transform: translateZ(1px); -webkit-tap-highlight-color: transparent; }
+.reel__nav--prev { left: 0; width: 34%; border-radius: var(--r) 0 0 var(--r); }
+.reel__nav--next { right: 0; width: 66%; border-radius: 0 var(--r) var(--r) 0; }
+.reel__nav:focus-visible { outline: 2px solid #FFF; outline-offset: -6px; }
+.reel__toggle { position: absolute; z-index: 6; top: 20px; right: 6px; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: #FFF; background: none; cursor: pointer; transform: translateZ(2px); }
+.reel__toggle .icon { width: 18px; height: 18px; filter: drop-shadow(0 1px 4px rgba(11, 25, 41, .4)); }
+.reel__toggle:focus-visible { outline: 2px solid #FFF; outline-offset: -4px; }
+@media (min-width: 640px) { .reel { --w: 320px; } }
+/* En escritorio también cabe entera en pantallas bajas: alto de la tarjeta ≤ alto útil */
+@media (min-width: 900px) { .reel { --w: min(330px, calc((100vh - 190px) * .8)); --r: 28px; translate: -7% 0; } .hero__visual { padding: 0 0 24px; } }
+@media (min-width: 1024px) { .reel { --w: min(370px, calc((100vh - 190px) * .8)); } }
+@media (min-width: 1280px) { .reel { --w: min(390px, calc((100vh - 190px) * .8)); } .reel__cap { left: 18px; bottom: 16px; font-size: 1rem; } }
+/* Pantallas muy bajas (horizontal ancho): sin subtítulo, para no chocar con el botón de pausa */
+@media (min-width: 900px) and (max-height: 470px) { .reel__who small { display: none; } .reel__cap { left: 12px; right: 12px; font-size: .8125rem; } }
+/* Móvil en horizontal: la tarjeta cabe entera en la primera pantalla */
+@media (min-width: 640px) and (max-width: 899px) and (max-height: 520px) { .reel { --w: min(236px, 26vw); translate: -4% 0; } }
 
 @media (prefers-reduced-motion: no-preference) {
   .h1 .w > span { transform: translateY(110%); animation: word-up .9s var(--ease) forwards; animation-delay: calc(80ms + var(--i, 0) * 60ms); }
@@ -66,15 +103,17 @@
   .hero__lead { animation-delay: .42s; }
   .hero__actions { animation-delay: .52s; }
   .ticker { animation-delay: .7s; }
-  .hero__img { animation: product-in 1.2s var(--ease) both; }
-  .scan { opacity: 0; animation: scan-in 1s ease 1s forwards; }
-  .scan__fan { animation: sweep 6.5s ease-in-out infinite alternate; }
+  /* Entrada: la tarjeta delantera sube y las de atrás se reparten desde detrás (solo transform) */
+  .reel__card { animation: deal 1.1s var(--ease) backwards; animation-delay: calc(.25s + var(--p) * .14s); }
+  .reel__ui, .reel__toggle { animation: fade-up .8s var(--ease) .8s backwards; }
+  /* Zoom lento de la foto delantera (se pausa con la tarjeta) */
+  .reel__card.is-front .reel__img { animation: kenburns 6.5s linear both; }
+  .reel.is-paused .reel__img { animation-play-state: paused; }
 }
 @keyframes word-up { to { transform: none; } }
 @keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@keyframes product-in { from { opacity: 0; transform: translateY(18px) scale(.96); } }
-@keyframes scan-in { to { opacity: .9; } }
-@keyframes sweep { from { transform: rotate(-28deg); } to { transform: rotate(28deg); } }
+@keyframes deal { from { transform: translate3d(0, 28px, 0) scale(.96); } }
+@keyframes kenburns { from { transform: scale(1.08); } to { transform: none; } }
 
 /* ==========================================================================
    2 · Equipos
@@ -335,9 +374,9 @@ html.has-cookie-banner .mbar { transform: translateY(110%); }
 .card::after, .cat__btn::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: radial-gradient(280px circle at var(--hx, 50%) var(--hy, 50%), rgba(72, 160, 168, .13), transparent 62%); opacity: 0; transition: opacity .45s ease; }
 @media (hover: hover) and (pointer: fine) { .card:hover::after, .cat__btn:hover::after { opacity: 1; } }
 
-/* Marquesinas infinitas (línea de confianza y testimonios) */
+/* Marquesina infinita (línea de confianza) */
 @keyframes marquee { to { transform: translateX(-50%); } }
-[data-marquee].is-paused .ticker__track, [data-marquee].is-paused .tsts__track { animation-play-state: paused; }
+[data-marquee].is-paused .ticker__track { animation-play-state: paused; }
 
 /* ---------- Línea de confianza bajo el hero ---------- */
 .ticker { position: relative; margin-top: 40px; border-block: 1px solid var(--line); background: rgba(255, 255, 255, .72); overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
@@ -420,25 +459,6 @@ html.has-cookie-banner .mbar { transform: translateY(110%); }
 }
 
 /* ==========================================================================
-   Testimonios (fondo blanco con degradado suave)
-   ========================================================================== */
-.tsts { position: relative; overflow: hidden; background: linear-gradient(180deg, #FFF 0%, #F3F6F8 100%); }
-.tsts .h2 { margin-bottom: 36px; }
-.tsts__rail { overflow: hidden; padding: 6px 0 14px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
-.tsts__track { display: flex; width: max-content; animation: marquee 80s linear infinite; }
-.tsts__rail:hover .tsts__track, .tsts__rail:focus-within .tsts__track { animation-play-state: paused; }
-.tsts__list { display: flex; flex: none; gap: 16px; padding-right: 16px; }
-.tst { flex: none; width: 290px; }
-.tst figure { display: flex; flex-direction: column; justify-content: space-between; gap: 22px; height: 100%; margin: 0; padding: 24px; border-radius: 24px; background: #FFF; box-shadow: inset 0 0 0 1px var(--line), var(--shadow); }
-.tst blockquote { margin: 0; }
-.tst blockquote::before { content: "\201C"; display: block; height: 22px; font-family: var(--serif); font-style: italic; font-size: 3rem; line-height: 1; color: var(--teal); }
-.tst blockquote p { font-size: 1rem; line-height: 1.55; color: var(--ink); }
-.tst figcaption { display: grid; gap: 2px; font-size: .8125rem; color: var(--ink-3); }
-.tst figcaption strong { font-size: .9375rem; font-weight: 560; color: var(--ink); }
-.tst figcaption small { margin-top: 8px; font-size: .75rem; letter-spacing: .01em; color: var(--ink-3); }
-@media (min-width: 900px) { .tsts .h2 { margin-bottom: 56px; } .tst { width: 340px; } .tst figure { padding: 28px; } }
-
-/* ==========================================================================
    Catálogo (fondo turquesa muy claro con puntos) y maqueta 3D
    ========================================================================== */
 .catalog { position: relative; isolation: isolate; overflow: hidden; background: linear-gradient(160deg, #F2F8F8 0%, #E3EEEF 100%); }
@@ -466,12 +486,9 @@ html.has-cookie-banner .mbar { transform: translateY(110%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .scan__fan { animation: none; }
   .rv, .rvi { transform: none; }
-  .ticker__track, .tsts__track { animation: none; }
-  .ticker__list[aria-hidden="true"], .tsts__list[aria-hidden="true"] { display: none; }
+  .ticker__track { animation: none; }
+  .ticker__list[aria-hidden="true"] { display: none; }
   .ticker__list { flex-wrap: wrap; justify-content: center; }
   .ticker { -webkit-mask-image: none; mask-image: none; }
-  .tsts__rail { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-mask-image: none; mask-image: none; padding-inline: var(--g); }
-  .tst { scroll-snap-align: start; }
 }

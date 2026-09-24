@@ -3,9 +3,42 @@
 Landing de una sola página para las campañas de Instagram y Facebook de VytalGroup. Equipos médicos de alta calidad para profesionales sanitarios, sin timos ni letra pequeña. Ecógrafos y diatermias como protagonistas, y el resto del catálogo a un clic. Una única acción principal: pedir asesoramiento.
 
 - HTML, CSS y JavaScript vanilla. Sin frameworks ni librerías en el navegador.
-- 8 secciones y un footer: Hero (con línea de confianza), Lo más pedido, Más equipos, Por qué VytalGroup, Testimonios, Catálogo, Dudas y Formulario.
-- Carga inicial en móvil: unos 88 KB (presupuesto 250 KB). JS propio: 14,3 KB. CSS: 10,2 KB (gzip).
-- Lighthouse: móvil 99 a 100 en rendimiento y 100 en lo demás; escritorio y páginas legales, 100 en todo.
+- 7 secciones y un footer: Hero (con la tarjeta "Clientes" y la línea de confianza), Lo más pedido, Más equipos, Por qué VytalGroup, Catálogo, Dudas y Formulario.
+- Carga inicial en móvil: unos 109 KB en el peor caso (presupuesto 250 KB). JS propio: 15,5 KB. CSS: 10,4 KB (gzip). El vídeo del hero (644 KB en WebM, 763 KB en MP4) se pide después de la carga.
+- Lighthouse: 100 en rendimiento, accesibilidad, buenas prácticas y SEO, en móvil y en escritorio.
+
+---
+
+## Cambios de la v4: hero con material real de clientes
+
+**Qué se pidió.** Quitar la sección de testimonios y rediseñar el hero para que quede limpio, pero con algo más visual, usando las fotos y el vídeo de clientes que envió VytalGroup.
+
+**Testimonios eliminados.** Se quitan la sección, sus estilos, sus pruebas y el aviso de la compilación. La prueba social ahora es real y va en el hero.
+
+**Hero nuevo.** El texto es el mismo: titular, línea de apoyo, CTA y "Ver catálogo". Se quitan el recorte del equipo, la rejilla de puntos y el barrido de ecografía. A la derecha (debajo en móvil) hay una **tarjeta "Clientes" en formato historia de Instagram**, el mismo nombre que tiene el destacado de la marca:
+- Una baraja de 3 tarjetas 4:5 con material real:
+  1. el vídeo de la diatermia en consulta, con un fisioterapeuta tratando la rodilla de un deportista;
+  2. las botas de presoterapia con el logo de VytalGroup;
+  3. la diatermia montada en la camilla de una clínica.
+- Cabecera de historia: barras de progreso, logo, "Clientes · Fotos y vídeo reales" y botón de pausa.
+- Tocar la derecha avanza y la izquierda vuelve. La tarjeta delantera sale hacia la izquierda y vuelve al fondo de la baraja.
+- Avanza sola: el vídeo hasta el final y cada foto 5 s, con un zoom lento.
+- En escritorio la baraja se inclina un poco con el cursor.
+- Al cargar, las tarjetas se reparten desde detrás de la primera.
+
+**Rendimiento y accesibilidad**
+- Carga del vídeo:
+  - Mientras carga, se ve una foto de la misma sesión (es el LCP y va precargada).
+  - El vídeo se pide después del evento `load` y aparece encima con un fundido cuando empieza a reproducirse.
+  - Nunca se descarga con ahorro de datos o en 2G.
+  - Va sin audio, en WebM (VP9) con MP4 (H.264) de respaldo.
+- Empieza en el plano general, que coincide con la foto, y el bucle no tiene saltos.
+- Se pausa con el botón (WCAG 2.2.2), fuera de pantalla y con la pestaña oculta.
+- Con `prefers-reduced-motion` empieza en pausa, sin vídeo ni zoom. El botón lo pone en marcha si se quiere.
+
+**Material no usado.** Las capturas de WhatsApp e Instagram muestran nombres, números y conversaciones. Tampoco encajan con un hero limpio.
+
+**Recursos.** `scripts/assets/build_clientes.py` genera las fotos (400, 520, 640 y 800 px, AVIF + WebP) y el vídeo desde los archivos originales.
 
 ---
 
@@ -21,7 +54,7 @@ Se mantiene el sistema visual del rediseño: Geist + Instrument Serif, paleta, e
 3. **Lo más pedido.** El segmentado y las tarjetas de siempre, más un CTA de sección.
 4. **Más equipos** (nueva). 6 categorías del catálogo con imagen y nombre. La descripción aparece al pasar el ratón, al tocar o con el foco del teclado. Debajo: "Y más de 50 páginas de equipos en el catálogo." y el CTA.
 5. **Por qué VytalGroup.** Título "Sin timos. *Sin letra pequeña.*", la historia de Javier, las tres cifras y un comparador de 3 filas "Lo habitual" frente a "Con VytalGroup", con checks que se dibujan.
-6. **Testimonios** (nueva, petición del cliente). 8 testimonios de ejemplo en bucle infinito hacia la izquierda, cada uno marcado como "Testimonio de ejemplo". Se sustituyen por los reales (ver apartado 7).
+6. **Testimonios** (petición del cliente): 8 de ejemplo en bucle, marcados como tales. **Eliminada en la v4**; la prueba social pasa al hero con material real.
 7. **Catálogo** (nueva). Maqueta 3D del catálogo (portada y dos páginas reales) que se abre en abanico al entrar y se inclina con el cursor en escritorio. Debajo, "PDF · 53 páginas · Descarga directa", el botón "Descargar catálogo" y el enlace "¿Prefieres que te asesore?".
 8. **Dudas.** 5 preguntas, entre ellas la nueva "¿Solo vendéis ecógrafos y diatermias?", y después el CTA y el enlace de WhatsApp.
 9. **Formulario.** El paso 1 tiene ahora 5 opciones: Ecógrafo · Diatermia · Presoterapia · Ondas de choque · Otro equipo. "Otro equipo" abre un desplegable propio con magnetoterapia, láser, electrólisis percutánea, camillas u otro.
@@ -30,10 +63,9 @@ Se mantiene el sistema visual del rediseño: Geist + Instrument Serif, paleta, e
 **Regla de CTA.** Cada sección termina con un único CTA, siempre con el texto "Quiero asesoramiento". La única excepción es el catálogo, con "Descargar catálogo".
 
 **Fondos por sección** (petición del cliente):
-- Hero: claro con rejilla de puntos.
+- Hero: claro y limpio, con un halo turquesa muy suave (v4).
 - Más equipos: gris azulado con rejilla fina.
 - Por qué VytalGroup: marino con grano.
-- Testimonios: degradado blanco.
 - Catálogo: turquesa muy claro con puntos.
 - Formulario: halo turquesa.
 
@@ -59,9 +91,10 @@ Se mantiene el sistema visual del rediseño: Geist + Instrument Serif, paleta, e
 ├── site.webmanifest
 ├── assets/
 │   ├── css/                    base.css (compartido), landing.css, legal.css. Se insertan inline al compilar
-│   ├── js/                     main.js, form.js, select.js (desplegable propio), data.js,
+│   ├── js/                     main.js, reel.js (tarjeta Clientes), form.js, select.js (desplegable propio), data.js,
 │   │                           attribution.js, consent.js, tracking.js, legal.js
-│   ├── img/                    Productos, categorías, páginas del catálogo, hero y Javier en AVIF + WebP
+│   ├── img/                    Productos, categorías, páginas del catálogo, fotos de clientes y Javier (AVIF + WebP)
+│   ├── video/                  Vídeo de clientes del hero (WebM + MP4, sin audio)
 │   ├── fonts/                  Geist (variable, 400 a 600) e Instrument Serif cursiva, woff2 con subset latino
 │   ├── brand/                  Favicon, iconos e imagen Open Graph
 │   └── docs/catalogo-vytalgroup-2026.pdf
@@ -69,7 +102,7 @@ Se mantiene el sistema visual del rediseño: Geist + Instrument Serif, paleta, e
 ├── scripts/
 │   ├── build.mjs               Compilación a dist/ (hashes, CSS inline, minificado, SITE_URL, sitemap)
 │   ├── serve.mjs               Servidor local que aplica las cabeceras de vercel.json
-│   └── assets/                 Generadores: imágenes, fuentes, imagen OG y páginas legales
+│   └── assets/                 Generadores: imágenes, material de clientes, fuentes, imagen OG y páginas legales
 ├── tests/                      Pruebas automáticas con Playwright (npm test)
 ├── PLAN.md                     Lista de tareas seguida durante el trabajo
 └── README.md
@@ -200,11 +233,9 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 2. **URL del Apps Script** → `config.js` (apartado 3).
 3. **Datos legales del titular** en `aviso-legal.html` y `privacidad.html` (marcados en amarillo como "[Pendiente: …]"): razón social o nombre, NIF o CIF, domicilio y datos registrales, y el plazo de conservación de los leads. Se editan en `scripts/assets/gen_legal.py` y se regeneran con `python3 scripts/assets/gen_legal.py`. Conviene que un asesor legal revise los textos.
 4. **¿Puede Javier prometer "respuesta en menos de 24 h"?** Si lo confirma, se cambia el subtítulo del formulario ("Te respondo yo personalmente.") por "Te respondo yo, en menos de 24 h.".
-5. **Testimonios reales.** Los 8 actuales son **de ejemplo** (los pidió el cliente para ver el diseño) y cada uno lo indica en pantalla. Meta y la normativa de consumo no permiten opiniones inventadas en publicidad, así que hay que cambiarlos por reales, con permiso de cada cliente, antes de lanzar anuncios. La compilación avisa mientras sigan siendo de ejemplo. Para cambiarlos, en `index.html`, sección `#testimonios`:
-   - Edita cada `<li class="tst">` de la primera lista: la cita en `<p>`, el nombre en `<strong>` y la profesión y la ciudad en `<span>`.
-   - Copia la lista entera en la segunda (`aria-hidden="true"`), que es la copia que hace el bucle infinito. Las dos deben ser iguales.
-   - Borra las etiquetas `<small>Testimonio de ejemplo</small>` y el atributo `data-ejemplo` de la sección.
-   - Cambia `aria-label="Testimonios de ejemplo"` por `aria-label="Testimonios"`.
+5. **Permiso de imagen.** El fisioterapeuta y el deportista del vídeo y de la foto se reconocen, y en la camiseta se ven logos de un club y de un hotel. Hay que confirmar que los clientes autorizan su uso en la web y en anuncios (RGPD). Para cambiar o quitar material:
+   - Edita `scripts/assets/build_clientes.py` y vuelve a generarlo (apartado 11).
+   - Ajusta las tarjetas `.reel__card` de `index.html`.
 6. **Vídeo de Javier.** El vídeo de la diatermia (1:47) que había en el proyecto no es de Javier (lo confirmó el cliente), así que no se usa. Si Javier graba uno, se puede poner en "Por qué VytalGroup" con portada y carga solo al pulsar.
 7. **Material que no llegó:** la carpeta `referencias/` no venía en el encargo. Mejorarían la web unas fotos de los Acclarix a más resolución (el catálogo trae unos 550 px) y una foto de Javier más grande (la recibida es de 640 × 640).
 8. **Confirmar el usuario de Instagram** de la marca: se enlaza `instagram.com/vytalgroup`.
@@ -214,11 +245,10 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 ## 8. Decisiones tomadas
 
 **Estructura.** Las preguntas del visitante, en orden:
-- ¿Qué es? → Hero.
+- ¿Qué es y quién lo usa? → Hero (con fotos y vídeo reales de clientes).
 - ¿Qué es lo más habitual? → Lo más pedido.
 - ¿Tenéis también…? → Más equipos.
 - ¿Por qué vosotros? → Por qué VytalGroup.
-- ¿Qué dicen otros? → Testimonios.
 - ¿Puedo verlo todo? → Catálogo.
 - ¿Y si…? → Dudas.
 - ¿Cómo lo pido? → Formulario.
@@ -229,11 +259,11 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - "Descargar catálogo", en el catálogo, como pide el brief.
   - "Lo quiero", en las tarjetas: lleva al formulario con ese modelo ya elegido.
 - Palabras visibles, medidas por código en las pruebas (sin respuestas del acordeón, descripciones de Más equipos ni formulario):
-  - 244 en las secciones;
+  - 250 en las secciones;
   - 24 en la línea de confianza;
   - 23 en cabecera y footer.
-  
-  Para quedar en torno a 250:
+
+  Para quedar en torno a 250 en la v3:
   - la línea de confianza usa cifra + 1 o 2 palabras;
   - se quitó "¿No sabes cuál elegir?";
   - se acortó el comparador;
@@ -270,11 +300,11 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - la Superinductiva y la Physio Invasiva, recortadas con GrabCut, con la dominante cian corregida en la segunda;
   - el láser, con el fondo gris aclarado.
 - Maqueta del catálogo: portada y páginas 6 y 8 del PDF renderizadas con `pdftoppm`.
-- Hero: la Diatermia Multifunción VytaMeD, con un barrido de ecografía en abanico.
+- Hero (v4): fotos y vídeo reales de clientes, recortados a 4:5 (`scripts/assets/build_clientes.py`). El recorte de la Diatermia Multifunción VytaMeD queda solo para la imagen OG.
 - Javier: su foto real.
 
 **Animaciones.** Solo `transform`, `opacity` y variables CSS, con IntersectionObserver, `requestAnimationFrame` y listeners pasivos. Easing `cubic-bezier(.22, 1, .36, 1)`.
-- Hero: titular por palabras con máscara y entrada escalonada de texto, botones y línea de confianza. Es la animación de entrada, sin pantalla previa.
+- Hero: titular por palabras con máscara y entrada escalonada de texto, botones y línea de confianza. La baraja "Clientes" se reparte desde detrás, con zoom lento en las fotos, vídeo con fundido, avance tipo historia e inclinación con el cursor. Es la animación de entrada, sin pantalla previa.
 - Titulares de sección: aparecen por líneas con máscara (75 ms entre líneas).
 - Imágenes de producto y categorías: fundido y escala de 0,96 a 1, escalonadas. En escritorio, parallax vertical muy leve (máx. 16 px).
 - Más equipos: entrada escalonada; al pasar el ratón, la tarjeta sube, la imagen hace zoom a 1,04 y aparece la descripción.
@@ -285,9 +315,9 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 - Botones: brillo al pasar, hundimiento al pulsar y efecto magnético en escritorio.
 - Halo de luz que sigue al cursor en tarjetas y categorías (escritorio).
 - Segmentado: transición cruzada con desplazamiento corto hacia el lado al que se cambia.
-- Marquesinas (confianza y testimonios): CSS puro, en pausa fuera de pantalla y al pasar el ratón.
+- Marquesina de confianza: CSS puro, en pausa fuera de pantalla y al pasar el ratón.
 - Acordeón: solo `transform` (FLIP).
-- `prefers-reduced-motion`: sin parallax, inclinación, marquesinas (se muestran quietas y sin copias) ni conteos. Quedan solo fundidos.
+- `prefers-reduced-motion`: sin parallax, inclinación, marquesina (quieta y sin copia), conteos, zoom ni vídeo automático. Quedan solo fundidos.
 
 **Formulario (6 pasos)**
 - Equipo → perfil → plazo → nombre → WhatsApp → email y consentimiento.
@@ -314,7 +344,11 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 
 ## 9. Historial de cambios
 
-**v3 (este encargo)**
+**v4 (este encargo)**
+- Hero rediseñado con la tarjeta "Clientes": fotos y vídeo reales en formato historia.
+- Quitado: la sección de testimonios de ejemplo, el recorte del equipo en el hero y el barrido de ecografía.
+
+**v3**
 - Añadido:
   - línea de confianza;
   - Más equipos;
@@ -363,8 +397,8 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - doble clic sin duplicar;
   - Lead una sola vez con `eventID` = `event_id`;
   - endpoint vacío, error del servidor y antispam.
-- **Interfaz y reglas del brief (80):**
-  - las 8 secciones en orden;
+- **Interfaz y reglas del brief (90):**
+  - las 7 secciones en orden, sin testimonios;
   - palabras visibles;
   - un CTA por sección, con el texto idéntico, y "Descargar catálogo" en el catálogo;
   - nada prohibido (ISO, FDA, veterinaria);
@@ -374,11 +408,11 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - segmentado y carrusel;
   - Más equipos: 3 columnas, zoom 1,04, halo y descripción al pasar; en móvil, 2 columnas, al tocar, una abierta a la vez;
   - comparador: filas escalonadas y checks dibujados;
-  - testimonios: 8, hacia la izquierda, marcados como ejemplo y en pausa fuera de pantalla;
+  - tarjeta Clientes: 3 fotos reales con la primera precargada; vídeo en silencio pedido después de `load`; barra que avanza con el vídeo; pausa y reanudación; anterior y siguiente; fotos que avanzan cada 5 s; pausa fuera de pantalla; sin vídeo con ahorro de datos;
   - catálogo: abanico, inclinación, descarga directa y barra móvil oculta;
   - acordeón y conteo;
   - fuentes y teclado;
-  - movimiento reducido: sin marquesinas, conteos, inclinación ni parallax;
+  - movimiento reducido: sin marquesina, conteos, inclinación, parallax ni vídeo automático;
   - CSP limpia con el píxel;
   - cabeceras, caché, PDF como adjunto y URLs limpias;
   - metadatos, OG, JSON-LD, sitemap y robots.
@@ -395,11 +429,11 @@ Resultados de la entrega:
 
 | | Rendimiento | Accesibilidad | Buenas prácticas | SEO |
 |---|---|---|---|---|
-| Móvil, landing (3 pasadas) | 99 · 99 · 100 | 100 | 100 | 100 |
+| Móvil, landing (3 pasadas) | 100 · 100 · 100 | 100 | 100 | 100 |
 | Escritorio, landing | 100 | 100 | 100 | 100 |
 | Móvil, páginas legales | 100 | 100 | 100 | 100 |
 
-- Móvil: LCP 1,8 s, CLS 0, TBT 0 a 30 ms. Escritorio: LCP 0,4 s. Interacción más lenta medida: 112 ms (INP < 200 ms).
+- Móvil: LCP 1,7 s (la foto de la tarjeta Clientes), CLS 0, TBT 10 a 40 ms. Escritorio: LCP 0,4 s. Interacción más lenta medida: 120 ms (INP < 200 ms), con la tarjeta Clientes incluida.
 - HTML válido (validador W3C) en `dist/`.
 - Sin rayas, sin emojis y sin menciones a veterinaria, ISO 13485 o FDA, comprobado por código.
 
@@ -412,6 +446,8 @@ bash scripts/assets/subset_fonts.sh                 # fuentes (requiere fonttool
 python3 scripts/assets/build_images.py <pdfimages> <fotos> assets/img
                                                     # imágenes (pdfimages -all -p del catálogo, foto de Javier;
                                                     # las páginas de la maqueta se renderizan del PDF con pdftoppm)
+python3 scripts/assets/build_clientes.py <material_clientes> assets/img assets/video
+                                                    # fotos y vídeo de clientes del hero (requiere ffmpeg)
 node scripts/assets/build_og.mjs                    # imagen Open Graph (Playwright)
 python3 scripts/assets/gen_legal.py                 # páginas legales (toman el pie y las cookies de index.html)
 ```

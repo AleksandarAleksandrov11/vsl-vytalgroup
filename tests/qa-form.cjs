@@ -101,7 +101,8 @@ async function block(name, fn) {
     let calls = await fb(p);
     ok(calls.some((c) => c[0] === 'init' && c[1] === '1234567890') && calls.filter((c) => c[0] === 'track' && c[1] === 'PageView').length === 1, 'Tracking: init + PageView una vez');
     ok(!calls.some((c) => c[1] === 'ViewContent'), 'Tracking: sin ViewContent antes de ver los equipos');
-    await p.click('#tab-dia');
+    // Se cambia de pestaña sin desplazar la página: la sección aún no se ha visto
+    await p.evaluate(() => document.getElementById('tab-dia').click());
     await p.evaluate(() => document.querySelector('#equipos').scrollIntoView());
     await p.waitForTimeout(900);
     await p.evaluate(() => window.scrollTo(0, 0));

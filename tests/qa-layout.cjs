@@ -40,7 +40,7 @@ const PAGES = [['/', 'index'], ['/privacidad', 'privacidad'], ['/cookies', 'cook
         });
         const cut = [];
         document.querySelectorAll('h1,h2,h3,p,a,button,li,dd,dt,span,label').forEach((el) => {
-          if (!shown(el) || el.closest('.cards, .scan')) return;
+          if (!shown(el) || el.closest('.cards')) return;
           if (el.scrollWidth > el.clientWidth + 2 && el.clientWidth > 0 && getComputedStyle(el).overflowX !== 'visible') cut.push(`${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]}`);
         });
         // Palabras partidas o que se salen de su caja (texto más ancho que su contenedor)
@@ -58,7 +58,7 @@ const PAGES = [['/', 'index'], ['/privacidad', 'privacidad'], ['/cookies', 'cook
           }
         });
         // Botones, datos y cifras en una sola línea (sin partirse)
-        document.querySelectorAll('.btn, .seg__btn, .card__data dd, .why__list strong, .catalog__meta, .sel__btn, .lhd__back, .hd__logo').forEach((el) => {
+        document.querySelectorAll('.btn, .seg__btn, .card__data dd, .why__list strong, .catalog__meta, .reel__cap, .reel__who strong, .reel__who small, .sel__btn, .lhd__back, .hd__logo').forEach((el) => {
           if (!shown(el)) return;
           const tops = new Set();
           const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);

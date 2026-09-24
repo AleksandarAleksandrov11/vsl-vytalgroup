@@ -1,13 +1,14 @@
 // VytalGroup · landing
-// Cabecera y barra de progreso, entradas al hacer scroll (bloques, titulares por líneas e imágenes),
-// parallax y halo en escritorio, control segmentado, carrusel, categorías, conteo, comparador,
-// maqueta del catálogo, marquesinas, acordeón, barra fija en móvil, botones magnéticos,
-// carga diferida del formulario y eventos del píxel.
+// Cabecera y barra de progreso, tarjeta "Clientes" del hero (reel.js), entradas al hacer scroll
+// (bloques, titulares por líneas e imágenes), parallax y halo en escritorio, control segmentado,
+// carrusel, categorías, conteo, comparador, maqueta del catálogo, marquesina, acordeón, barra fija
+// en móvil, botones magnéticos, carga diferida del formulario y eventos del píxel.
 // Solo se animan transform, opacity y variables CSS. Con prefers-reduced-motion quedan los fundidos.
 
 import { captureAttribution } from './attribution.js';
 import { initConsent } from './consent.js';
 import { initTracking, viewContent, catalogDownload, contact } from './tracking.js';
+import { initReel } from './reel.js';
 
 const html = document.documentElement;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -55,6 +56,10 @@ window.addEventListener('scroll', () => {
   if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
 }, { passive: true });
 onScroll();
+
+// ------------------------------------------------------------------ tarjeta "Clientes" del hero
+const reelEl = $('[data-reel]');
+if (reelEl) initReel(reelEl, { reduced, tilt: fine && desktop.matches && !reduced });
 
 // ------------------------------------------------------------------ entradas al hacer scroll
 // Solo se preparan los elementos que están por debajo de la primera pantalla: nada parpadea.
@@ -289,7 +294,7 @@ if (book) {
   }
 }
 
-// ------------------------------------------------------------------ marquesinas: en pausa fuera de pantalla
+// ------------------------------------------------------------------ marquesina: en pausa fuera de pantalla
 if (hasIO) {
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => e.target.classList.toggle('is-paused', !e.isIntersecting));

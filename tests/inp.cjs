@@ -18,6 +18,8 @@ const { chromium } = require('playwright');
   await p.waitForTimeout(1500);
   const go = (sel) => p.evaluate((s) => document.querySelector(s).scrollIntoView({ block: 'center' }), sel);
   const steps = [
+    ['historia (siguiente)', () => p.tap('[data-reel-next]', { position: { x: 60, y: 120 } })],
+    ['historia (pausa)', () => p.tap('[data-reel-toggle]')],
     ['segmentado', async () => { await go('#equipos .seg'); await p.waitForTimeout(900); await p.tap('#tab-dia'); }],
     ['segmentado (vuelta)', () => p.tap('#tab-eco')],
     ['lo quiero', () => p.tap('[data-want="Acclarix LX9 (EDAN)"]')],

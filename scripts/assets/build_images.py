@@ -29,13 +29,15 @@ AVIF_Q, WEBP_Q = 60, 80
 CW, CH = 640, 480  # lienzo de producto (4:3)
 
 
-def save(im, name, widths, alpha=False):
+def save(im, name, widths, alpha=False, formats=('avif', 'webp')):
     im = im.convert('RGBA' if alpha else 'RGB')
     for w in widths:
         w = min(w, im.width)
         r = im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
-        r.save(os.path.join(OUT, f'{name}-{w}.avif'), quality=AVIF_Q, speed=4)
-        r.save(os.path.join(OUT, f'{name}-{w}.webp'), quality=WEBP_Q, method=6)
+        if 'avif' in formats:
+            r.save(os.path.join(OUT, f'{name}-{w}.avif'), quality=AVIF_Q, speed=4)
+        if 'webp' in formats:
+            r.save(os.path.join(OUT, f'{name}-{w}.webp'), quality=WEBP_Q, method=6)
     print(name, im.size, widths)
 
 
@@ -288,7 +290,8 @@ dark = Image.new('RGBA', hero.size, (11, 25, 41, 0))
 dark.putalpha(sh)
 hero = Image.alpha_composite(hero, dark)
 hero.alpha_composite(vytamed, (20, 20))
-save(hero, 'hero-vytamed', [400, 560, 760], alpha=True)
+# Desde la v4 el hero muestra material real de clientes (build_clientes.py): el recorte solo se usa en la imagen OG
+save(hero, 'hero-vytamed', [760], alpha=True, formats=('webp',))
 
 # ---------------------------------------------------------------- Javier
 # El recorte termina por encima del logo de terceros que lleva bordado el polo (y = 448)

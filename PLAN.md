@@ -73,3 +73,13 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - Lighthouse:
   - móvil: 99, 99 y 100 en rendimiento, y 100 en accesibilidad, buenas prácticas y SEO;
   - escritorio y páginas legales: 100 en todo.
+
+## 5. v4: hero con material real de clientes (sin testimonios)
+- [x] Descargar y revisar el material: 7 fotos (una repetida) y un vídeo de 14 s. Se descartan las capturas de WhatsApp e Instagram por los datos personales que muestran.
+- [x] Quitar la sección de testimonios: HTML, CSS, pruebas, aviso de compilación y README.
+- [x] Hero limpio: sin recorte, rejilla de puntos ni barrido. Tarjeta "Clientes" en formato historia con el vídeo y 2 fotos.
+- [x] Vídeo: bucle sin saltos, 4:5, WebM + MP4 sin audio, pedido después de `load`, nunca con ahorro de datos. Foto de la misma sesión como LCP.
+- [x] Pausa (WCAG 2.2.2), pausa fuera de pantalla, anterior y siguiente, y movimiento reducido.
+- [x] Pruebas nuevas (UI 90/90, formulario 89/89, diseño 17/17) y capturas revisadas en todos los anchos, horizontal incluido.
+- [x] Lighthouse 100 en todo (móvil y escritorio), HTML válido, INP 120 ms.
+- [ ] Pendiente del cliente: permiso de imagen de las personas que aparecen.

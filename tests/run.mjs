@@ -4,7 +4,8 @@
 //                (Apps Script simulado), UTM, antispam, consentimiento y eventos del píxel
 //                (Meta simulado, sin salir a internet).
 //  · qa-ui     → estructura (secciones, palabras, un CTA por sección), cabecera, barra de progreso,
-//                línea de confianza, segmentado, carrusel, más equipos, comparador, testimonios,
+//                tarjeta "Clientes" del hero (vídeo, pausa, avance, ahorro de datos), línea de
+//                confianza, segmentado, carrusel, más equipos, comparador,
 //                catálogo, acordeón, conteo, barra móvil, fuentes, teclado, movimiento reducido,
 //                CSP, caché y metadatos.
 //  · qa-layout → capturas de página completa en todos los anchos y comprobación por código de

@@ -49,12 +49,12 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       nav: document.querySelectorAll('nav').length,
       ids: [...document.querySelectorAll('main > section')].map((x) => x.id),
     }));
-    ok(s.ids.join(',') === 'inicio,equipos,mas-equipos,por-que,testimonios,catalogo,dudas,asesoramiento' && s.footers === 1, 'Estructura: las 7 secciones del brief más testimonios (petición del cliente) y el footer', s.ids.join(', '));
+    ok(s.ids.join(',') === 'inicio,equipos,mas-equipos,por-que,catalogo,dudas,asesoramiento' && s.footers === 1, 'Estructura: las 7 secciones del brief (sin testimonios) y el footer', s.ids.join(', '));
     ok(s.nav === 0, 'Minimalismo: sin menú de navegación');
     // Palabras visibles del contenido: sin cabecera, footer, respuestas del acordeón, formulario ni la línea de confianza
     const words = await p.evaluate(() => {
       // Las descripciones de Más equipos (al pasar o tocar) cuentan como las respuestas del acordeón
-      const skip = '.acc__panel, .cat__desc, #qf, .sr-only, .skip, .sprite, #cookie-banner, #cookie-panel, [data-mbar], script, style, [aria-hidden="true"], .tsts__rail';
+      const skip = '.acc__panel, .cat__desc, #qf, .sr-only, .skip, .sprite, #cookie-banner, #cookie-panel, [data-mbar], script, style, [aria-hidden="true"]';
       const out = { main: 0, ticker: 0, chrome: 0 };
       const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       while (w.nextNode()) {
@@ -69,7 +69,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(words.main <= 260, 'Minimalismo: unas 250 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
     // Un CTA por sección con el mismo texto; el catálogo es la única excepción
     const perSec = await p.$$eval('main > section:not(#asesoramiento)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
-    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento', 'por-que:Quiero asesoramiento', 'testimonios:Quiero asesoramiento', 'catalogo:Descargar catálogo', 'dudas:Quiero asesoramiento'];
+    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento', 'por-que:Quiero asesoramiento', 'catalogo:Descargar catálogo', 'dudas:Quiero asesoramiento'];
     ok(perSec.join('|') === want.join('|'), 'CTA: uno por sección, "Quiero asesoramiento" en todas y "Descargar catálogo" en el catálogo', perSec.join(' | '));
     const cta = await p.$$eval('[data-cta]', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
     ok(cta.length === 1 && cta[0] === 'Quiero asesoramiento', 'CTA: texto de asesoramiento idéntico en todas partes (cabecera, secciones y barra móvil)', cta.join(' | '));
@@ -78,7 +78,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const perCard = await p.$$eval('.card', (els) => els.map((c) => c.querySelectorAll('a, button').length));
     ok(perCard.length === 6 && perCard.every((n) => n === 1), 'Lo más pedido: 6 tarjetas (3 por categoría) con un solo botón', perCard.join(','));
     const html = await p.content();
-    const gone = ['Ver ficha', 'También te equipamos', 'Cómo trabajamos', 'wa-float', 'Me interesa', 'Habla con Javier', 'No sé cuál elegir', 'ISO 13485', 'FDA', 'veterinari'].filter((x) => html.includes(x));
+    const gone = ['Ver ficha', 'También te equipamos', 'Cómo trabajamos', 'wa-float', 'Testimonio de ejemplo', 'tsts', 'data-ejemplo', 'Me interesa', 'Habla con Javier', 'No sé cuál elegir', 'ISO 13485', 'FDA', 'veterinari'].filter((x) => html.includes(x));
     ok(!gone.length, 'Contenido: nada de lo eliminado ni prohibido (ISO, FDA, veterinaria)', gone.join(', '));
     const qs = await p.$$eval('.acc__btn', (els) => els.map((e) => e.textContent.trim()));
     ok(qs.length === 5 && qs.includes('¿Solo vendéis ecógrafos y diatermias?'), 'Dudas: 5 preguntas, con "¿Solo vendéis ecógrafos y diatermias?"', qs.join(' · '));
@@ -258,22 +258,64 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await ctx.close();
   });
 
-  await block('Testimonios', async () => {
-    const { ctx, p } = await page(b, {});
+  await block('Hero: tarjeta Clientes', async () => {
+    const { ctx, p, logs } = await page(b, {});
+    const media = [];
+    let loaded = 0;
+    p.on('request', (r) => { if (/\.(mp4|webm)$/.test(r.url())) media.push({ url: r.url().split('/').pop(), afterLoad: loaded > 0 }); });
+    p.on('load', () => { loaded = Date.now(); });
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
-    await scrollToSel(p, '#testimonios'); await p.waitForTimeout(700);
-    const r = await p.evaluate(() => {
-      const lists = document.querySelectorAll('.tsts__list');
-      const items = [...lists[0].querySelectorAll('.tst')];
-      const tr = document.querySelector('.tsts__track');
-      return { n: items.length, dup: lists[1].getAttribute('aria-hidden'), marked: items.every((t) => t.querySelector('figcaption small')?.textContent.trim() === 'Testimonio de ejemplo'), anyMark: items.some((t) => /de ejemplo/i.test(t.textContent)), flag: document.querySelector('#testimonios').hasAttribute('data-ejemplo'), anim: getComputedStyle(tr).animationName, dir: getComputedStyle(tr).animationDirection, paused: document.querySelector('.tsts__rail').classList.contains('is-paused') };
+    const first = await p.evaluate(() => {
+      const img = document.querySelector('.reel__card .reel__img');
+      const pre = document.querySelector('link[rel="preload"][as="image"]');
+      return { cards: document.querySelectorAll('.reel__card').length, alt: img.alt, prio: img.getAttribute('fetchpriority'), preload: !!pre && /cliente-diatermia/.test(pre.getAttribute('imagesrcset')), caps: [...document.querySelectorAll('.reel__cap')].map((c) => c.textContent.trim()), head: document.querySelector('.reel__head').textContent.trim().replace(/\s+/g, ' ') };
     });
-    ok(r.n === 8 && r.dup === 'true' && r.anim === 'marquee' && r.dir === 'normal' && !r.paused, 'Testimonios: 8 en bucle infinito hacia la izquierda', JSON.stringify(r));
-    // Con testimonios de ejemplo (data-ejemplo en la sección) cada uno debe indicarlo; con los reales, ninguno
-    ok(r.flag ? r.marked : !r.anyMark, 'Testimonios: los de ejemplo llevan "Testimonio de ejemplo" hasta tener los reales', r.flag ? 'de ejemplo' : 'reales');
-    await scrollTo(p, 0); await p.waitForTimeout(500);
-    ok(await p.evaluate(() => document.querySelector('.tsts__rail').classList.contains('is-paused')), 'Testimonios: la marquesina se pausa fuera de pantalla');
+    ok(first.cards === 3 && first.alt && first.prio === 'high' && first.preload, 'Hero: tarjeta "Clientes" con 3 fotos reales y la primera precargada (LCP)', first.caps.join(' · '));
+    await p.waitForFunction(() => document.querySelector('.reel__card').classList.contains('is-playing'), null, { timeout: 12000 });
+    const v = await p.evaluate(() => { const x = document.querySelector('.reel__video'); return { muted: x.muted, inline: x.playsInline, paused: x.paused, t: x.currentTime, src: x.currentSrc.split('/').pop(), hidden: x.getAttribute('aria-hidden'), bar: parseFloat(document.querySelector('.reel__bars i').style.getPropertyValue('--t')) }; });
+    ok(v.muted && v.inline && !v.paused && v.hidden === 'true' && /^cliente-diatermia\.[a-f0-9]{8}\.webm$/.test(v.src), 'Hero: el vídeo real se reproduce en silencio dentro de la tarjeta (WebM con hash)', JSON.stringify(v));
+    ok(media.length >= 1 && media.every((m) => m.afterLoad), 'Hero: el vídeo se pide después del evento load (no retrasa la carga)', media.map((m) => m.url).join(', '));
+    await p.waitForTimeout(600);
+    const bar = await p.evaluate(() => parseFloat(document.querySelector('.reel__bars i').style.getPropertyValue('--t')));
+    ok(bar > v.bar, 'Hero: la barra de la historia avanza con el vídeo', `${v.bar.toFixed(3)} → ${bar.toFixed(3)}`);
+    // Pausa (WCAG 2.2.2)
+    await p.click('[data-reel-toggle]');
+    await p.waitForTimeout(300);
+    const pz = await p.evaluate(() => ({ label: document.querySelector('[data-reel-toggle]').getAttribute('aria-label'), paused: document.querySelector('.reel__video').paused, cls: document.querySelector('[data-reel]').classList.contains('is-paused'), t: document.querySelector('.reel__bars i').style.getPropertyValue('--t') }));
+    await p.waitForTimeout(700);
+    const t2 = await p.evaluate(() => document.querySelector('.reel__bars i').style.getPropertyValue('--t'));
+    ok(pz.label === 'Reproducir' && pz.paused && pz.cls && pz.t === t2, 'Hero: el botón pausa el vídeo y la historia', JSON.stringify(pz));
+    await p.click('[data-reel-toggle]');
+    await p.waitForTimeout(300);
+    ok(await p.evaluate(() => document.querySelector('[data-reel-toggle]').getAttribute('aria-label') === 'Pausar' && !document.querySelector('.reel__video').paused), 'Hero: y la reanuda');
+    // Pasar tocando los lados
+    await p.mouse.move(5, 5);
+    await p.evaluate(() => document.querySelector('[data-reel-next]').click());
+    await p.waitForTimeout(900);
+    const n1 = await p.evaluate(() => ({ front: [...document.querySelectorAll('.reel__card')].findIndex((c) => c.classList.contains('is-front')), ps: [...document.querySelectorAll('.reel__card')].map((c) => c.style.getPropertyValue('--p')).join(','), vpaused: document.querySelector('.reel__video').paused, bars: [...document.querySelectorAll('.reel__bars i')].map((i) => Number(i.style.getPropertyValue('--t')) > 0.999 ? 1 : 0).join(',') }));
+    ok(n1.front === 1 && n1.ps === '2,0,1' && n1.vpaused && n1.bars.startsWith('1,0'), 'Hero: "Siguiente" pasa a la segunda tarjeta y pausa el vídeo', JSON.stringify(n1));
+    await p.evaluate(() => document.querySelector('[data-reel-prev]').click());
+    await p.waitForTimeout(900);
+    const n0 = await p.evaluate(() => ({ front: [...document.querySelectorAll('.reel__card')].findIndex((c) => c.classList.contains('is-front')), vpaused: document.querySelector('.reel__video').paused }));
+    ok(n0.front === 0 && !n0.vpaused, 'Hero: "Anterior" vuelve al vídeo y lo reanuda', JSON.stringify(n0));
+    // Avance automático de las fotos (5 s)
+    await p.evaluate(() => document.querySelector('[data-reel-next]').click());
+    await p.waitForTimeout(5800);
+    ok(await p.evaluate(() => document.querySelectorAll('.reel__card')[2].classList.contains('is-front')), 'Hero: las fotos avanzan solas cada 5 s');
+    // Fuera de pantalla se pausa
+    await scrollToSel(p, '#por-que'); await p.waitForTimeout(500);
+    ok(await p.evaluate(() => document.querySelector('[data-reel]').classList.contains('is-paused')), 'Hero: la historia se pausa fuera de pantalla');
+    ok(!logs.length, 'Hero: consola limpia', logs.join(' / '));
     await ctx.close();
+    // Ahorro de datos: no se descarga el vídeo
+    const { ctx: c2, p: p2 } = await page(b, { width: 390, height: 844, mobile: true });
+    await c2.addInitScript(() => { Object.defineProperty(navigator, 'connection', { configurable: true, value: { saveData: true, effectiveType: '4g' } }); });
+    const media2 = [];
+    p2.on('request', (r) => { if (/\.(mp4|webm)$/.test(r.url())) media2.push(r.url()); });
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p2.waitForTimeout(3500);
+    ok(!media2.length && await p2.evaluate(() => !document.querySelector('.reel__video').getAttribute('src')), 'Hero: con ahorro de datos no se descarga el vídeo (se ve la foto)');
+    await c2.close();
   });
 
   await block('Catálogo', async () => {
@@ -332,24 +374,26 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await p.waitForTimeout(300);
     const r = await p.evaluate(() => ({
       word: getComputedStyle(document.querySelector('.h1 .w > span')).transform,
-      fan: getComputedStyle(document.querySelector('.scan__fan')).animationName,
+      deal: getComputedStyle(document.querySelector('.reel__card')).animationName,
       rv: document.querySelectorAll('.rv').length,
       smooth: getComputedStyle(document.documentElement).scrollBehavior,
-      marquee: [...document.querySelectorAll('.ticker__track, .tsts__track')].map((t) => getComputedStyle(t).animationName).join(','),
-      dups: [...document.querySelectorAll('.ticker__list[aria-hidden], .tsts__list[aria-hidden]')].every((l) => getComputedStyle(l).display === 'none'),
+      marquee: [...document.querySelectorAll('.ticker__track')].map((t) => getComputedStyle(t).animationName).join(','),
+      dups: [...document.querySelectorAll('.ticker__list[aria-hidden]')].every((l) => getComputedStyle(l).display === 'none'),
+      reel: { paused: document.querySelector('[data-reel]').classList.contains('is-paused'), label: document.querySelector('[data-reel-toggle]').getAttribute('aria-label'), src: document.querySelector('.reel__video').getAttribute('src') },
       split: document.querySelectorAll('[data-lines].is-split, .rvi, .cmp.is-armed').length,
       count: [...document.querySelectorAll('[data-count]')].map((e) => e.textContent).join(','),
     }));
-    ok(r.word === 'none' && r.fan === 'none' && r.rv === 0 && r.split === 0 && r.smooth === 'auto', 'Movimiento reducido: sin animaciones de entrada ni desplazamiento suave', JSON.stringify(r));
-    ok(r.marquee === 'none,none' && r.dups && r.count === '2,0,1', 'Movimiento reducido: marquesinas quietas (sin copias) y cifras finales sin conteo', `${r.marquee} · ${r.count}`);
+    ok(r.word === 'none' && r.deal === 'none' && r.rv === 0 && r.split === 0 && r.smooth === 'auto', 'Movimiento reducido: sin animaciones de entrada ni desplazamiento suave', JSON.stringify(r));
+    ok(r.marquee === 'none' && r.dups && r.count === '2,0,1', 'Movimiento reducido: línea de confianza quieta (sin copia) y cifras finales sin conteo', `${r.marquee} · ${r.count}`);
+    ok(r.reel.paused && r.reel.label === 'Reproducir' && !r.reel.src, 'Movimiento reducido: la tarjeta Clientes empieza en pausa y sin vídeo (se puede reproducir con el botón)', JSON.stringify(r.reel));
     await scrollToSel(p, '#catalogo'); await p.waitForTimeout(400);
     await p.mouse.move(700, 400, { steps: 3 }); await p.waitForTimeout(300);
     const st = await p.evaluate(() => ({ open: document.querySelector('[data-book]').classList.contains('is-open'), tilt: document.querySelector('.book__stack').style.getPropertyValue('--ry'), py: [...document.querySelectorAll('[data-parallax]')].some((i) => i.style.getPropertyValue('--py')), tr: getComputedStyle(document.querySelector('.book__cover')).transitionProperty }));
     ok(st.open && !st.tilt && !st.py && !/transform/.test(st.tr), 'Movimiento reducido: maqueta ya abierta, sin inclinación ni parallax', JSON.stringify(st));
     const { ctx: c2, p: p2 } = await page(b, {});
     await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
-    const anim = await p2.evaluate(() => ({ fan: getComputedStyle(document.querySelector('.scan__fan')).animationName, word: getComputedStyle(document.querySelector('.h1 .w > span')).animationName, rv: document.querySelectorAll('.rv').length, lines: document.querySelectorAll('[data-lines].is-split').length, rvi: document.querySelectorAll('.rvi').length }));
-    ok(anim.fan === 'sweep' && anim.word === 'word-up' && anim.rv > 5 && anim.lines >= 6 && anim.rvi >= 6, 'Animaciones: barrido de ecografía, titular por palabras, titulares por líneas y entradas al hacer scroll', JSON.stringify(anim));
+    const anim = await p2.evaluate(() => ({ deal: getComputedStyle(document.querySelector('.reel__card')).animationName, kb: getComputedStyle(document.querySelector('.reel__card.is-front .reel__img')).animationName, word: getComputedStyle(document.querySelector('.h1 .w > span')).animationName, rv: document.querySelectorAll('.rv').length, lines: document.querySelectorAll('[data-lines].is-split').length, rvi: document.querySelectorAll('.rvi').length }));
+    ok(anim.deal === 'deal' && anim.kb === 'kenburns' && anim.word === 'word-up' && anim.rv > 5 && anim.lines >= 6 && anim.rvi >= 6, 'Animaciones: baraja de clientes que se reparte, zoom lento de la foto, titular por palabras, titulares por líneas y entradas al hacer scroll', JSON.stringify(anim));
     await scrollToSel(p2, '.why__photo', 100); await p2.waitForTimeout(400);
     const w = await p2.evaluate(() => ({ py: document.querySelector('.why__photo img').style.getPropertyValue('--py'), lines: new Set([...document.querySelectorAll('#por-que [data-lines] .w')].map((x) => x.style.getPropertyValue('--i'))).size, magnetic: document.querySelectorAll('[data-magnetic]').length }));
     ok(w.py && w.py !== '0.0px' && w.lines >= 1 && w.magnetic >= 6, 'Animaciones: parallax leve en escritorio y botones magnéticos', JSON.stringify(w));
