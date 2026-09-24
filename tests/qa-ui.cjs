@@ -1,255 +1,309 @@
-// QA de componentes de interfaz contra dist/ (8081)
+// QA de interfaz y de las reglas del brief contra dist/ servido con las cabeceras de vercel.json.
 const { chromium } = require('playwright');
-const BASE = process.env.BASE || 'http://localhost:' + (process.env.PORT || 8081);
-const results = [];
-const ok = (c, n, x = '') => results.push(`${c ? 'PASS' : 'FAIL'}  ${n}${x ? `  · ${x}` : ''}`);
-const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-async function open(b, { width, height, mobile, consent = true, intro = false, reduced = false, init = null }) {
-  const ctx = await b.newContext({ viewport: { width, height }, isMobile: mobile, hasTouch: mobile, reducedMotion: reduced ? 'reduce' : 'no-preference' });
-  await ctx.addInitScript(({ consent, intro }) => {
-    try {
-      if (!intro) sessionStorage.setItem('vg_intro', '1');
-      if (consent) localStorage.setItem('vg_consent', JSON.stringify({ v: 1, date: new Date().toISOString(), necessary: true, analytics: false, marketing: false }));
-    } catch (e) {}
-  }, { consent, intro });
-  if (init) await ctx.addInitScript(init);
-  await ctx.route(/wa\.me|facebook/, (r) => r.fulfill({ body: '' }));
-  const p = await ctx.newPage();
-  const errors = [];
-  p.on('pageerror', (e) => errors.push(e.message));
-  p.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-  const reqs = [];
-  p.on('request', (r) => reqs.push(r.url()));
-  await p.goto(BASE + '/', { waitUntil: 'networkidle' });
-  return { ctx, p, errors, reqs };
+const BASE = process.env.BASE || `http://localhost:${process.env.PORT || 8081}`;
+const SITE_URL = 'https://vsl-vytalgroup.vercel.app';
+const results = [];
+const ok = (cond, name, extra = '') => results.push(`${cond ? 'PASS' : 'FAIL'}  ${name}${extra ? `  · ${extra}` : ''}`);
+async function block(name, fn) {
+  try { await fn(); } catch (err) { ok(false, `${name}: error en la prueba`, String(err.message).split('\n')[0]); }
 }
+const get = (p) => new Promise((resolve, reject) => {
+  http.get(BASE + p, (res) => {
+    const chunks = [];
+    res.on('data', (c) => chunks.push(c));
+    res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) }));
+  }).on('error', reject);
+});
+const CONSENT = (marketing) => ({ v: 2, date: new Date().toISOString(), necessary: true, marketing });
+
+async function page(b, { width = 1440, height = 900, mobile = false, reduced = false, consent = false, pixel = '' } = {}) {
+  const ctx = await b.newContext({ viewport: { width, height }, isMobile: mobile, hasTouch: mobile, reducedMotion: reduced ? 'reduce' : 'no-preference' });
+  await ctx.addInitScript((c) => { try { if (c) localStorage.setItem('vg_consent', JSON.stringify(c)); } catch (e) { /* */ } }, consent === null ? null : CONSENT(consent));
+  if (pixel) {
+    await ctx.route('**/config.js', (r) => r.fulfill({ contentType: 'text/javascript', body: `window.VG_CONFIG={SHEETS_ENDPOINT:"",META_PIXEL_ID:"${pixel}"};` }));
+    await ctx.route(/facebook\.(net|com)/, (r) => r.fulfill({ contentType: 'text/javascript', body: 'window.__fbok=1;' }));
+  }
+  const p = await ctx.newPage();
+  const logs = [];
+  p.on('console', (m) => { if (['error', 'warning'].includes(m.type())) logs.push(`${m.type()}: ${m.text()}`); });
+  p.on('pageerror', (e) => logs.push(`pageerror: ${e.message}`));
+  return { ctx, p, logs };
+}
+const scrollTo = (p, y) => p.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), y);
+const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = document.querySelector(s); window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - off, behavior: 'instant' }); }, [s, off]);
 
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME_PATH || undefined });
 
-  // ------------------------------------------------ Móvil 390
-  {
-    const { ctx, p, errors, reqs } = await open(b, { width: 390, height: 844, mobile: true });
-    // CTA bar oculta arriba
-    ok(!(await p.evaluate(() => document.getElementById('ctabar').classList.contains('is-visible'))), 'Móvil: barra CTA oculta sobre el hero');
-    // Menú
-    await p.click('.burger');
-    await wait(500);
-    const menuState = await p.evaluate(() => ({ open: document.getElementById('menu').classList.contains('is-open'), lock: getComputedStyle(document.documentElement).overflow, exp: document.querySelector('.burger').getAttribute('aria-expanded'), focus: document.activeElement.className }));
-    ok(menuState.open && menuState.lock === 'hidden' && menuState.exp === 'true', 'Móvil: menú abre y bloquea el scroll', JSON.stringify(menuState));
-    ok(!(await p.evaluate(() => document.getElementById('ctabar').classList.contains('is-visible'))), 'Móvil: barra CTA oculta con el menú abierto');
-    await p.keyboard.press('Escape');
-    await wait(500);
-    ok(await p.evaluate(() => document.getElementById('menu').hidden && document.activeElement.classList.contains('burger')), 'Móvil: Escape cierra el menú y devuelve el foco');
-    await p.click('.burger');
-    await wait(500);
-    await p.click('.menu__link[href="#diatermias"]');
-    await wait(1500);
-    const afterNav = await p.evaluate(() => { const h = document.getElementById('header').getBoundingClientRect(); const t = document.getElementById('dia-title').getBoundingClientRect(); return { menuHidden: document.getElementById('menu').hidden, headerBottom: h.bottom, headerHidden: document.getElementById('header').classList.contains('is-hidden'), titleTop: t.top, sectionTop: document.getElementById('diatermias').getBoundingClientRect().top }; });
-    ok(afterNav.menuHidden && Math.abs(afterNav.sectionTop - 72) < 12, 'Móvil: enlace del menú lleva a su sección y cierra', JSON.stringify(afterNav));
-    ok(afterNav.titleTop > afterNav.headerBottom || afterNav.headerHidden, 'Móvil: la cabecera no tapa el título de la sección');
-    // CTA bar visible tras el hero
-    await wait(400);
-    ok(await p.evaluate(() => document.getElementById('ctabar').classList.contains('is-visible')), 'Móvil: barra CTA visible pasado el hero');
-    // Cabecera se oculta al bajar deprisa y reaparece al subir
-    await p.evaluate(() => window.scrollBy(0, 30));
-    await wait(80);
-    await p.mouse.wheel(0, 900);
-    await wait(400);
-    const hid = await p.evaluate(() => document.getElementById('header').classList.contains('is-hidden'));
-    await p.mouse.wheel(0, -300);
-    await wait(400);
-    const shown = await p.evaluate(() => !document.getElementById('header').classList.contains('is-hidden'));
-    ok(hid && shown, 'Móvil: cabecera se oculta al bajar y reaparece al subir', `${hid}/${shown}`);
-    // Barra oculta con el formulario en pantalla (usando el propio CTA de la barra)
-    await p.click('#ctabar .ctabar__main');
-    await wait(2600);
-    const land = await p.evaluate(() => { const r = document.querySelector('#asesoramiento .fcard').getBoundingClientRect(); return { top: Math.round(r.top), header: document.getElementById('header').offsetHeight }; });
-    ok(Math.abs(land.top - (land.header + 12)) <= 4, 'Móvil: el CTA lleva exactamente a la tarjeta del formulario', JSON.stringify(land));
-    ok(!(await p.evaluate(() => document.getElementById('ctabar').classList.contains('is-visible'))), 'Móvil: barra CTA oculta con el formulario visible');
-    // Barra no tapa el final de la página
-    await p.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    await wait(700);
-    const end = await p.evaluate(() => { const bar = document.getElementById('ctabar'); const vis = bar.classList.contains('is-visible'); const last = document.querySelector('.footer__legal p').getBoundingClientRect(); return { vis, lastBottom: last.bottom, barTop: vis ? bar.getBoundingClientRect().top : innerHeight }; });
-    ok(end.lastBottom <= end.barTop, 'Móvil: la barra CTA no tapa el contenido final', JSON.stringify(end));
-    // Carrusel con indicadores
-    await p.evaluate(() => document.getElementById('ecografos').scrollIntoView());
-    await wait(500);
-    await p.click('#ecografos .carousel__dot:nth-child(3)');
-    await wait(900);
-    const car = await p.evaluate(() => { const t = document.querySelector('#ecografos .carousel__track'); const cur = [...document.querySelectorAll('#ecografos .carousel__dot')].findIndex((d) => d.getAttribute('aria-current') === 'true'); return { left: Math.round(t.scrollLeft), item: t.children[2].offsetLeft, cur }; });
-    ok(car.cur === 2 && car.left > 0, 'Móvil: indicadores del carrusel', JSON.stringify(car));
-    // Ficha
-    await p.evaluate(() => { const t = document.querySelector('#ecografos .carousel__track'); t.scrollLeft = 0; });
-    await wait(500);
-    await p.click('#ecografos [aria-controls="ficha-ecow"]');
-    await wait(700);
-    const f = await p.evaluate(() => { const el = document.getElementById('ficha-ecow'); const r = el.getBoundingClientRect(); const c = el.closest('.pcard').getBoundingClientRect(); return { open: el.classList.contains('is-open'), inside: r.top >= c.top - 1 && r.bottom <= c.bottom + 1, focus: document.activeElement.className, cta: !!el.querySelector('.ficha__foot [data-interest]') }; });
-    ok(f.open && f.inside && f.focus.includes('ficha__close') && f.cta, 'Móvil: "Ver ficha" abre el panel dentro de la tarjeta', JSON.stringify(f));
-    await p.keyboard.press('Escape');
-    await wait(700);
-    ok(await p.evaluate(() => document.getElementById('ficha-ecow').hidden), 'Móvil: Escape cierra la ficha');
-    // Hoja inferior dentro de pantalla y cierre con fondo
-    await p.evaluate(() => document.querySelector('#asesoramiento .fcard').scrollIntoView({ block: 'center' }));
-    await wait(800);
-    await p.click('label.opt:has(input[value="Ecógrafo"])');
-    await p.click('[data-next]');
-    await wait(600);
-    await p.click('.qstep[data-step="2"] .dd__trigger');
-    await wait(600);
-    const sh = await p.evaluate(() => { const el = document.querySelector('.dd__panel.is-sheet'); const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, lock: document.documentElement.classList.contains('dd-lock') }; });
-    ok(sh.top >= 0 && sh.bottom <= 845 && sh.lock, 'Móvil: dropdown como hoja inferior con scroll bloqueado', JSON.stringify(sh));
-    await p.mouse.click(195, 60);
-    await wait(700);
-    ok(await p.evaluate(() => !document.querySelector('.dd__panel.is-sheet') && !document.documentElement.classList.contains('dd-lock')), 'Móvil: pulsar fuera cierra la hoja');
-    ok(errors.length === 0, 'Móvil: sin errores en consola', errors.join(' / '));
-    ok(!reqs.some((u) => /diatermia-loop|diatermia-demo/.test(u)) || true, 'Móvil: control de vídeos (ver prueba de escritorio)');
+  // ------------------------------------------------------------ minimalismo
+  await block('Minimalismo', async () => {
+    const { ctx, p, logs } = await page(b, {});
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const s = await p.evaluate(() => ({
+      sections: document.querySelectorAll('main > section').length,
+      footers: document.querySelectorAll('body > footer').length,
+      nav: document.querySelectorAll('nav').length,
+      ids: [...document.querySelectorAll('main > section')].map((x) => x.id),
+    }));
+    ok(s.sections === 5 && s.footers === 1, 'Minimalismo: 5 secciones más el footer', s.ids.join(', '));
+    ok(s.nav === 0, 'Minimalismo: sin menú de navegación');
+    const words = await p.evaluate(() => {
+      const skip = '.acc__panel, #qf, .sr-only, .skip, .sprite, #cookie-banner, #cookie-panel, [data-mbar], script, style';
+      const out = [];
+      const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      while (w.nextNode()) {
+        const el = w.currentNode.parentElement;
+        if (!el || el.closest(skip)) continue;
+        if (!el.checkVisibility({ visibilityProperty: true })) continue;
+        out.push(...w.currentNode.textContent.split(/\s+/).filter((t) => /[\p{L}\p{N}]/u.test(t)));
+      }
+      return out;
+    });
+    ok(words.length < 180, 'Minimalismo: menos de 180 palabras visibles (sin acordeón ni formulario)', `${words.length} palabras`);
+    const cta = await p.$$eval('[data-cta]', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
+    const toForm = await p.$$eval('a[href="#asesoramiento"]:not([data-want])', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
+    ok(cta.length === 1 && cta[0] === 'Quiero asesoramiento' && toForm.length === 1, 'Minimalismo: un único texto de CTA', `${cta.join(' | ')} (tarjetas: "Lo quiero", según el brief)`);
+    const badges = await p.evaluate(() => [...document.querySelectorAll('[class]')].map((e) => String(e.className.baseVal ?? e.className)).filter((c) => /badge|chip|tag\b|pill|label--|ribbon/.test(c)));
+    ok(!badges.length, 'Minimalismo: sin badges, chips ni etiquetas', badges.join(', '));
+    const perCard = await p.$$eval('.card', (els) => els.map((c) => c.querySelectorAll('a, button').length));
+    ok(perCard.length === 6 && perCard.every((n) => n === 1), 'Minimalismo: 6 tarjetas (3 por categoría) con un solo botón', perCard.join(','));
+    const html = await p.content();
+    const gone = ['Ver ficha', 'Physio Invasiva', 'También te equipamos', 'Cómo trabajamos', '<table', 'wa-float', 'Me interesa', 'Habla con Javier', 'No sé cuál elegir'].filter((x) => html.includes(x));
+    ok(!gone.length, 'Minimalismo: nada de lo eliminado vuelve a aparecer', gone.join(', '));
+    ok((await p.$$('.acc__item')).length === 5, 'Dudas: 5 preguntas');
+    ok(!logs.length, 'Consola limpia (inicio)', logs.join(' / '));
     await ctx.close();
-  }
+  });
 
-  // ------------------------------------------------ Escritorio 1440
-  {
-    const { ctx, p, errors, reqs } = await open(b, { width: 1440, height: 900, mobile: false });
-    ok(!reqs.some((u) => /\.(mp4|webm)/.test(u)), 'Escritorio: ningún vídeo se descarga al cargar');
-    ok(await p.evaluate(() => getComputedStyle(document.getElementById('ctabar')).display === 'none'), 'Escritorio: sin barra CTA móvil');
-    await p.evaluate(() => window.scrollTo(0, 60));
-    await wait(400);
-    ok(await p.evaluate(() => document.getElementById('header').classList.contains('is-scrolled')), 'Escritorio: cabecera con fondo al hacer scroll');
-    await p.click('.nav__link[href="#preguntas"]');
-    await wait(2600);
-    const faqTop = await p.evaluate(() => Math.round(document.getElementById('preguntas').getBoundingClientRect().top));
-    ok(Math.abs(faqTop - 84) <= 4, 'Escritorio: el ancla lejana (#preguntas) aterriza en su sitio', String(faqTop));
-    await p.click('.nav__link[href="#diatermias"]');
-    await wait(2200);
-    const spy = await p.evaluate(() => ({ active: document.querySelector('.nav__link.is-active')?.textContent, headerBottom: document.getElementById('header').getBoundingClientRect().bottom, eyebrowTop: document.querySelector('#diatermias .eyebrow').getBoundingClientRect().top }));
-    ok(spy.active === 'Diatermias', 'Escritorio: scrollspy marca la sección activa', spy.active);
-    ok(spy.eyebrowTop > spy.headerBottom, 'Escritorio: la cabecera no tapa el ancla', JSON.stringify(spy));
-    await wait(1200);
-    ok((await p.evaluate(() => performance.getEntriesByType('resource').map((r) => r.name))).some((u) => /diatermia-loop/.test(u)), 'Escritorio: el vídeo en bucle se carga al entrar en pantalla');
-    ok(await p.evaluate(() => { const v = document.querySelector('.demo__video'); return !v.paused && v.muted && v.loop && v.playsInline; }), 'Escritorio: vídeo muted, loop, playsinline y reproduciéndose');
-    ok(await p.evaluate(() => document.querySelector('.wa-float').classList.contains('is-visible')), 'Escritorio: botón flotante de WhatsApp visible pasado el hero');
-    // Diálogo de vídeo
-    await p.click('[data-video-open]');
-    await wait(900);
-    ok(await p.evaluate(() => document.getElementById('video-dialog').open), 'Escritorio: se abre el vídeo de demostración');
-    await p.keyboard.press('Escape');
-    await wait(400);
-    ok(await p.evaluate(() => !document.getElementById('video-dialog').open && document.querySelector('.vdialog__video').paused), 'Escritorio: Escape cierra y pausa el vídeo');
-    // Gama completa y filtros
-    await p.evaluate(() => document.querySelector('.range').scrollIntoView({ block: 'center' }));
-    await wait(400);
-    await p.click('.range__toggle');
-    await wait(700);
-    const counts = {};
-    for (const f of ['carro', 'portatil', 'inalambrico', 'all']) {
-      await p.click(`.chip[data-filter="${f}"]`);
-      await wait(300);
-      counts[f] = await p.$$eval('.ritem', (els) => els.filter((e) => !e.hidden && e.offsetParent).length);
-    }
-    ok(counts.carro === 5 && counts.portatil === 4 && counts.inalambrico === 1 && counts.all === 10, 'Escritorio: chips de filtro de la gama', JSON.stringify(counts));
-    ok(await p.evaluate(() => document.querySelector('.chip[data-filter="all"]').getAttribute('aria-pressed') === 'true'), 'Escritorio: chips con aria-pressed');
-    // Acordeón
-    await p.evaluate(() => document.getElementById('preguntas').scrollIntoView());
-    await wait(500);
-    await p.click('#faq-3-b');
-    await wait(700);
-    const acc = await p.evaluate(() => ({ exp: document.getElementById('faq-3-b').getAttribute('aria-expanded'), h: document.getElementById('faq-3').getBoundingClientRect().height }));
-    ok(acc.exp === 'true' && acc.h > 30, 'Escritorio: acordeón abre', JSON.stringify(acc));
-    await p.click('#faq-3-b');
-    await wait(700);
-    ok(await p.evaluate(() => document.getElementById('faq-3').getBoundingClientRect().height < 2), 'Escritorio: acordeón cierra');
-    // Dropdown: clic fuera, Escape, apertura hacia arriba
-    await p.evaluate(() => document.querySelector('#asesoramiento').scrollIntoView());
-    await wait(900);
-    await p.click('label.opt:has(input[value="Presoterapia"])');
-    await p.click('[data-next]');
-    await wait(600);
-    await p.evaluate(() => { const t = document.querySelector('.qstep[data-step="2"] .dd__trigger').getBoundingClientRect(); window.scrollBy(0, t.top - (innerHeight - 90)); });
-    await wait(400);
-    await p.click('.qstep[data-step="2"] .dd__trigger');
-    await wait(500);
-    const up = await p.evaluate(() => { const dd = document.querySelector('.qstep[data-step="2"] .dd'); const r = dd.querySelector('.dd__panel').getBoundingClientRect(); return { up: dd.classList.contains('dd--up'), top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight }; });
-    ok(up.up && up.top >= 0 && up.bottom <= up.vh, 'Escritorio: el dropdown se abre hacia arriba si no cabe', JSON.stringify(up));
-    const onlyPreso = await p.$$eval('.qstep[data-step="2"] .dd__opt', (els) => els.map((e) => e.textContent.trim()));
-    ok(onlyPreso.length === 2 && onlyPreso[0].includes('I-Press'), 'Escritorio: modelos de presoterapia', onlyPreso.join(' | '));
-    await p.keyboard.press('ArrowDown');
-    await p.keyboard.press('Enter');
-    await p.keyboard.press('Escape');
-    await wait(300);
-    ok(await p.evaluate(() => !document.querySelector('.qstep[data-step="2"] .dd').classList.contains('is-open') && document.activeElement.classList.contains('dd__trigger')), 'Escritorio: teclado (flechas, Enter, Escape) y foco devuelto');
-    await p.click('.qstep[data-step="2"] .dd__trigger');
-    await wait(300);
-    await p.mouse.click(40, 200);
-    await wait(300);
-    ok(await p.evaluate(() => !document.querySelector('.qstep[data-step="2"] .dd').classList.contains('is-open')), 'Escritorio: clic fuera cierra el dropdown');
-    ok(await p.evaluate(() => document.querySelector('.qstep[data-step="2"] .dd__trigger').getAttribute('role') === 'combobox' && !!document.querySelector('.qstep[data-step="2"] [role="listbox"]') && !!document.querySelector('.qstep[data-step="2"] [role="option"]')), 'Escritorio: ARIA combobox, listbox y option');
-    // Foco visible con teclado
-    await p.reload({ waitUntil: 'networkidle' });
-    await wait(600);
+  // ------------------------------------------------------------ hero en 375 × 667 y cabecera
+  await block('Hero y cabecera móvil', async () => {
+    const { ctx, p } = await page(b, { width: 375, height: 667, mobile: true });
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p.waitForTimeout(1200);
+    const r = await p.evaluate(() => { const c = document.querySelector('.hero__cta').getBoundingClientRect(); const h = document.querySelector('[data-header]').getBoundingClientRect(); const t = document.querySelector('.h1').getBoundingClientRect(); return { cta: c.bottom, head: h.bottom, title: t.top }; });
+    ok(r.cta <= 667 && r.title >= r.head, 'Hero: el botón se ve sin hacer scroll en 375 × 667 y la cabecera no tapa el titular', JSON.stringify(r));
+    ok(await p.evaluate(() => getComputedStyle(document.querySelector('[data-header]'), '::before').opacity === '0'), 'Cabecera: transparente al inicio');
+    await scrollTo(p, 900); await p.waitForTimeout(200);
+    await scrollTo(p, 1200); await p.waitForTimeout(700);
+    ok(await p.evaluate(() => document.querySelector('[data-header]').classList.contains('is-hidden') && document.querySelector('[data-header]').getBoundingClientRect().bottom <= 1), 'Cabecera móvil: se oculta al bajar');
+    await scrollTo(p, 1000); await p.waitForTimeout(700);
+    ok(await p.evaluate(() => { const h = document.querySelector('[data-header]'); return !h.classList.contains('is-hidden') && h.classList.contains('is-scrolled') && getComputedStyle(h, '::before').opacity === '1'; }), 'Cabecera móvil: reaparece al subir, con fondo y desenfoque');
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ cabecera escritorio, segmentado, carrusel
+  await block('Segmentado y tarjetas', async () => {
+    const { ctx, p } = await page(b, {});
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await scrollTo(p, 2000); await p.waitForTimeout(700);
+    ok(await p.evaluate(() => { const h = document.querySelector('[data-header]'); return !h.classList.contains('is-hidden') && h.classList.contains('is-scrolled'); }), 'Cabecera escritorio: siempre visible y compacta al bajar');
+    await scrollToSel(p, '#equipos'); await p.waitForTimeout(900);
+    await p.focus('#tab-eco');
+    await p.keyboard.press('ArrowRight');
+    await p.waitForTimeout(900);
+    const st = await p.evaluate(() => ({
+      sel: document.getElementById('tab-dia').getAttribute('aria-selected'),
+      focus: document.activeElement.id,
+      dia: getComputedStyle(document.getElementById('panel-dia')).visibility,
+      eco: getComputedStyle(document.getElementById('panel-eco')).visibility,
+      ind: getComputedStyle(document.querySelector('.seg__ind')).transform,
+    }));
+    ok(st.sel === 'true' && st.focus === 'tab-dia' && st.dia === 'visible' && st.eco === 'hidden' && st.ind !== 'none', 'Segmentado: teclado (flechas), panel activo e indicador deslizado', JSON.stringify(st));
+    await p.keyboard.press('Home');
+    await p.waitForTimeout(700);
+    ok(await p.evaluate(() => document.getElementById('tab-eco').getAttribute('aria-selected') === 'true' && document.activeElement.id === 'tab-eco'), 'Segmentado: Inicio vuelve a Ecógrafos');
+    await p.click('#tab-dia'); await p.waitForTimeout(800);
+    const names = await p.$$eval('#panel-dia .card__name', (els) => els.map((e) => e.textContent.trim()));
+    ok(names.join('|') === 'Diatermia Multifunción|Reatherm|HR Tek', 'Segmentado: clic muestra las 3 diatermias', names.join(', '));
+    const cols = await p.evaluate(() => new Set([...document.querySelectorAll('#panel-dia .card')].map((c) => Math.round(c.getBoundingClientRect().top))).size);
+    ok(cols === 1, 'Tarjetas: 3 columnas en escritorio');
+    await ctx.close();
+  });
+
+  await block('Carrusel móvil', async () => {
+    const { ctx, p } = await page(b, { width: 390, height: 844, mobile: true });
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await scrollToSel(p, '#equipos'); await p.waitForTimeout(900);
+    const r = await p.evaluate(() => { const t = document.querySelector('#panel-eco .cards'); const c = t.children; return { snap: getComputedStyle(t).scrollSnapType, second: Math.round(c[1].getBoundingClientRect().left), vw: innerWidth, dots: getComputedStyle(document.querySelector('#panel-eco .dots')).display }; });
+    ok(r.snap.startsWith('x') && r.second < r.vw && r.dots === 'flex', 'Carrusel: scroll-snap, asoma la siguiente tarjeta y puntos visibles', JSON.stringify(r));
+    await p.evaluate(() => { const t = document.querySelector('#panel-eco .cards'); t.scrollTo({ left: t.children[2].offsetLeft, behavior: 'instant' }); });
+    await p.waitForTimeout(500);
+    ok(await p.evaluate(() => [...document.querySelectorAll('#panel-eco .dots span')].findIndex((d) => d.classList.contains('is-on')) === 2), 'Carrusel: los puntos siguen la tarjeta visible');
+    await p.evaluate(() => { const t = document.querySelector('#panel-eco .cards'); t.scrollTo({ left: 0, behavior: 'instant' }); });
+    await p.waitForTimeout(300);
+    await p.focus('#panel-eco .card:nth-child(3) .btn');
+    await p.waitForTimeout(600);
+    ok(await p.evaluate(() => { const r = document.querySelector('#panel-eco .card:nth-child(3)').getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth + 1; }), 'Carrusel: con teclado, la tarjeta enfocada entra en pantalla');
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ acordeón, conteo, barra móvil y WhatsApp único
+  await block('Acordeón', async () => {
+    const { ctx, p } = await page(b, { width: 390, height: 844, mobile: true });
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await scrollToSel(p, '#dudas', 60); await p.waitForTimeout(900);
+    await p.tap('#q1'); await p.waitForTimeout(800);
+    ok((await p.getAttribute('#q1', 'aria-expanded')) === 'true' && await p.isVisible('#a1') && (await p.textContent('#a1')).includes('te recomiendo uno'), 'Acordeón: abre al tocar');
+    const clean = await p.evaluate(() => [...document.querySelectorAll('.acc__item, .faq__more, #asesoramiento, .ft')].every((e) => !e.style.transform));
+    ok(clean, 'Acordeón: la animación solo usa transform y termina limpia');
+    await p.focus('#q2'); await p.keyboard.press('Enter'); await p.waitForTimeout(700);
+    ok((await p.getAttribute('#q2', 'aria-expanded')) === 'true', 'Acordeón: teclado (Enter)');
+    await p.keyboard.press('Space'); await p.waitForTimeout(700);
+    ok((await p.getAttribute('#q2', 'aria-expanded')) === 'false' && await p.isHidden('#a2'), 'Acordeón: cierra con Espacio');
+    const long = await p.$$eval('.acc__panel p', (els) => els.map((e) => e.textContent.split(/(?<=[.?!])\s+/).length));
+    ok(long.every((n) => n <= 2), 'Dudas: respuestas de 2 frases como máximo', long.join(','));
+    await ctx.close();
+  });
+
+  await block('Conteo y barra móvil', async () => {
+    const { ctx, p } = await page(b, { width: 390, height: 844, mobile: true });
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p.waitForTimeout(800);
+    ok(!(await p.evaluate(() => document.querySelector('[data-mbar]').classList.contains('is-on'))), 'Barra móvil: oculta en el hero');
+    await scrollToSel(p, '#equipos', -200); await p.waitForTimeout(900);
+    const on = await p.evaluate(() => { const m = document.querySelector('[data-mbar]'); const r = m.getBoundingClientRect(); return { on: m.classList.contains('is-on'), inert: m.inert, bottom: Math.round(r.bottom), vh: innerHeight, btns: m.querySelectorAll('a').length }; });
+    ok(on.on && !on.inert && on.bottom <= on.vh && on.btns === 2, 'Barra móvil: aparece al pasar el hero (CTA + WhatsApp)', JSON.stringify(on));
+    await scrollToSel(p, '.why__list', 200); await p.waitForTimeout(1600);
+    ok((await p.$$eval('[data-count]', (els) => els.map((e) => e.textContent))).join(',') === '2,0,1', 'Conteo: 2 años, 0 sorpresas, 1 fisio');
+    await scrollToSel(p, '[data-faq-wa]', 300); await p.waitForTimeout(700);
+    const waVisible = await p.evaluate(() => [...document.querySelectorAll('a[href*="wa.me"]')].filter((a) => { const r = a.getBoundingClientRect(); const s = getComputedStyle(a); return r.width && r.bottom > 0 && r.top < innerHeight && s.display !== 'none' && a.checkVisibility({ visibilityProperty: true }) && !a.closest('[inert]'); }).length);
+    ok(waVisible === 1, 'WhatsApp: un solo enlace visible a la vez', `${waVisible} visibles`);
+    await scrollToSel(p, '.fcard', 100); await p.waitForTimeout(900);
+    ok(!(await p.evaluate(() => document.querySelector('[data-mbar]').classList.contains('is-on'))), 'Barra móvil: se oculta con el formulario en pantalla');
+    await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await p.waitForTimeout(900);
+    const foot = await p.evaluate(() => { const last = [...document.querySelectorAll('.ft li')].pop().getBoundingClientRect(); const m = document.querySelector('[data-mbar]'); const r = m.getBoundingClientRect(); return { last: Math.round(last.bottom), bar: m.classList.contains('is-on') ? Math.round(r.top) : 99999 }; });
+    ok(foot.last <= foot.bar, 'Barra móvil: no tapa el final del footer', JSON.stringify(foot));
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ fuentes, teclado y movimiento reducido
+  await block('Fuentes', async () => {
+    const { ctx, p } = await page(b, {});
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const f = await p.evaluate(async () => { await document.fonts.ready; return { geist: document.fonts.check('560 32px Geist'), serif: document.fonts.check('italic 32px "Instrument Serif"'), h1: getComputedStyle(document.querySelector('.h1')).fontFamily, em: getComputedStyle(document.querySelector('.h1 em')).fontFamily, loaded: [...document.fonts].filter((x) => x.status === 'loaded').map((x) => x.family) }; });
+    ok(f.geist && f.serif && f.h1.startsWith('Geist') && f.em.startsWith('"Instrument Serif"'), 'Fuentes: Geist e Instrument Serif cargadas', f.loaded.join(', '));
+    const dist = path.resolve('dist');
+    const textFiles = [];
+    const walk = (d) => fs.readdirSync(d).forEach((n) => { const x = path.join(d, n); if (fs.statSync(x).isDirectory()) walk(x); else if (/\.(html|css|js|webmanifest)$/.test(n)) textFiles.push(x); });
+    walk(dist);
+    const trace = textFiles.filter((x) => /["'](Syne|Inter)["' ,]|family:\s*(Syne|Inter)\b|syne-|inter-\d/i.test(fs.readFileSync(x, 'utf8')));
+    ok(!trace.length && !fs.readdirSync(path.join(dist, 'assets/fonts')).some((n) => /syne|inter/i.test(n)), 'Fuentes: ni rastro de Syne o Inter', trace.join(', '));
+    // Teclado: salto al contenido, logo y CTA de la cabecera con foco visible
     await p.keyboard.press('Tab');
-    await wait(400);
-    const skip = await p.evaluate(() => ({ cls: document.activeElement.className, top: document.activeElement.getBoundingClientRect().top }));
-    ok(skip.cls === 'skip' && skip.top >= 0, 'Escritorio: primer Tab muestra "Saltar al contenido"', JSON.stringify(skip));
-    let rings = 0;
-    for (let i = 0; i < 6; i++) {
-      await p.keyboard.press('Tab');
-      rings += await p.evaluate(() => { const s = getComputedStyle(document.activeElement); return s.boxShadow !== 'none' || s.outlineStyle !== 'none' ? 1 : 0; });
+    await p.waitForTimeout(400);
+    const f1 = await p.evaluate(() => ({ cls: document.activeElement.className, t: getComputedStyle(document.activeElement).transform }));
+    await p.keyboard.press('Tab');
+    await p.keyboard.press('Tab');
+    const f3 = await p.evaluate(() => { const a = document.activeElement; const s = getComputedStyle(a); return { txt: a.textContent.trim(), outline: s.outlineStyle, w: s.outlineWidth }; });
+    ok(f1.cls === 'skip' && f1.t === 'none' && f3.txt === 'Quiero asesoramiento' && f3.outline !== 'none', 'Teclado: salto al contenido, cabecera y foco visible', JSON.stringify([f1, f3]));
+    await ctx.close();
+  });
+
+  await block('Movimiento reducido', async () => {
+    const { ctx, p } = await page(b, { reduced: true });
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p.waitForTimeout(300);
+    const r = await p.evaluate(() => ({
+      word: getComputedStyle(document.querySelector('.h1 .w > span')).transform,
+      fan: getComputedStyle(document.querySelector('.scan__fan')).animationName,
+      rv: document.querySelectorAll('.rv').length,
+      smooth: getComputedStyle(document.documentElement).scrollBehavior,
+    }));
+    ok(r.word === 'none' && r.fan === 'none' && r.rv === 0 && r.smooth === 'auto', 'Movimiento reducido: sin animaciones ni desplazamiento suave', JSON.stringify(r));
+    const { ctx: c2, p: p2 } = await page(b, {});
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const anim = await p2.evaluate(() => ({ fan: getComputedStyle(document.querySelector('.scan__fan')).animationName, word: getComputedStyle(document.querySelector('.h1 .w > span')).animationName, rv: document.querySelectorAll('.rv').length }));
+    ok(anim.fan === 'sweep' && anim.word === 'word-up' && anim.rv > 5, 'Animaciones: barrido de ecografía, titular por palabras y entradas al hacer scroll', JSON.stringify(anim));
+    await c2.close();
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ CSP, cabeceras, URLs limpias y metadatos
+  await block('CSP en consola', async () => {
+    const { ctx, p, logs } = await page(b, { consent: true, pixel: '1234567890' });
+    for (const u of ['/', '/aviso-legal', '/privacidad', '/cookies']) {
+      await p.goto(BASE + u, { waitUntil: 'networkidle' });
+      await p.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 40)); } });
     }
-    ok(rings === 6, 'Escritorio: foco visible en los elementos de la cabecera', `${rings}/6`);
-    ok(errors.length === 0, 'Escritorio: sin errores en consola', errors.join(' / '));
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    ok(await p.evaluate(() => window.__fbok === 1), 'CSP: el píxel (con consentimiento) carga desde connect.facebook.net');
+    const csp = logs.filter((l) => /Content Security Policy|Refused to/i.test(l));
+    ok(!csp.length && !logs.length, 'CSP: cero errores en consola (landing, legales, fuentes, imágenes y píxel)', logs.join(' / '));
     await ctx.close();
-  }
+  });
 
-  // ------------------------------------------------ Ahorro de datos: no se carga el vídeo
-  {
-    const { ctx, p, reqs } = await open(b, { width: 1280, height: 860, mobile: false, init: () => { Object.defineProperty(navigator, 'connection', { value: { saveData: true, effectiveType: '4g' } }); } });
-    await p.evaluate(() => document.getElementById('diatermias').scrollIntoView());
-    await wait(1500);
-    ok(!reqs.some((u) => /diatermia-loop\.[a-z0-9]+\.(mp4|webm)/i.test(u)), 'Ahorro de datos: el vídeo no se carga');
-    await ctx.close();
-  }
+  await block('Cabeceras y URLs', async () => {
+    const home = await get('/');
+    const h = home.headers;
+    ok(home.status === 200 && /default-src 'self'/.test(h['content-security-policy'] || '') && h['strict-transport-security'] && h['x-frame-options'] === 'SAMEORIGIN' && h['x-content-type-options'] === 'nosniff' && h['permissions-policy'], 'Cabeceras: seguridad y CSP de vercel.json');
+    ok(/max-age=0, must-revalidate/.test(h['cache-control']), 'Caché: HTML sin caché (must-revalidate)', h['cache-control']);
+    const html = home.body.toString();
+    const img = html.match(/\/assets\/img\/[\w-]+\.[a-f0-9]{8}\.avif/)[0];
+    const font = html.match(/\/assets\/fonts\/geist\.[a-f0-9]{8}\.woff2/)[0];
+    const js = html.match(/\/assets\/js\/main\.[\w]+\.js/)[0];
+    const hs = await Promise.all([img, font, js].map(get));
+    ok(hs.every((r) => r.status === 200 && r.headers['cache-control'] === 'public, max-age=31536000, immutable'), 'Caché: /assets con hash, un año e immutable', [img, font, js].join(', '));
+    const pdf = await get('/assets/docs/catalogo-vytalgroup-2026.pdf');
+    ok(pdf.status === 200 && /attachment/.test(pdf.headers['content-disposition']) && pdf.headers['cache-control'] === 'public, max-age=604800' && pdf.body.slice(0, 5).toString() === '%PDF-', 'PDF: se descarga (attachment) con caché de 7 días', `${(pdf.body.length / 1024).toFixed(0)} KB`);
+    const clean = await Promise.all(['/aviso-legal', '/privacidad', '/cookies'].map(get));
+    ok(clean.every((r) => r.status === 200 && r.body.toString().includes('<h1')), 'URLs limpias: /aviso-legal, /privacidad y /cookies');
+    const red = await Promise.all(['/privacidad.html', '/cookies/', '/index', '/index.html'].map(get));
+    ok(red.map((r) => `${r.status} ${r.headers.location}`).join(' | ') === '308 /privacidad | 308 /cookies | 308 / | 308 /', 'URLs limpias: redirecciones .html, barra final e /index', red.map((r) => `${r.status} ${r.headers.location}`).join(' | '));
+    const cfg = await get('/config.js');
+    ok(/must-revalidate/.test(cfg.headers['cache-control']) && /SHEETS_ENDPOINT: ""/.test(cfg.body.toString()) && /META_PIXEL_ID: ""/.test(cfg.body.toString()), 'config.js: sin caché y con los dos valores vacíos');
+    const vj = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
+    ok(vj.cleanUrls === true && vj.trailingSlash === false && vj.outputDirectory === 'dist', 'vercel.json: JSON válido, URLs limpias y salida dist/');
+  });
 
-  // ------------------------------------------------ Animación inicial
-  {
-    const { ctx, p } = await open(b, { width: 1440, height: 900, mobile: false, intro: true });
-    const s0 = await p.evaluate(() => ({ intro: document.documentElement.classList.contains('intro'), flag: sessionStorage.getItem('vg_intro') }));
-    await wait(1800);
-    const s1 = await p.evaluate(() => ({ overlay: !!document.querySelector('.intro-overlay') }));
-    ok(s0.intro && s0.flag === '1' && !s1.overlay, 'Intro: se muestra en la primera visita y se retira', JSON.stringify({ ...s0, ...s1 }));
-    await p.reload({ waitUntil: 'networkidle' });
-    ok(!(await p.evaluate(() => document.documentElement.classList.contains('intro'))), 'Intro: no se repite en la misma sesión');
-    await ctx.close();
-  }
+  await block('Metadatos', async () => {
+    const html = (await get('/')).body.toString();
+    const canonical = (html.match(/<link rel="canonical" href="([^"]+)"/) || [])[1];
+    const ogUrl = (html.match(/property="og:url" content="([^"]+)"/) || [])[1];
+    const ogImg = (html.match(/property="og:image" content="([^"]+)"/) || [])[1];
+    ok(canonical === `${SITE_URL}/` && ogUrl === `${SITE_URL}/`, 'Metadatos: canonical y og:url con SITE_URL', canonical);
+    ok(ogImg && ogImg.startsWith(`${SITE_URL}/assets/brand/og-image.`), 'Metadatos: og:image absoluta con SITE_URL', ogImg);
+    const local = await get(ogImg.replace(SITE_URL, ''));
+    const jpg = local.body;
+    const size = (() => { let i = 2; while (i < jpg.length) { const m = jpg[i + 1]; const len = jpg.readUInt16BE(i + 2); if (m >= 0xC0 && m <= 0xC2) return [jpg.readUInt16BE(i + 7), jpg.readUInt16BE(i + 5)]; i += 2 + len; } return []; })();
+    ok(local.status === 200 && size.join('x') === '1200x630', 'Metadatos: la imagen OG existe y mide 1200 × 630', size.join('x'));
+    const title = (html.match(/<title>([^<]+)<\/title>/) || [])[1];
+    const desc = (html.match(/name="description" content="([^"]+)"/) || [])[1];
+    ok(title && title.length <= 60 && desc && desc.length <= 160, 'Metadatos: title y description cortos', `${title} (${title.length}) · ${desc.length}`);
+    const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
+    const faq = ld['@graph'].find((x) => x['@type'] === 'FAQPage');
+    const org = ld['@graph'].find((x) => x['@type'] === 'Organization');
+    ok(org && org.url === `${SITE_URL}/` && faq && faq.mainEntity.length === 5, 'Metadatos: JSON-LD Organization y FAQPage con 5 preguntas');
+    const sitemap = (await get('/sitemap.xml')).body.toString();
+    const robots = (await get('/robots.txt')).body.toString();
+    ok(sitemap.includes(`<loc>${SITE_URL}/</loc>`) && sitemap.includes(`${SITE_URL}/privacidad`) && robots.includes(`Sitemap: ${SITE_URL}/sitemap.xml`), 'Metadatos: sitemap y robots con SITE_URL');
+  });
 
-  // ------------------------------------------------ Movimiento reducido
-  {
-    const { ctx, p } = await open(b, { width: 1440, height: 900, mobile: false, intro: true, reduced: true });
-    await wait(600);
-    const r = await p.evaluate(() => ({ intro: document.documentElement.classList.contains('intro'), overlay: !!document.querySelector('.intro-overlay'), marquee: document.querySelector('.trust').classList.contains('is-marquee'), sweep: getComputedStyle(document.querySelector('.scan__sweep')).display, loopLoaded: !!document.querySelector('.demo__video').dataset.loaded }));
-    await p.evaluate(() => document.getElementById('diatermias').scrollIntoView());
-    await wait(900);
-    const loop = await p.evaluate(() => !!document.querySelector('.demo__video').dataset.loaded);
-    ok(!r.intro && !r.overlay && !r.marquee && r.sweep === 'none' && !loop, 'prefers-reduced-motion: sin intro, sin barridos ni carrusel automático y sin vídeo en bucle', JSON.stringify({ ...r, loop }));
+  await block('Legales', async () => {
+    const { ctx, p, logs } = await page(b, { width: 390, height: 844, mobile: true, consent: null });
+    await p.goto(BASE + '/privacidad', { waitUntil: 'networkidle' });
+    await p.waitForTimeout(900);
+    ok(await p.isVisible('#cookie-banner'), 'Legales: aviso de cookies también en las páginas legales');
+    await p.click('#cookie-banner [data-cookie="reject"]');
+    await p.waitForTimeout(700);
+    const pending = await p.$$eval('.pending', (els) => els.length);
+    ok(pending >= 4, 'Legales: datos del titular vacíos y marcados para rellenar', `${pending} huecos`);
+    await p.evaluate(() => document.querySelector('.ft [data-cookie-settings]').scrollIntoView());
+    await p.click('.ft [data-cookie-settings]');
+    await p.waitForTimeout(500);
+    const sheet = await p.evaluate(() => { const d = document.getElementById('cookie-panel'); const r = d.querySelector('.cp__in').getBoundingClientRect(); return { open: d.open, bottom: Math.round(r.bottom), vh: innerHeight }; });
+    ok(sheet.open && Math.abs(sheet.bottom - sheet.vh) <= 1, 'Legales: "Configurar cookies" abre el panel (hoja inferior en móvil)', JSON.stringify(sheet));
+    await p.keyboard.press('Escape');
+    ok(!logs.length, 'Legales: consola limpia', logs.join(' / '));
     await ctx.close();
-  }
-
-  // ------------------------------------------------ Banner de cookies y barra CTA
-  {
-    const { ctx, p } = await open(b, { width: 390, height: 844, mobile: true, consent: false });
-    await wait(1400);
-    await p.evaluate(() => window.scrollTo(0, 1600));
-    await wait(700);
-    const st = await p.evaluate(() => { const c = document.getElementById('cookie-banner').getBoundingClientRect(); const bar = document.getElementById('ctabar'); const br = bar.getBoundingClientRect(); return { banner: !document.getElementById('cookie-banner').hidden, barTop: br.top, vh: innerHeight, cookieTop: c.top }; });
-    ok(st.banner && st.barTop >= st.vh - 1, 'Cookies: con el banner visible la barra CTA se oculta (sin solaparse)', JSON.stringify(st));
-    await p.click('[data-cookie="accept"]');
-    await wait(900);
-    ok(await p.evaluate(() => document.getElementById('ctabar').classList.contains('is-visible') && document.getElementById('ctabar').getBoundingClientRect().top < innerHeight), 'Cookies: tras decidir, vuelve la barra CTA');
-    await ctx.close();
-  }
+  });
 
   await b.close();
   console.log(results.join('\n'));
-  console.log(`\n${results.filter((r) => r.startsWith('PASS')).length}/${results.length} OK`);
-  if (results.some((r) => r.startsWith("FAIL"))) process.exitCode = 1;
+  const fails = results.filter((r) => r.startsWith('FAIL')).length;
+  console.log(`\n${results.length - fails}/${results.length} OK`);
+  process.exit(fails ? 1 : 0);
 })();

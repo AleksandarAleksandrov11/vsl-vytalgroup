@@ -1,77 +1,70 @@
-# PLAN · Landing VytalGroup (Meta Ads)
+# PLAN · Rediseño completo de la landing VytalGroup
 
 Trabajo en solitario y secuencial, sin subagentes. Se marca cada tarea al completarla.
+Regla de oro: menos. Ante la duda, se quita.
 
-## 1. Análisis y material
-- [x] Leer el brief completo
-- [x] Revisar material recibido: catálogo ADC | VytalGroup 2026 (53 págs.), vídeo presoterapia VytalGroup, vídeo de demostración de la Diatermia Multifunción
-- [x] Extraer el texto del catálogo con `pdftotext`
-- [x] Descargar la web actual (vytalgroup.org) y extraer sus recursos base64 (imágenes, vídeo, PDF)
-- [x] Revisar la landing de referencia que ha pasado el cliente (vdnperformance.com): ritmo, animaciones y tono
-- [x] Anotar el material que NO ha llegado (carpeta `referencias/`, catálogo EDAN, fotos de Javier, cartel del sorteo)
+## 1. Análisis
+- [x] Leer el brief del rediseño entero
+- [x] Decidir qué se reaprovecha: google-sheets.gs, consentimiento, tracking, atribución, envío del formulario, contenido legal, imágenes de producto, foto de Javier y PDF del catálogo
+- [x] Comprobar en las fuentes el término exacto del mantenimiento: "asegurado" (brief y web actual)
+- [x] Vídeo de la diatermia: quien sale no es Javier (lo confirmó el cliente), así que no se usa y se borra
+- [x] Anotar lo que falta (carpeta `referencias/`, confirmación de "menos de 24 h")
 
-## 2. Recursos gráficos
-- [x] Logo VytalGroup vectorizado (SVG) en versión clara y oscura, más el símbolo "VG"
-- [x] Favicon SVG + PNG, apple-touch-icon y manifest
-- [x] Imágenes de producto recortadas y exportadas en AVIF + WebP en varios tamaños
-- [x] Retrato y avatar de Javier (foto enviada por el cliente) con etalonaje de marca
-- [x] Portada del catálogo para el mockup
-- [x] Vídeo de demostración (Diatermia) optimizado en MP4 H.264 + WebM, con póster
-- [x] Catálogo PDF comprimido por debajo de 5 MB (`catalogo-vytalgroup-2026.pdf`)
-- [x] Fuentes Syne (700, 800) e Inter (400, 500, 600) autoalojadas en woff2 con subset latino
-- [x] Imagen Open Graph de 1200 × 630
+## 2. Recursos
+- [x] Geist variable (400 a 600) e Instrument Serif cursiva, autoalojadas en woff2 con subset latino
+- [x] Recortes de producto homogéneos (mismo tamaño visual y misma sombra): Eco Wireless, Acclarix AX8, Acclarix LX9, Diatermia Multifunción, Reatherm y HR Tek
+- [x] Imagen del hero (producto protagonista, versión móvil y escritorio)
+- [x] Retrato de Javier para la sección marina, con etalonaje suave
+- [x] Nueva imagen Open Graph 1200 × 630 con el nuevo diseño
+- [x] Borrar fuentes, imágenes, vídeos y scripts que dejan de usarse
 
-## 3. Maquetación (HTML + CSS)
-- [x] Tokens de diseño, tipografía fluida y utilidades
-- [x] Animación inicial de entrada ("escaneo" de ultrasonido) profesional y dinámica, sin penalizar LCP
-- [x] Header sticky + menú móvil a pantalla completa + scrollspy
-- [x] Hero + barra de confianza
-- [x] De fisio a fisio (historia de Javier)
-- [x] Ecógrafos: 4 destacados, "Ver ficha", "Me interesa", gama completa con filtros, Physio Invasiva 2.0
-- [x] Diatermias: 4 modelos, comparativa y vídeo de demostración
-- [x] También te equipamos con
-- [x] Cómo trabajamos (línea temporal que se dibuja con el scroll)
-- [x] Garantías
-- [x] Catálogo (mockup y descarga)
-- [x] Preguntas frecuentes (acordeón)
-- [x] Formulario "una pregunta cada vez"
-- [x] Footer, botón flotante de WhatsApp (escritorio) y barra CTA móvil
-- [x] Banner y panel de cookies
-- [x] Páginas legales: aviso legal, privacidad y cookies
+## 3. Maquetación (HTML + CSS desde cero)
+- [x] Tokens: paleta clara, marino solo en 4.3 y footer, tipografía fluida, radios, sombras
+- [x] Header: logo + "Quiero asesoramiento"; transparente, desenfoque al bajar; en móvil se oculta al bajar
+- [x] Hero: titular corto, línea de apoyo, un botón, línea de confianza, producto con barrido de ecografía
+- [x] Equipos: control segmentado Ecógrafos | Diatermias, 3 tarjetas por categoría, carrusel en móvil, enlace al catálogo
+- [x] Por qué VytalGroup: foto de Javier, frase, 3 razones con conteo, firma y botón
+- [x] Dudas: 5 preguntas en acordeón y un enlace de WhatsApp
+- [x] Formulario de 6 pasos, pantalla de éxito y de error
+- [x] Footer mínimo
+- [x] Barra fija móvil (CTA + WhatsApp pequeño)
+- [x] Banner de cookies mínimo y panel con interruptores propios
+- [x] Páginas legales con el nuevo diseño
 
-## 4. JavaScript (vanilla, módulos)
-- [x] main.js: header, menú, scrollspy, reveals, carruseles, fichas, filtros, acordeón, timeline, CTA móvil, vídeo diferido
-- [x] intro.js (dentro de main): coreografía de entrada
-- [x] attribution.js: UTM, fbclid, fbc y fbp en sessionStorage
-- [x] consent.js: banner, preferencias y almacenamiento 12 meses
-- [x] tracking.js: Meta Pixel condicionado al consentimiento y eventos
-- [x] dropdown.js: combobox/listbox accesible con hoja inferior en móvil
-- [x] form.js: pasos, validaciones, prefijos, sugerencia de email, provincias, envío, pantalla de gracias
+## 4. JavaScript (vanilla, sin librerías)
+- [x] main.js: header, reveals, segmentado, carrusel, conteo, acordeón, barra móvil, botón magnético, CTA con preselección
+- [x] form.js: 6 pasos, Enter, avance automático, validación, prefijos con buscador, honeypot, 3 s, doble envío
+- [x] Reaprovechar attribution.js, consent.js y tracking.js (ViewContent con la categoría activa)
 - [x] config.js con `SHEETS_ENDPOINT` y `META_PIXEL_ID` vacíos
 
-## 5. Integraciones y despliegue
-- [x] `integrations/google-sheets.gs` (doPost, cabeceras, LockService, Europe/Madrid, aviso por email opcional)
-- [x] Build: minificación, hashes, CSS crítico inline (`npm run build` → `dist/`)
-- [x] `_headers` (Netlify), `netlify.toml`, `vercel.json`, `robots.txt`, `sitemap.xml`
-- [x] SEO: title, description, OG, Twitter Card, JSON-LD Organization + FAQPage
+## 5. Integraciones, build y despliegue
+- [x] `integrations/google-sheets.gs` con las nuevas columnas
+- [x] `SITE_URL` en un único sitio; canonical, OG, JSON-LD, sitemap y robots salen de ahí
+- [x] Build: hash en todo /assets (menos el PDF), CSS crítico inline, sin scripts inline (CSP)
+- [x] `vercel.json` con cabeceras, CSP, caché y URLs limpias; quitar Netlify
+- [x] Servidor local que aplica las cabeceras de `vercel.json`
 
-## 6. Revisión final (sección 18)
-- [x] Capturas de página completa en 12 anchos y revisión una a una
-- [x] Comprobación automática de desbordamiento horizontal
-- [x] Componentes: dropdowns, prefijos, acordeón, fichas, carruseles, filtros, "Me interesa"
-- [x] Formulario: recorrido, validaciones, endpoint vacío, endpoint simulado con UTM, doble clic, honeypot y tiempo mínimo
-- [x] Tracking: sin consentimiento no se carga nada; PageView, ViewContent, Lead (una vez, con eventID), DescargaCatalogo y Contact
-- [x] Contenido: sin rayas (U+2014 y U+2013), sin veterinaria, sin datos inventados, sin relleno
-- [x] Lighthouse móvil ≥ 95 en las 4 categorías, CLS 0, LCP < 2 s
-- [x] Validación HTML (W3C), consola limpia, teclado y `prefers-reduced-motion`
-- [x] Repaso estético final como cliente
+## 6. Revisión final (sección 13)
+- [x] Minimalismo: 5 secciones, < 180 palabras (por código), un texto de CTA, sin badges, un botón por tarjeta
+- [x] Capturas de página completa en 320, 360, 375, 390, 414, 430, 768, 1024, 1280, 1440 y 1920, revisadas una a una
+- [x] Botón del hero visible en 375 × 667; sin desbordes ni solapes (por código)
+- [x] Segmentado, carrusel, acordeón y desplegable con táctil y teclado
+- [x] Formulario: 6 pasos, preselección, validaciones, endpoint vacío, endpoint simulado con UTM, doble clic
+- [x] Tracking: nada de Facebook sin consentimiento, Lead único con eventID, ViewContent, DescargaCatalogo y Contact
+- [x] Vercel: JSON válido, cero errores de CSP, caché, PDF, URLs limpias, canonical y OG
+- [x] Contenido: sin rayas, sin veterinaria, sin datos inventados, ortografía
+- [x] Lighthouse móvil ≥ 95 en las cuatro categorías, CLS 0, LCP < 2 s, INP < 200 ms
+- [x] HTML válido, consola limpia, teclado, `prefers-reduced-motion`, sin archivos muertos
+- [x] Repaso final como fisio que llega desde un anuncio
 
 ## 7. Entrega
-- [x] README completo (estructura, local, Google Sheets paso a paso, píxel, despliegue, pendientes, decisiones)
+- [x] README (estructura, Google Sheets, píxel, dominio y `SITE_URL`, pendientes, decisiones)
 - [x] Commit y push a `claude/vytalgroup-landing-meta-1y05py`
+- [x] Resumen con Lighthouse y lista de lo eliminado
 
 ## Notas finales
-- Añadido a petición del cliente: animación de entrada profesional ("escaneo de ultrasonido") y referencia visual de vdnperformance.com.
-- Corrección del cliente: la persona del vídeo no es Javier. Se usa la foto de Javier que envió (historia, hero y formulario) y el vídeo pasa a ser una demostración del producto, sin atribuírselo.
-- Resultado: Lighthouse móvil 96 a 100 en rendimiento y 100 en accesibilidad, buenas prácticas y SEO; escritorio 100 en todo; LCP 1,7 a 1,8 s; CLS 0; INP medido 96 ms.
-- Pruebas automáticas: `npm test` (formulario y tracking 212/212, componentes 47/47, diseño 14/14 tamaños).
+- Resultado: Lighthouse 100 en las cuatro categorías (móvil y escritorio, landing y legales); LCP móvil 1,7 a 1,8 s; CLS 0; interacción más lenta 104 ms.
+- Pruebas: `npm test` (formulario y tracking 77/77, interfaz y reglas del brief 57/57, diseño 17/17 tamaños).
+- 177 palabras visibles, 5 secciones, un texto de CTA ("Lo quiero" en tarjetas, como pide el brief).
+- El vídeo de la diatermia no es de Javier: no se usa y se ha borrado. Se usa su foto.
+

@@ -1,37 +1,42 @@
-// Formulario "una pregunta cada vez".
-// Pasos, validación en línea, prefijos con buscador, sugerencia de email, resumen,
-// envío a Google Sheets (Apps Script) y evento Lead solo tras respuesta de éxito.
+// Formulario "una pregunta cada vez" (6 pasos).
+// · Avance automático al elegir una opción con el dedo o el ratón; con teclado, Enter.
+// · Validación en línea, datos conservados al volver atrás, prefijo con buscador.
+// · Antispam: campo trampa, tiempo mínimo de 3 s y bloqueo de doble envío.
+// · Envío a Google Apps Script (texto plano, sin preflight CORS). Solo tras una respuesta
+//   { ok: true } se muestra el "gracias" y se dispara Lead (una vez, eventID = event_id).
 
-import { createDropdown } from './dropdown.js';
-import { MODELS, UNSURE, COUNTRIES, PROVINCES, PROVINCE_ALIASES, OUTSIDE_SPAIN, EMAIL_DOMAINS } from './data.js';
+import { COUNTRIES, EMAIL_DOMAINS } from './data.js';
+import { createPrefix } from './prefix.js';
 import { getAttribution } from './attribution.js';
 import { lead } from './tracking.js';
 
-const TOTAL = 9;
+const TOTAL = 6;
+const MIN_MS = 3000;
 const WA = 'https://wa.me/34616372644?text=';
 const EMAIL_RE = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[a-z]{2,}$/i;
-const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const WHAT = { 'Ecógrafo': 'un ecógrafo', 'Diatermia': 'una diatermia', 'Otro equipo': 'otro equipo del catálogo' };
 
 let form;
 let steps;
 let ui;
-let dd;
+let prefix;
 let state;
+let ready = false;
 let busy = false;
 let finished = false;
-let returnTo = 0;
 let pointerPick = false;
-let errTimer = 0;
-let ready = false;
+let pending = null;
 
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const uuid = () => (crypto.randomUUID ? crypto.randomUUID()
   : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (crypto.getRandomValues(new Uint8Array(1))[0] & 15);
-    return (c === 'x' ? r : (r & 3) | 8).toString(16);
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
   }));
 const $ = (sel, ctx = form) => ctx.querySelector(sel);
 const stepEl = (n) => steps[n - 1];
-const errEl = (n) => stepEl(n).querySelector('[data-error]');
+const radio = (name) => { const r = form.querySelector(`input[name="${name}"]:checked`); return r ? r.value : ''; };
+const shortModel = (m) => m.replace(/\s*\([^)]*\)$/, '');
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // ------------------------------------------------------------------ teléfono
@@ -53,12 +58,12 @@ function groupDigits(d, groups) {
 }
 function phoneValid() {
   const c = state.country;
-  const d = String(ui.tel.value).replace(/\D/g, '');
+  const d = ui.tel.value.replace(/\D/g, '');
   if (c.iso === 'XX') return /^\+/.test(ui.tel.value.trim()) && d.length >= 8 && d.length <= 15;
   const n = phoneDigits(ui.tel.value, c);
   return n.length >= c.min && n.length <= c.max && (!c.lead || c.lead.test(n));
 }
-function phoneE164Display() {
+function phoneFull() {
   const c = state.country;
   if (c.iso === 'XX') return `+${ui.tel.value.replace(/\D/g, '')}`;
   return `+${c.dial} ${groupDigits(phoneDigits(ui.tel.value, c), c.groups)}`;
@@ -69,11 +74,13 @@ function onTelInput() {
   const caret = el.selectionStart ?? v.length;
   const digitsBefore = v.slice(0, caret).replace(/\D/g, '').length;
   const trimmed = v.trim();
+  // Si pegan el número con prefijo internacional, se detecta el país
   if (/^(\+|00)/.test(trimmed) && state.country.iso !== 'XX') {
     const all = trimmed.replace(/^00/, '').replace(/\D/g, '');
     const hit = COUNTRIES.filter((c) => c.dial).sort((a, b) => b.dial.length - a.dial.length).find((c) => all.startsWith(c.dial));
     if (hit) {
-      setCountry(hit.iso, true);
+      setCountry(hit);
+      prefix.setValue(hit.iso);
       v = all.slice(hit.dial.length);
     }
   }
@@ -95,32 +102,27 @@ function onTelInput() {
     }
     try { el.setSelectionRange(pos, pos); } catch { /* algunos navegadores no lo permiten en tel */ }
   }
-  fieldChanged(6);
+  clearError(5);
 }
-function setCountry(iso, silent) {
-  const c = COUNTRIES.find((x) => x.iso === iso) || COUNTRIES[0];
+function setCountry(c) {
   state.country = c;
   ui.tel.placeholder = c.ph;
-  if (silent) dd.prefix.setValue(iso, true);
 }
 
 // ------------------------------------------------------------------ email
 function lev(a, b) {
-  const m = a.length;
-  const n = b.length;
-  const d = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
-  for (let j = 1; j <= n; j++) d[0][j] = j;
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
+  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
+  for (let j = 1; j <= b.length; j++) d[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
       d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
     }
   }
-  return d[m][n];
+  return d[a.length][b.length];
 }
 function emailSuggestion(v) {
   const at = v.lastIndexOf('@');
   if (at < 1) return '';
-  const user = v.slice(0, at);
   const domain = v.slice(at + 1).toLowerCase().trim();
   if (domain.length < 4 || EMAIL_DOMAINS.includes(domain)) return '';
   let best = '';
@@ -129,181 +131,143 @@ function emailSuggestion(v) {
     const x = lev(domain, d);
     if (x < dist) { dist = x; best = d; }
   });
-  return dist > 0 && dist <= 2 ? `${user}@${best}` : '';
+  return dist > 0 && dist <= 2 ? `${v.slice(0, at)}@${best}` : '';
 }
 function updateSuggestion() {
   const s = emailSuggestion(ui.email.value.trim());
-  if (s === ui.suggest.dataset.value) return; // no se vuelve a pintar: el botón debe seguir existiendo al pulsarlo
+  if (s === ui.suggest.dataset.value) return; // no se repinta: el botón debe seguir ahí al pulsarlo
   ui.suggest.dataset.value = s;
-  if (!s) { ui.suggest.hidden = true; ui.suggest.innerHTML = ''; return; }
-  ui.suggest.hidden = false;
-  ui.suggest.innerHTML = `¿Querías decir <strong>${esc(s)}</strong>? <button type="button" data-fix-email="${esc(s)}">Sí, corregir</button>`;
+  ui.suggest.hidden = !s;
+  ui.suggest.innerHTML = s ? `¿Querías decir <strong>${esc(s)}</strong>?<button type="button" data-fix-email>Sí, corregir</button>` : '';
 }
 
 // ------------------------------------------------------------------ validación
-function validate(n, show = false) {
-  let ok = true;
-  let msg = '';
+function problem(n) {
   switch (n) {
-    case 1: ok = state.productos.length > 0; msg = 'Elige al menos un equipo para seguir.'; break;
-    case 2: ok = true; break;
-    case 3: ok = !!state.perfil; msg = 'Elige tu perfil para seguir.'; break;
-    case 4: ok = !!state.plazo; msg = 'Dime para cuándo lo necesitas.'; break;
-    case 5: {
-      const v = ui.nombre.value.trim();
-      ok = v.length >= 2 && /\p{L}/u.test(v);
-      msg = 'Escribe tu nombre, con al menos 2 letras.';
-      break;
+    case 1: return state.equipo ? '' : 'Elige una opción.';
+    case 2: return radio('perfil') ? '' : 'Elige una opción.';
+    case 3: return radio('plazo') ? '' : 'Elige una opción.';
+    case 4: {
+      const v = ui.name.value.trim();
+      if (!v) return 'Escribe tu nombre.';
+      return v.length >= 2 && /\p{L}/u.test(v) ? '' : 'Revisa tu nombre.';
     }
+    case 5:
+      if (!ui.tel.value.trim()) return 'Escribe tu número de WhatsApp.';
+      return phoneValid() ? '' : 'Revisa el número: faltan o sobran cifras.';
     case 6: {
-      ok = phoneValid();
-      const c = state.country;
-      msg = c.iso === 'XX'
-        ? 'Escribe el prefijo y el número, por ejemplo +41 78 123 45 67.'
-        : `Revisa el número: en ${c.name} tiene ${c.min === c.max ? c.min : `entre ${c.min} y ${c.max}`} cifras.`;
-      break;
+      const v = ui.email.value.trim();
+      if (!v) return 'Escribe tu email.';
+      return EMAIL_RE.test(v) ? '' : 'Revisa el email.';
     }
-    case 7: ok = EMAIL_RE.test(ui.email.value.trim()); msg = 'Revisa el email, parece que falta algo.'; break;
-    case 8:
-      if (!state.provincia) { ok = false; msg = 'Elige tu provincia o "Fuera de España".'; }
-      else if (state.provincia === OUTSIDE_SPAIN && ui.pais.value.trim().length < 2) { ok = false; msg = 'Escribe en qué país estás.'; }
-      break;
-    case 9: ok = ui.consent.checked; msg = 'Necesito tu consentimiento para poder escribirte.'; break;
-    default: break;
+    default: return '';
   }
-  if (show) setError(n, ok ? '' : msg);
-  return ok;
+}
+function field(n) {
+  return { 4: ui.name, 5: ui.tel, 6: ui.email }[n];
 }
 function setError(n, msg) {
-  const e = errEl(n);
-  if (e && e.textContent !== msg) e.textContent = msg;
-  const field = { 5: ui.nombre, 6: ui.tel, 7: ui.email }[n];
-  if (field) field.setAttribute('aria-invalid', msg ? 'true' : 'false');
-  if (n === 8) {
-    dd.prov.setInvalid(!!msg && !state.provincia);
-    ui.pais.setAttribute('aria-invalid', msg && state.provincia === OUTSIDE_SPAIN ? 'true' : 'false');
+  stepEl(n).querySelector('[data-error]').textContent = msg;
+  const f = field(n);
+  if (f) f.setAttribute('aria-invalid', String(!!msg));
+}
+function clearError(n) {
+  if (stepEl(n).querySelector('[data-error]').textContent) setError(n, '');
+}
+function consentOk(show) {
+  const ok = ui.consent.checked;
+  if (show || ok) {
+    ui.consentErr.textContent = ok ? '' : 'Necesito tu permiso para escribirte.';
+    ui.consent.setAttribute('aria-invalid', String(!ok));
   }
-}
-function fieldChanged(n) {
-  clearTimeout(errTimer);
-  if (validate(n)) setError(n, '');
-  else if (currentValueNotEmpty(n)) errTimer = setTimeout(() => validate(n, true), 900);
-  update();
-}
-function currentValueNotEmpty(n) {
-  const el = { 5: ui.nombre, 6: ui.tel, 7: ui.email, 8: ui.pais }[n];
-  return !!(el && el.value.trim());
+  return ok;
 }
 
-// ------------------------------------------------------------------ interfaz
+// ------------------------------------------------------------------ navegación
 function update() {
   const n = state.step;
-  const valid = validate(n);
-  const last = n === TOTAL;
-  ui.next.hidden = last;
-  ui.submit.hidden = !last;
-  ui.next.disabled = !valid;
-  ui.submit.disabled = !valid || busy;
-  ui.back.hidden = n === 1;
-  ui.nextLabel.textContent = returnTo && n !== TOTAL ? 'Guardar' : 'Siguiente';
-  ui.count.textContent = `Paso ${n}`;
-  ui.progress.setAttribute('aria-valuenow', String(n));
-  ui.bar.style.setProperty('--progress', String(n / TOTAL));
+  ui.progress.style.setProperty('--p', (finished ? TOTAL : n) / TOTAL);
+  ui.bar.setAttribute('aria-valuenow', String(n));
+  ui.bar.setAttribute('aria-valuetext', `Paso ${n} de ${TOTAL}`);
+  ui.count.textContent = `${n}/${TOTAL}`;
+  ui.back.hidden = n === 1 || finished;
+  // En los pasos de opciones el botón "Siguiente" solo aparece si ya hay respuesta
+  const answered = { 1: !!state.equipo, 2: !!radio('perfil'), 3: !!radio('plazo') };
+  steps.slice(0, 3).forEach((s, i) => s.querySelector('[data-next]').classList.toggle('is-shown', answered[i + 1]));
 }
-function announce() {
-  const q = stepEl(state.step).querySelector('.qstep__q').textContent.trim();
-  ui.live.textContent = `Paso ${state.step} de ${TOTAL}. ${q}`;
+function keepInView() {
+  const card = form.closest('.fcard') || form;
+  const r = card.getBoundingClientRect();
+  const hd = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hd')) || 64;
+  const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  if (r.top < hd + 8 || r.top > vh * 0.45) {
+    window.scrollBy({ top: r.top - hd - 16, behavior: reduced() ? 'auto' : 'smooth' });
+  }
+}
+// Con el teclado del móvil abierto, el campo y su botón deben quedar a la vista
+function fitStep() {
+  const vv = window.visualViewport;
+  if (!vv || finished) return;
+  const step = stepEl(state.step);
+  const btn = step.querySelector('.qf__next.is-shown, .qf__send');
+  const q = step.querySelector('.qf__q');
+  if (!btn || !q) return;
+  const bottom = vv.offsetTop + vv.height - 12;
+  const over = btn.getBoundingClientRect().bottom - bottom;
+  const room = q.getBoundingClientRect().top - vv.offsetTop - 12;
+  if (over > 0) window.scrollBy({ top: Math.min(over, Math.max(room, 0)) });
 }
 function focusStep() {
-  const s = stepEl(state.step);
-  let target = null;
-  switch (state.step) {
-    case 1: target = s.querySelector('input:checked') || s.querySelector('input'); break;
-    case 2: target = dd.models.trigger; break;
-    case 3: case 4: target = s.querySelector('input:checked') || s.querySelector('input'); break;
-    case 5: target = ui.nombre; break;
-    case 6: target = ui.tel; break;
-    case 7: target = ui.email; break;
-    case 8: target = dd.prov.trigger; break;
-    case 9: target = ui.consent; break;
-    default: break;
-  }
+  const el = stepEl(state.step);
+  let target;
+  if (state.step === 1 && !ui.pickedBox.hidden) target = el.querySelector('[data-next]');
+  else target = el.querySelector('.field') || el.querySelector('input[type=radio]:checked') || el.querySelector('input[type=radio]');
   if (target) target.focus({ preventScroll: true });
 }
-
 function goTo(n, dir = 'fwd') {
-  if (n === state.step || n < 1 || n > TOTAL) return;
-  const cur = stepEl(state.step);
-  const nxt = stepEl(n);
-  if (n === 2) buildModelOptions();
-  if (n === TOTAL) renderSummary();
-  const back = dir === 'back';
-  cur.classList.remove('is-active', 'is-entering', 'is-back');
-  cur.classList.add('is-leaving');
-  cur.classList.toggle('is-back', back);
-  setTimeout(() => cur.classList.remove('is-leaving', 'is-back'), reduced() ? 0 : 330);
-  nxt.classList.add('is-active', 'is-entering');
-  nxt.classList.toggle('is-back', back);
-  setTimeout(() => nxt.classList.remove('is-entering', 'is-back'), reduced() ? 0 : 520);
+  if (n === state.step) return;
+  stepEl(state.step).classList.remove('is-active');
+  form.classList.toggle('is-back', dir === 'back');
   state.step = n;
+  stepEl(n).classList.add('is-active');
   update();
-  announce();
   focusStep();
-  keepFormInView();
+  keepInView();
+  ui.live.textContent = `Paso ${n} de ${TOTAL}: ${stepEl(n).querySelector('.qf__q').textContent}`;
 }
 function next() {
-  if (!validate(state.step, true)) return;
-  if (returnTo && state.step !== TOTAL) {
-    const r = returnTo;
-    returnTo = 0;
-    goTo(r);
+  if (finished) return;
+  const n = state.step;
+  const msg = problem(n);
+  setError(n, msg);
+  if (msg) {
+    const f = field(n) || stepEl(n).querySelector('input');
+    if (f) f.focus({ preventScroll: true });
     return;
   }
-  if (state.step < TOTAL) goTo(state.step + 1);
+  if (n < TOTAL) goTo(n + 1);
+  else submit();
 }
 function back() {
-  returnTo = 0;
-  if (state.step > 1) goTo(state.step - 1, 'back');
-}
-function keepFormInView() {
-  const r = (form.closest('.fcard') || form).getBoundingClientRect();
-  const headerH = document.getElementById('header')?.offsetHeight || 64;
-  if (r.top < headerH || r.top > innerHeight * 0.6) {
-    const y = scrollY + r.top - headerH - 16;
-    window.scrollTo({ top: y, behavior: reduced() ? 'auto' : 'smooth' });
-  }
+  if (state.step > 1 && !finished) goTo(state.step - 1, 'back');
 }
 
-// ------------------------------------------------------------------ modelos
-function buildModelOptions() {
-  const prods = state.productos.length ? state.productos : Object.keys(MODELS);
-  const opts = [];
-  prods.forEach((p) => (MODELS[p] || []).forEach((m) => opts.push({ value: m, label: m, group: p })));
-  opts.push({ value: UNSURE, label: UNSURE, special: true });
-  dd.models.setOptions(opts);
-  state.modelos = state.modelos.filter((m) => opts.some((o) => o.value === m));
-  dd.models.setValue(state.modelos, true);
+// ------------------------------------------------------------------ preselección desde las tarjetas
+function showPicked(on) {
+  ui.pickedBox.hidden = !on;
+  ui.opts.hidden = on;
+  if (on) ui.picked.textContent = shortModel(state.modelo);
 }
-function syncProducts() {
-  form.querySelectorAll('input[name="productos"]').forEach((i) => { i.checked = state.productos.includes(i.value); });
-}
-
-// ------------------------------------------------------------------ resumen
-function ubicacion() {
-  return state.provincia === OUTSIDE_SPAIN ? `Fuera de España: ${ui.pais.value.trim()}` : state.provincia;
-}
-function renderSummary() {
-  const rows = [
-    ['Equipo', state.productos.join(', '), 1],
-    ['Modelo', state.modelos.length ? state.modelos.join(', ') : 'Sin preferencia', 2],
-    ['Perfil', state.perfil, 3],
-    ['Plazo', state.plazo, 4],
-    ['Nombre', ui.nombre.value.trim(), 5],
-    ['Teléfono', phoneE164Display(), 6],
-    ['Email', ui.email.value.trim(), 7],
-    ['Ubicación', ubicacion(), 8],
-  ];
-  ui.summary.innerHTML = rows.map(([k, v, s]) => `<div><dt>${k}</dt><dd>${esc(v || '')}</dd><button type="button" class="summary__edit" data-edit="${s}" aria-label="Editar ${k.toLowerCase()}">Editar</button></div>`).join('');
+function applyPreselect(model, equipo) {
+  if (finished) return;
+  state.equipo = equipo;
+  state.modelo = model;
+  const r = form.querySelector(`input[name="equipo"][value="${equipo}"]`);
+  if (r) r.checked = true;
+  setError(1, '');
+  showPicked(true);
+  if (state.step !== 1) goTo(1, 'back');
+  else update();
 }
 
 // ------------------------------------------------------------------ envío
@@ -311,34 +275,21 @@ function device() {
   const ua = navigator.userAgent;
   const iPadOS = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
   const tablet = /iPad|Tablet/i.test(ua) || iPadOS || (/Android/i.test(ua) && !/Mobi/i.test(ua));
-  const mobile = /Mobi|iPhone|iPod|Android/i.test(ua);
-  const type = tablet ? 'Tablet' : mobile ? 'Móvil' : 'Escritorio';
+  const type = tablet ? 'Tablet' : /Mobi|iPhone|iPod|Android/i.test(ua) ? 'Móvil' : 'Escritorio';
   const os = /iPhone|iPad|iPod/.test(ua) || iPadOS ? 'iOS' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : 'Otro';
-  return `${type} · ${os} · ${screen.width}×${screen.height}`;
-}
-function browser() {
-  const ua = navigator.userAgent;
-  const b = /Instagram/.test(ua) ? 'Instagram (navegador interno)'
-    : /FBAN|FBAV|FB_IAB/.test(ua) ? 'Facebook (navegador interno)'
-      : /EdgA?\/|EdgiOS/.test(ua) ? 'Edge'
-        : /SamsungBrowser/.test(ua) ? 'Samsung Internet'
-          : /OPR\//.test(ua) ? 'Opera'
-            : /Firefox|FxiOS/.test(ua) ? 'Firefox'
-              : /Chrome|CriOS/.test(ua) ? 'Chrome'
-                : /Safari/.test(ua) ? 'Safari' : 'Otro';
-  return `${b} · ${navigator.language || ''}`;
+  const app = /Instagram/.test(ua) ? ' · Instagram' : /FBAN|FBAV|FB_IAB/.test(ua) ? ' · Facebook' : '';
+  return `${type} · ${os}${app}`;
 }
 function payload() {
   const a = getAttribution();
   return {
-    nombre: ui.nombre.value.trim(),
-    telefono: phoneE164Display(),
+    nombre: ui.name.value.trim(),
+    telefono: phoneFull(),
     email: ui.email.value.trim(),
-    ubicacion: ubicacion(),
-    productos: state.productos.join(', '),
-    modelos: state.modelos.join(', '),
-    perfil: state.perfil,
-    plazo: state.plazo,
+    equipo: state.equipo,
+    modelo: state.modelo || (state.equipo === 'Otro equipo' ? '' : 'Sin decidir'),
+    perfil: radio('perfil'),
+    plazo: radio('plazo'),
     consentimiento: `Sí · ${new Date().toISOString()}`,
     utm_source: a.utm_source || '',
     utm_medium: a.utm_medium || '',
@@ -351,40 +302,45 @@ function payload() {
     referrer: a.referrer || '',
     landing_url: a.landing_url || location.href,
     dispositivo: device(),
-    navegador_idioma: browser(),
+    idioma: navigator.language || '',
     event_id: state.eventId,
     website: form.elements.website.value || '',
   };
 }
 function waText() {
-  const what = state.modelos.filter((m) => m !== UNSURE).join(', ') || state.productos.join(', ') || 'vuestros equipos';
-  const name = ui.nombre.value.trim();
-  return encodeURIComponent(`Hola Javier, ${name ? `soy ${name}. ` : ''}Vengo de la web y quiero información sobre ${what}.`);
+  const name = ui.name.value.trim().split(/\s+/)[0];
+  const what = state.modelo ? shortModel(state.modelo) : WHAT[state.equipo] || 'vuestros equipos';
+  return encodeURIComponent(`Hola Javier, ${name ? `soy ${name}. ` : ''}Vengo de la web y me interesa ${what}.`);
 }
 function setLoading(on) {
   ui.submit.classList.toggle('is-loading', on);
   ui.submit.setAttribute('aria-busy', String(on));
-  update();
+  ui.submit.setAttribute('aria-disabled', String(on));
 }
 async function submit() {
   if (busy || finished) return;
   for (let n = 1; n <= TOTAL; n++) {
-    if (!validate(n)) { if (n !== state.step) goTo(n, 'back'); validate(n, true); return; }
+    const msg = problem(n);
+    if (msg) {
+      if (n !== state.step) goTo(n, 'back');
+      setError(n, msg);
+      return;
+    }
   }
+  if (!consentOk(true)) { ui.consent.focus(); return; }
   busy = true;
   setLoading(true);
-  ui.fail.hidden = true;
   const data = payload();
-  const bot = data.website.trim() !== '' || performance.now() < 3000;
+  const bot = data.website.trim() !== '' || performance.now() - state.t0 < MIN_MS;
   try {
     if (bot) {
-      await new Promise((r) => setTimeout(r, 700));
+      await new Promise((r) => setTimeout(r, 800));
       done(false);
       return;
     }
     const endpoint = String((window.VG_CONFIG && window.VG_CONFIG.SHEETS_ENDPOINT) || '').trim();
     if (!endpoint) {
-      console.warn('[VytalGroup] Falta configurar SHEETS_ENDPOINT en config.js. El formulario no puede guardar leads hasta que pegues la URL de la aplicación web de Apps Script (ver README).');
+      console.warn('[VytalGroup] Falta SHEETS_ENDPOINT en config.js: el formulario no puede guardar leads hasta que pegues la URL de la aplicación web de Apps Script (ver README).');
       throw new Error('sin-endpoint');
     }
     const ctrl = new AbortController();
@@ -410,27 +366,27 @@ async function submit() {
     setLoading(false);
   }
 }
-function done(real) {
-  finished = true;
-  const first = ui.nombre.value.trim().split(/\s+/)[0] || '';
-  ui.doneTitle.textContent = first ? `Gracias, ${first}. Te escribo muy pronto.` : 'Gracias. Te escribo muy pronto.';
-  ui.doneWa.href = WA + waText();
+function showEnd(el) {
   stepEl(state.step).classList.remove('is-active');
   form.classList.add('is-finished');
-  ui.done.hidden = false;
-  ui.done.focus({ preventScroll: true });
-  keepFormInView();
+  el.hidden = false;
+  el.focus({ preventScroll: true });
+  keepInView();
+}
+function done(real) {
+  finished = true;
+  const first = ui.name.value.trim().split(/\s+/)[0] || '';
+  ui.doneTitle.textContent = first ? `Gracias, ${first}. Te escribo muy pronto.` : 'Gracias. Te escribo muy pronto.';
+  ui.doneWa.href = WA + waText();
+  update();
+  showEnd(ui.done);
   ui.live.textContent = ui.doneTitle.textContent;
-  if (real) lead(state.eventId, state.productos);
+  if (real) lead(state.eventId, state.modelo ? shortModel(state.modelo) : state.equipo, state.equipo);
   window.dispatchEvent(new CustomEvent('vg:lead-done'));
 }
 function failed() {
   ui.failWa.href = WA + waText();
-  stepEl(state.step).classList.remove('is-active');
-  form.classList.add('is-finished');
-  ui.fail.hidden = false;
-  ui.fail.focus({ preventScroll: true });
-  keepFormInView();
+  showEnd(ui.fail);
   ui.live.textContent = 'No se ha podido enviar. Tus datos siguen aquí.';
 }
 function retry() {
@@ -440,213 +396,114 @@ function retry() {
   submit();
 }
 
-// ------------------------------------------------------------------ API pública
+// ------------------------------------------------------------------ API
 export function initForm() {
   if (ready) return;
-  form = document.getElementById('qform');
+  form = document.getElementById('qf');
   if (!form) return;
-  ready = true;
-  steps = [...form.querySelectorAll('.qstep')];
+  steps = [...form.querySelectorAll('.qf__step')];
   ui = {
-    next: $('[data-next]'),
+    bar: $('.qf__bar'),
+    progress: $('[data-progress]'),
+    count: $('[data-count-step]'),
     back: $('[data-back]'),
-    submit: $('[data-submit]'),
-    count: $('[data-step-now]'),
-    progress: $('.qform__progress'),
-    bar: $('.qform__bar'),
-    live: $('[data-live]'),
-    nombre: $('#f-nombre'),
+    opts: $('[data-opts]'),
+    pickedBox: $('[data-picked-box]'),
+    picked: $('[data-picked]'),
+    name: $('#f-name'),
     tel: $('#f-tel'),
     email: $('#f-email'),
-    pais: $('#f-pais'),
-    country: $('[data-country]'),
     suggest: $('[data-suggest]'),
-    consent: form.elements.consentimiento,
-    summary: $('[data-summary]'),
+    consent: form.elements.consent,
+    consentErr: $('[data-error-consent]'),
+    submit: $('[data-submit]'),
     done: $('[data-done]'),
     doneTitle: $('[data-done-title]'),
     doneWa: $('[data-done-wa]'),
     fail: $('[data-fail]'),
     failWa: $('[data-fail-wa]'),
+    live: $('[data-live]'),
   };
-  ui.nextLabel = document.createElement('span');
-  ui.nextLabel.textContent = 'Siguiente';
-  ui.next.firstChild.replaceWith(ui.nextLabel);
+  state = { step: 1, equipo: '', modelo: '', country: COUNTRIES[0], eventId: uuid(), t0: performance.now() };
 
-  state = {
-    step: 1,
-    productos: [],
-    modelos: [],
-    perfil: '',
-    plazo: '',
-    provincia: '',
-    country: COUNTRIES[0],
-    eventId: uuid(),
-  };
+  prefix = createPrefix($('[data-prefix]'), {
+    countries: COUNTRIES,
+    value: 'ES',
+    onChange: (c) => {
+      setCountry(c);
+      onTelInput();
+      ui.tel.focus({ preventScroll: true });
+    },
+  });
+  setCountry(COUNTRIES[0]);
 
-  dd = {
-    models: createDropdown($('[data-dd="modelos"]'), {
-      multiple: true,
-      searchable: true,
-      label: 'Modelos',
-      placeholder: 'Elige uno o varios modelos',
-      sheetTitle: '¿Qué modelo tienes en mente?',
-      searchPlaceholder: 'Busca un modelo',
-      exclusive: UNSURE,
-      renderValue: (sel) => esc(sel.length === 1 ? sel[0].label : `${sel.length} modelos elegidos`),
-      onChange: (v) => { state.modelos = v; update(); },
-    }),
-    prefix: createDropdown($('[data-dd="prefijo"]'), {
-      searchable: true,
-      className: 'dd--prefix',
-      label: 'Prefijo del país',
-      sheetTitle: 'Prefijo del país',
-      searchPlaceholder: 'Busca un país o prefijo',
-      describedBy: 'e-tel',
-      options: COUNTRIES.map((c) => ({
-        value: c.iso,
-        label: c.name,
-        keywords: c.dial ? `+${c.dial} ${c.dial}` : '',
-        html: `${c.flag}<span class="dd__opt-main">${esc(c.name)}</span><span class="dd__opt-sub">${c.dial ? `+${c.dial}` : ''}</span>`,
-      })),
-      renderValue: (sel) => {
-        const c = COUNTRIES.find((x) => x.iso === sel[0].value);
-        return `<span style="display:inline-flex;align-items:center;gap:8px">${c.flag}<span>${c.dial ? `+${c.dial}` : '+'}</span></span>`;
-      },
-      onChange: (iso) => {
-        setCountry(iso, false);
-        if (iso === 'XX' && !ui.tel.value.trim().startsWith('+')) ui.tel.value = ui.tel.value ? `+${ui.tel.value.replace(/\D/g, '')}` : '';
-        else if (iso !== 'XX') onTelInput();
-        fieldChanged(6);
-        ui.tel.focus({ preventScroll: true });
-      },
-    }),
-    prov: createDropdown($('[data-dd="provincia"]'), {
-      searchable: true,
-      label: 'Provincia',
-      placeholder: 'Elige tu provincia',
-      sheetTitle: '¿Dónde estás?',
-      searchPlaceholder: 'Busca tu provincia',
-      searchAutocomplete: 'address-level1',
-      options: [
-        ...PROVINCES.map((p) => ({ value: p, label: p, keywords: PROVINCE_ALIASES[p] || '' })),
-        { value: OUTSIDE_SPAIN, label: OUTSIDE_SPAIN, special: true, keywords: 'extranjero otro pais internacional' },
-      ],
-      onChange: (v) => {
-        state.provincia = v;
-        const out = v === OUTSIDE_SPAIN;
-        ui.country.hidden = !out;
-        if (out) setTimeout(() => ui.pais.focus({ preventScroll: true }), 60);
-        fieldChanged(8);
-      },
-    }),
-  };
-  dd.prefix.setValue('ES', true);
-
-  // Selección de opciones (checkbox y radio)
-  form.addEventListener('pointerdown', (e) => { if (e.target.closest('.opt')) pointerPick = true; });
-  form.addEventListener('keydown', () => { pointerPick = false; }, true);
-  form.addEventListener('change', (e) => {
+  form.addEventListener('pointerdown', (e) => { pointerPick = !!e.target.closest('.opt'); });
+  form.addEventListener('click', (e) => {
     const t = e.target;
-    if (t.name === 'productos') {
-      state.productos = [...form.querySelectorAll('input[name="productos"]:checked')].map((i) => i.value);
-      fieldChanged(1);
-      if (state.productos.length) setError(1, '');
-    } else if (t.name === 'perfil' || t.name === 'plazo') {
-      state[t.name] = t.value;
+    if (t.matches('.opt input')) {
+      if (t.name === 'equipo') {
+        state.equipo = t.value;
+        state.modelo = '';
+      }
       setError(state.step, '');
       update();
-      const opt = t.closest('.opt');
-      opt.classList.remove('is-picked');
-      void opt.offsetWidth;
-      opt.classList.add('is-picked');
       if (pointerPick) {
-        const at = state.step;
-        setTimeout(() => { if (state.step === at && !finished) next(); }, 300);
+        pointerPick = false;
+        setTimeout(next, reduced() ? 0 : 280);
       }
-      pointerPick = false;
-    } else if (t.name === 'consentimiento') {
-      if (t.checked) setError(9, '');
-      update();
-    }
-  });
-
-  ui.nombre.addEventListener('input', () => fieldChanged(5));
-  ui.nombre.addEventListener('blur', () => { if (ui.nombre.value.trim()) validate(5, true); });
-  ui.tel.addEventListener('input', onTelInput);
-  ui.tel.addEventListener('blur', () => { if (ui.tel.value.trim()) validate(6, true); });
-  ui.email.addEventListener('input', () => { fieldChanged(7); updateSuggestion(); });
-  ui.email.addEventListener('blur', () => { if (ui.email.value.trim()) validate(7, true); updateSuggestion(); });
-  ui.pais.addEventListener('input', () => fieldChanged(8));
-
-  form.addEventListener('click', (e) => {
-    const fix = e.target.closest('[data-fix-email]');
-    if (fix) {
-      ui.email.value = fix.dataset.fixEmail;
-      updateSuggestion();
-      fieldChanged(7);
-      ui.email.focus({ preventScroll: true });
       return;
     }
-    const edit = e.target.closest('[data-edit]');
-    if (edit) {
-      returnTo = TOTAL;
-      goTo(+edit.dataset.edit, 'back');
+    if (t.closest('[data-next]')) { next(); return; }
+    if (t.closest('[data-back]')) { back(); return; }
+    if (t.closest('[data-change]')) {
+      state.modelo = '';
+      showPicked(false);
+      update();
+      focusStep();
+      return;
     }
+    if (t.closest('[data-fix-email]')) {
+      ui.email.value = ui.suggest.dataset.value;
+      updateSuggestion();
+      clearError(6);
+      ui.email.focus();
+      return;
+    }
+    if (t.closest('[data-retry]')) retry();
   });
-  ui.next.addEventListener('click', next);
-  ui.back.addEventListener('click', back);
-  form.addEventListener('submit', (e) => { e.preventDefault(); submit(); });
-  form.querySelector('[data-retry]').addEventListener('click', retry);
-
-  // Enter avanza en los campos de texto y en las opciones
   form.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter' || e.isComposing) return;
     const t = e.target;
-    if (t.closest('.dd')) return;
-    if (t.matches('input[type="text"], input[type="tel"], input[type="email"], input[type="radio"], input[type="checkbox"]')) {
+    if (t.closest('.pf')) return; // el buscador de prefijos gestiona su propio Enter
+    if (t.matches('input:not([type=checkbox]), .opt input')) {
       e.preventDefault();
-      if (state.step === TOTAL) { if (validate(TOTAL, true)) submit(); } else next();
+      next();
     }
   });
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    next();
+  });
+  ui.name.addEventListener('input', () => clearError(4));
+  ui.tel.addEventListener('input', onTelInput);
+  ui.email.addEventListener('input', () => { clearError(6); updateSuggestion(); });
+  ui.consent.addEventListener('change', () => consentOk(false));
+  [ui.name, ui.tel, ui.email].forEach((f) => f.addEventListener('focus', () => setTimeout(fitStep, 350)));
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { if (form.contains(document.activeElement)) fitStep(); });
 
-  // Con el teclado móvil abierto, mantener visibles el campo y el botón
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', () => {
-      const a = document.activeElement;
-      if (!a || !form.contains(a) || !a.matches('input')) return;
-      const nav = form.querySelector('.qform__nav').getBoundingClientRect();
-      const vv = window.visualViewport;
-      const limit = vv.height + vv.offsetTop - 12;
-      if (nav.bottom > limit) window.scrollBy({ top: nav.bottom - limit, behavior: 'smooth' });
-    });
-  }
-
+  ready = true;
   update();
+  if (pending) {
+    applyPreselect(pending.model, pending.equipo);
+    pending = null;
+  }
 }
 
-/** Preselecciona producto y modelo desde "Me interesa". Devuelve el texto para el aviso. */
-export function preselect(product, model) {
-  initForm();
-  if (!ready || finished) return '';
-  if (product && !state.productos.includes(product)) {
-    state.productos.push(product);
-    syncProducts();
-    setError(1, '');
-  }
-  if (model) {
-    if (model === UNSURE) state.modelos = [UNSURE];
-    else if (!state.modelos.includes(model)) state.modelos = state.modelos.filter((m) => m !== UNSURE).concat(model);
-  }
-  if (state.step <= 2) {
-    if (state.step === 2) buildModelOptions();
-    else goTo(2);
-  }
-  update();
-  return model && model !== UNSURE ? model : product;
+export function preselect(model, equipo) {
+  if (!ready) { pending = { model, equipo }; return; }
+  applyPreselect(model, equipo);
 }
 
-export function focusCurrent() {
-  initForm();
+export function focusForm() {
   if (ready && !finished) focusStep();
 }

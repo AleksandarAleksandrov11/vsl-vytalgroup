@@ -3,1178 +3,393 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ecógrafos y diatermias para fisioterapeutas | VytalGroup</title>
-<meta name="description" content="Ecógrafos y diatermias certificados, elegidos por un fisioterapeuta para profesionales sanitarios. 2 años de garantía y mantenimiento sin letra pequeña.">
-<link rel="canonical" href="https://vytalgroup.org/">
-<meta name="theme-color" content="#0B1929">
-<meta name="color-scheme" content="dark light">
-<meta name="format-detection" content="telephone=no">
-
+<title>Ecógrafos y diatermias para fisios | VytalGroup</title>
+<meta name="description" content="Ecógrafos y diatermias certificados CE, con 2 años de garantía y mantenimiento asegurado. Te asesora Javier, fisioterapeuta.">
+<link rel="canonical" href="https://site-url.invalid/">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#FAFBFC">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_ES">
 <meta property="og:site_name" content="VytalGroup">
-<meta property="og:url" content="https://vytalgroup.org/">
-<meta property="og:title" content="Ecógrafos y diatermias, elegidos por un fisio | VytalGroup">
-<meta property="og:description" content="Equipos certificados para profesionales sanitarios, con 2 años de garantía y mantenimiento sin letra pequeña. Te asesora Javier Ruiz, fisioterapeuta.">
-<meta property="og:image" content="https://vytalgroup.org/assets/brand/og-image.jpg">
+<meta property="og:title" content="Ecógrafos y diatermias, sin letra pequeña">
+<meta property="og:description" content="Te asesora Javier, fisioterapeuta. No un comercial.">
+<meta property="og:url" content="https://site-url.invalid/">
+<meta property="og:image" content="https://site-url.invalid/assets/brand/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="VytalGroup: ecógrafos y diatermias elegidos por un fisioterapeuta">
+<meta property="og:image:alt" content="VytalGroup: ecógrafos y diatermias, sin letra pequeña">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Ecógrafos y diatermias, elegidos por un fisio | VytalGroup">
-<meta name="twitter:description" content="Equipos certificados para profesionales sanitarios, con 2 años de garantía y mantenimiento sin letra pequeña.">
-<meta name="twitter:image" content="https://vytalgroup.org/assets/brand/og-image.jpg">
-
+<meta name="twitter:title" content="Ecógrafos y diatermias, sin letra pequeña">
+<meta name="twitter:description" content="Te asesora Javier, fisioterapeuta. No un comercial.">
+<meta name="twitter:image" content="https://site-url.invalid/assets/brand/og-image.jpg">
 <link rel="icon" href="/assets/brand/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/assets/brand/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
-
-<link rel="preload" href="/assets/fonts/syne-800.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" as="image" imagesrcset="/assets/img/hero-diatermia-m-400.avif 400w, /assets/img/hero-diatermia-m-640.avif 640w" imagesizes="(min-width: 600px) 520px, 92vw" type="image/avif" media="(max-width: 1023px)" fetchpriority="high">
-<link rel="preload" as="image" imagesrcset="/assets/img/hero-diatermia-400.avif 400w, /assets/img/hero-diatermia-640.avif 640w" imagesizes="460px" type="image/avif" media="(min-width: 1024px)" fetchpriority="high">
-
-<script>
-  // Estado inicial: JS activo y, solo en la primera visita de la sesión, animación de entrada.
-  (function (d) {
-    var h = d.documentElement, intro = false;
-    h.className += ' js';
-    try {
-      intro = !sessionStorage.getItem('vg_intro') && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-    } catch (e) {}
-    if (intro) h.className += ' intro';
-  })(document);
-</script>
-<link rel="stylesheet" href="/assets/css/critical.css" data-inline>
-<link rel="stylesheet" href="/assets/css/main.css" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="/assets/css/main.css"></noscript>
-
+<link rel="preload" href="/assets/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/instrument-serif-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" as="image" type="image/avif" imagesrcset="/assets/img/hero-vytamed-400.avif 400w, /assets/img/hero-vytamed-560.avif 560w, /assets/img/hero-vytamed-760.avif 760w" imagesizes="(min-width: 1024px) 540px, (min-width: 640px) 480px, calc(100vw - 32px)" fetchpriority="high">
+<link rel="stylesheet" href="/assets/css/base.css" data-inline>
+<link rel="stylesheet" href="/assets/css/landing.css" data-inline>
+<script defer src="/config.js"></script>
+<script type="module" src="/assets/js/main.js"></script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "VytalGroup",
-  "url": "https://vytalgroup.org/",
-  "logo": "https://vytalgroup.org/assets/brand/icon-512.png",
-  "email": "vytalkinetech@gmail.com",
-  "telephone": "+34 616 372 644",
-  "founder": { "@type": "Person", "name": "Javier Ruiz", "jobTitle": "Fisioterapeuta" },
-  "sameAs": ["https://www.instagram.com/vytalgroup/", "https://www.instagram.com/fisioruiz_/"],
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "telephone": "+34 616 372 644",
-    "email": "vytalkinetech@gmail.com",
-    "contactType": "sales",
-    "availableLanguage": ["es"]
-  }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {"@type": "Question", "name": "¿Qué ecógrafo me conviene para fisioterapia?", "acceptedAnswer": {"@type": "Answer", "text": "Depende de cómo trabajes. Si te mueves entre consulta y domicilio, el Eco Wireless. Si haces procedimientos ecoguiados y musculoesquelético, el Acclarix AX8. Cuéntame tu caso y te recomiendo uno."}},
-    {"@type": "Question", "name": "¿Qué diferencia hay entre las diatermias?", "acceptedAnswer": {"@type": "Answer", "text": "La Multifunción VytaMeD une diatermia RET/CET y electroterapia TENS/IFC en 4 canales. Reatherm (200 W) y Reacare (160 W) son capacitivas y resistivas de I-Tech. HR Tek (250 W) de EME trabaja a 445, 900 y 1200 kHz."}},
-    {"@type": "Question", "name": "¿Los equipos están certificados?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Son productos sanitarios con marcado CE y su clase aparece en cada ficha. Con cada operación recibes la documentación técnica y regulatoria aplicable."}},
-    {"@type": "Question", "name": "¿Qué garantía tienen?", "acceptedAnswer": {"@type": "Answer", "text": "2 años de garantía en piezas y mano de obra, sin letra pequeña."}},
-    {"@type": "Question", "name": "¿Cómo funciona el mantenimiento?", "acceptedAnswer": {"@type": "Answer", "text": "Tienes el mantenimiento asegurado con servicio técnico especializado. Te explico desde el principio qué incluye, sin sorpresas."}},
-    {"@type": "Question", "name": "¿Enviáis fuera de España?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Enviamos a la Unión Europea, Estados Unidos y Latinoamérica, con la gestión aduanera incluida."}},
-    {"@type": "Question", "name": "¿Incluye instalación y formación?", "acceptedAnswer": {"@type": "Answer", "text": "La instalación, la formación y el soporte se definen según cada proyecto. Te lo concreto en la propuesta."}},
-    {"@type": "Question", "name": "¿Cómo es el proceso de compra?", "acceptedAnswer": {"@type": "Answer", "text": "Me cuentas qué necesitas, te recomiendo el equipo y su configuración y recibes una propuesta con las condiciones. Después coordinamos la entrega."}}
+  "@graph": [
+    {
+      "@type": "Organization",
+      "name": "VytalGroup",
+      "url": "https://site-url.invalid/",
+      "logo": "https://site-url.invalid/assets/brand/icon-512.png",
+      "email": "vytalkinetech@gmail.com",
+      "telephone": "+34 616 372 644",
+      "sameAs": ["https://www.instagram.com/vytalgroup/"],
+      "founder": { "@type": "Person", "name": "Javier Ruiz", "jobTitle": "Fisioterapeuta" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "¿Cuál me conviene?", "acceptedAnswer": { "@type": "Answer", "text": "Depende de cómo trabajas. Me lo cuentas y te recomiendo uno." } },
+        { "@type": "Question", "name": "¿Qué garantía tienen?", "acceptedAnswer": { "@type": "Answer", "text": "2 años en piezas y mano de obra, sin letra pequeña." } },
+        { "@type": "Question", "name": "¿Y el mantenimiento?", "acceptedAnswer": { "@type": "Answer", "text": "Está asegurado, y sabes lo que incluye desde el principio." } },
+        { "@type": "Question", "name": "¿Están certificados?", "acceptedAnswer": { "@type": "Answer", "text": "Sí. Son productos sanitarios con marcado CE y su documentación." } },
+        { "@type": "Question", "name": "¿Enviáis fuera de España?", "acceptedAnswer": { "@type": "Answer", "text": "Sí, a la UE, USA y LATAM, con la aduana gestionada." } }
+      ]
+    }
   ]
 }
 </script>
-<script defer src="/config.js"></script>
-<script type="module" src="/assets/js/main.js"></script>
 </head>
 <body>
-<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false"><defs><linearGradient id="vgm" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2F7BD0"/><stop offset=".55" stop-color="#3FA8C8"/><stop offset="1" stop-color="#5CC8C8"/></linearGradient></defs><symbol id="sig" viewBox="-64 114 3592 1230"><path fill="currentColor" d="M281 748q46 35 136 35h4q56-104 107-192-153 90-247 157m590-473q0-34-46-40-87 101-192 266 117-70 178-123 60-53 60-103M261 729q94-66 291-180 120-206 217-314-105 7-206 52T393 395 281 528t-43 121 23 80m149 74h-21q-88 0-142-31Q-9 961-9 1143q0 112 78 112 37 0 75-38l40-40q17-19 43-58l42-65 46-79 46-82zm485-530q-1 59-74 122T606 544q-78 126-141 236 97-15 164-71 4-3 9-3t5 6-22 22-68 36-98 28q-159 270-219 346-81 103-130 130-30 16-58 16-43 0-67-38-25-38-25-86 0-210 269-411-39-35-39-95 0-61 47-135 46-75 124-141 77-66 192-113 114-47 236-54 47-49 82-75 12-8 31-8 18 0 18 10 0 5-14 15l-21 16-41 43q23 5 39 21t16 34M780 786q-6 0-6-4 0-5 7-11 33-27 33-49 0-14-25-16-45 1-107 65-63 64-63 96 0 11 13 11 12 0 33-17 19-12 71-60 12-12 23-12 14 0 14 13 0 5-3 8l-11 13-14 17q-18 26-18 34 0 20 16 20 21 0 79-38 58-39 106-78l48-38q7-5 13-5t6 7v2q-77 65-162 122-86 57-113 57-32 0-32-34 0-8 3-15l3-10q0-3-2-4-3 0-38 27-36 27-62 27-27 0-27-28t38-75 100-87 123-39q14 0 24 7 9 7 9 22 0 14-29 43t-50 29m373-39-16-7q-19 0-207 163-18 16-26 16-9 0-13-6-5-6-5-13 0-8 34-68 34-61 34-65 0-5-4-5-14 7-21 7t-7-4 4-9q42-33 59-33 16 0 16 19t-25 62-25 49 4 7 8-4l53-46q163-128 178-128h1q6 0 12 4t6 12-23 29-37 20m188-143q9 0 15 6 5 6 5 17t-15 28-26 17-16-6-5-15 16-28 26-19m82 135q8-5 13-5 4 0 4 6v3q4 0-53 44-58 44-123 88-66 44-83 44-29 0-29-24 0-29 50-109 50-81 73-81 17 0 17 13t-46 71-46 83q0 14 11 14 10 0 52-28 75-50 138-101Zm255 1q7-5 13-5t6 7v2q-104 86-173 129t-125 43q-45 0-45-44 0-65 66-133 66-69 111-69 25 0 25 28-5 55-158 148v10q0 33 35 33 34 0 74-23 78-46 146-105Zm-173-39q-22 0-56 37-35 37-47 84 48-29 81-61 33-33 33-46 0-14-11-14m395 39q7-5 13-5t6 7v2q-75 60-148 113-73 52-107 52-25 0-25-27t24-54 48-47 23-26-7-15-13-12q-17 17-74 62l-4-15q63-50 73-67v-9q0-25 5-34t24-25 26-16 13 5 5 10-3 12l-7 11-10 11q-6 6-7 9-2 2-3 8-2 6-7 10t-5 10 8 27 8 30-37 45-37 57q0 12 11 12 14 0 52-25l12-8q65-45 122-91Zm566-261q0-9-16-10-50 101-144 224-94 122-177 203-84 81-112 81-29 0-29-24 0-56 139-225 138-170 310-316 17-49 17-87 0-39-21-66-22-28-58-41-64-23-135-23-164 0-166 55 0 21 25 37 25 15 62 27 36 12 73 27 36 14 62 41 25 27 25 58t-9 31-10-12q0-37-42-64t-92-41-92-39-42-51 21-45 53-27q64-16 116-16t95 7 83 24 66 48 25 76q0 16-5 39 238-189 381-189 53 0 53 40 0 47-63 127-64 79-149 141t-140 62q-34 0-60-14l-4-1q-3 0-3 31l2 61q1 30 8 82 7 51 20 88 13 36 39 64t60 28 104-32q10-5 18-5 7 0 7 4 0 9-15 16-86 45-134 45t-79-34-44-93-16-113-4-117-3-82m11-72q-8 23-18 44h32q5 0 6 9l2 22q1 13 7 22 6 8 24 18 17 10 40 10 46 0 119-62 72-63 125-137 53-75 53-109 0-18-18-18-125 0-372 201m-446 540q23 0 98-77t162-197 130-219q-158 136-276 281-119 145-119 205 0 7 5 7m876-54q0-15 15-39 14-24 15-28t-2-4-8 6l-61 42q-56 36-77 36-14 0-14-18t56-93 79-75q5 0 10 5 4 4 4 7 0 2-51 61-52 59-52 76 0 4 4 4 19 0 82-51t90-79 41-28 15 13q0 8-6 16l-22 29-31 38q-39 50-39 63 0 12 11 12 10 0 51-28 76-50 139-101l22-18q7-5 12-5t5 6v3q4 0-53 44-58 44-123 88-66 44-83 44-29 0-29-26m377-289q9 0 15 6 5 6 5 17t-15 28-26 17-16-6-5-15 16-28 26-19m82 135q8-5 13-5 4 0 4 6v3q4 0-53 44-58 44-123 88-66 44-83 44-29 0-29-24 0-29 50-109 50-81 73-81 17 0 17 13t-46 71-46 83q0 14 11 14 10 0 52-28 75-50 138-101Zm-260 559q24 0 80-56t107-135 58-135q-103 67-179 152-77 84-77 159 0 15 11 15m355-386q-33 12-77 40v5q0 60-62 150t-134 154-107 63q-26 0-26-29 0-42 29-91 28-50 74-96 90-93 195-159-5-52-67-56-15 0-15-9 0-3 14-11l45-28q31-19 77-58 46-40 46-63 0-11-10-11-23 0-88 52l-31 25-4-15 27-21q90-74 134-74 27 0 27 29 0 59-182 160-8 4-8 8t2 4q50 13 61 51 23-14 50-26 26-13 34-13t8 7-12 12"/></symbol><symbol id="logo" viewBox="0 0 1117 171"><g class="lg-m"><path d="M147.18.748C132.672 3.504 122.064 9.016 112.028 19c-8.112 8.06-12.116 14.82-23.348 39.52-3.744 8.268-6.032 13.104-10.088 21.684-.936 1.976-1.872 3.536-2.08 3.536s-4.368-8.112-9.308-18.096C49.576 29.868 39.124 8.548 38.032 6.104L36.94 3.66H18.792c-9.932 0-18.2.104-18.356.312-.312.26.52 1.924 16.484 32.968 4.888 9.568 19.864 39.364 33.228 66.196 13.416 26.78 24.492 48.724 24.7 48.724.468 0 4.316-8.06 8.528-17.68 1.56-3.588 4.94-11.18 7.54-16.9a3285 3285 0 0 1 8.424-18.72c2.028-4.576 5.46-12.064 7.54-16.64s5.46-12.116 7.488-16.796c8.58-19.448 10.92-23.504 17.368-29.952 14.716-14.664 40.82-14.04 57.98 1.456 2.08 1.872 3.952 3.432 4.212 3.432.208 0 1.768-1.56 3.484-3.484 1.664-1.924 5.252-5.824 7.904-8.632 2.6-2.86 4.784-5.46 4.784-5.824 0-.832-5.356-5.772-8.476-7.852-1.196-.832-2.808-1.976-3.588-2.6-5.72-4.576-18.564-9.412-29.38-11.076-4.836-.728-17.16-.624-21.476.156"/><path d="M150.82 48.64c0 7.592.728 6.968-8.06 7.176l-5.72.104-.156 6.448c-.052 3.536.104 6.708.364 6.968.364.364 3.172.572 12.376.832 1.144.052 1.144.26 1.3 6.656l.156 6.656h14.04l.156-6.656c.052-3.64.312-6.604.52-6.656.208 0 3.12-.104 6.5-.156 3.38-.104 6.292-.312 6.448-.52.156-.156.312-3.276.364-6.916l.052-6.656-6.864-.156-6.916-.156V42.14h-14.56zm56.212 35.1-29.38.26-3.796 4.42c-8.632 10.036-14.976 17.784-15.132 18.512-.156.624 3.276.728 24.804.728 20.696 0 25.012.104 25.012.728 0 1.872-6.032 12.74-9.152 16.484-26.364 31.616-72.332 24.908-90.168-13.208-1.3-2.756-2.496-4.992-2.756-5.044-.676 0-12.844 26.364-12.844 27.924 0 1.82 6.708 9.984 12.064 14.768 20.28 17.94 41.756 24.18 67.756 19.708 27.404-4.732 52.052-26.988 60.736-54.86 4.576-14.612 6.084-31.564 2.704-30.784-.26.052-13.728.208-29.848.364"/></g><path d="M631.2 8.5c-.3.7-.4 27.2-.3 58.8l.3 57.5h20l.3-58.8.2-58.7h-10c-7.1 0-10.2.4-10.5 1.2m-358 3.8c-.3.5.5 3.6 1.8 6.7 1.3 3.2 5.9 14.3 10.1 24.8 4.3 10.4 10 24.2 12.6 30.5 2.7 6.3 7.1 17.1 9.9 24 2.7 6.9 6.3 15.6 7.9 19.5l2.9 7h21.5l2.5-6c4.1-9.8 19.8-48.3 29.8-73 5.1-12.7 10.2-25.2 11.4-27.8 1.2-2.7 1.9-5.3 1.5-5.8-.3-.5-5.5-.9-11.5-.9-10.4 0-11 .1-11.8 2.2-6.5 16.3-18.5 47.2-24.2 61.8-3.9 10.2-7.4 18.9-7.8 19.3s-3.6-6.6-7.1-15.5c-3.5-9-10.5-26.9-15.5-39.8-5.1-12.9-9.6-24.5-9.9-25.8-.7-2.1-1.2-2.2-12.1-2.2-6.4 0-11.6.4-12 1m208.5 17.5v11.5h-9l-.1 6.2c-.1 3.5-.2 7.4-.2 8.8-.1 2.3.3 2.5 4.5 2.8l4.7.3.3 25.2c.4 29.7 1.1 32.5 10.3 38.2 6.6 4.1 22.2 4.5 29.3.7l4.3-2.3-.3-7.7c-.3-7.6-.3-7.7-2.8-7.4-20.4 2.4-19.4 3.7-19.8-24.9l-.3-21.8 11.3-.3 11.3-.3v-17l-11.2-.3-11.3-.3V18.3h-21zm75.5 13.9c-12.7 4.1-12.8 4.2-9.3 12.7 3 7.4 2.9 7.4 9.9 5 8.6-2.9 23-3 27.6-.1 4.1 2.5 6.3 5.9 7 11 .6 4.5.7 4.5-6.7 2.5-12.5-3.4-28.9-.9-37.8 5.6-14.8 10.9-12.7 34.4 3.9 42.9 10.9 5.7 27.7 4.1 36.5-3.3 4.1-3.5 4.2-3.4 4.6 1l.3 3.8h19v-60l-3.3-6.8c-6-12.2-15.4-16.7-34.3-16.7-8 .1-12 .6-17.4 2.4M589 89.3c3.5 1 3.7 1.3 3.7 5.3 0 9.3-8.6 16.7-19.2 16.7-9.4 0-14.8-4.3-14.8-11.7 0-10.4 13.6-15 30.3-10.3M382.1 44.9c.4 1.4 3.9 9.9 7.7 18.8 3.9 8.8 7.9 18.5 8.9 21.4 1.1 2.9 5.2 12.7 9.1 21.8 6.9 15.8 7.1 16.7 6 20.4-2.3 7.7-8.3 10.4-16.6 7.5-2.1-.8-4-1.3-4.1-1.2-1.1 1.3-6.4 13-6.4 14.1 0 3.7 18.4 6.9 26.8 4.7 4.7-1.3 11-6.4 14.1-11.4 1.1-1.8 9.3-21.6 18.4-44.2s17.6-43.6 19.1-46.9c1.4-3.2 2.6-6.2 2.6-6.7s-4.9-.9-11-.9c-6 0-11 .2-11 .3 0 .8-12 34.8-16.1 45.6l-4.3 11.5-1.8-4.4c-1.7-4-7-18.2-16.2-43l-3.4-9.5-11.2-.3-11.2-.3z" class="lg-a"/><path d="M710.5 12.7c-15.4 5.5-26.7 15.6-33.5 29.6-19.5 40.7 8.2 85 53.2 85 12.8 0 33.4-7.5 41.6-15.2l3.5-3.3-.2-20.5c-.1-11.3-.2-21.3-.3-22.3-.1-1.6-1.7-1.7-23.8-1.5l-23.8.3v13l16 .5 16 .5v24.9l-7.6 3.8c-29.2 14.5-60.1-.9-64.2-32.1-2.6-20.1 6-37.9 22.7-46.8 7.1-3.7 7.2-3.7 19.1-3.7 13.2 0 19.2 2 28.9 9.6l3.9 3.1 4.3-4.9c2.4-2.7 4.2-5.6 4.1-6.4-.3-2.1-12.9-10.6-19.6-13.2-9-3.5-31.2-3.7-40.3-.4m168.7 30c-32.1 7.8-43.9 46.4-21.7 70.7 26 28.4 74.2 9.9 74.2-28.5 0-28.5-25.3-48.8-52.5-42.2m20.5 14.7c6 2.7 10.7 6.4 12.5 9.8 11.6 22.5-.2 46.1-22.9 46.1-22.5 0-35.1-22.8-24.5-44 5.7-11.5 22.9-17.4 34.9-11.9m168.8-14.7c-6 1.7-12.5 5.5-16.3 9.6l-3 3.2-.5-5.9-.5-5.8-6.6-.3-6.6-.3-.6 12.8c-.5 10.7-.4 40.3.2 88.5l.1 8.8h14v-19.5c0-10.7.4-19.5.8-19.5s2.3 1.5 4.1 3.3c6.9 7.2 20.3 11.1 30.7 8.9 23.8-4.9 37.2-28.5 31-54.5-5.1-20.9-27.3-34.9-46.8-29.3m18.7 15.6c9.4 5.2 13.6 12.2 14.3 23.6 1.2 21.8-14.2 35.4-34.3 30.3-19.5-4.9-25.1-37.4-8.7-50.9 7.7-6.3 20.4-7.7 28.7-3M825.5 44.2c-6.3 2.5-10.4 5.6-13.8 10.3l-2.9 4-.3-7.4-.3-7.3h-14v81h14l.5-22.5c.5-19.6.9-23.2 2.6-27.6 4.1-10.1 11.4-15.5 22.8-16.9 6.4-.8 6.9-1.7 6.4-10.1l-.3-4.9-5-.2c-3-.2-6.9.5-9.7 1.6m118.6.5c-.3.8-.4 14-.2 29.3.4 30.4.9 33.2 6.9 42 9.3 13.4 33.6 14.7 47 2.5l3.8-3.3.3 4.8.3 4.8h14v-81h-14l-.5 26c-.6 28.7-1.2 31.6-7.6 37.7-7.4 6.9-22.7 7.7-28.5 1.5-6-6.3-6.3-8-6.9-37.7l-.5-27.5-6.8-.3c-5.2-.2-6.9 0-7.3 1.2" class="lg-b"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol><symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol><symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></symbol><symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol><symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 3.5h2.3l1.5 4-2 1.4a11 11 0 0 0 6.7 6.7l1.4-2 4 1.5v2.3a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z"/></symbol><symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M4 7.5l8 5.5 8-5.5"/></symbol><symbol id="i-instagram" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".4" fill="currentColor"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.4-7.5 9.5-4.3-1.1-7.5-4.9-7.5-9.5V6L12 3z"/><path d="M8.8 12.2l2.2 2.2 4.3-4.4"/></symbol><symbol id="i-award" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.8"/><path d="M8.9 14l-1.4 7 4.5-2.5 4.5 2.5-1.4-7"/><path d="M9.6 9l1.7 1.7 3.1-3.2"/></symbol><symbol id="i-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.4-3.4a6 6 0 0 1-7.9 7.9l-6.6 6.6a2.1 2.1 0 0 1-3-3l6.6-6.6a6 6 0 0 1 7.9-7.9l-3.4 3.4z"/></symbol><symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol><symbol id="i-stetho" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5H5.2a1 1 0 0 0-1 1V9a4.8 4.8 0 0 0 9.6 0V4.5a1 1 0 0 0-1-1h-1.3"/><path d="M9 13.8v1.7a4.8 4.8 0 0 0 9.6 0v-2.3"/><circle cx="18.6" cy="11" r="2.1"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol><symbol id="i-truck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v9.5H3zM14 9h3.6l2.9 3v3.5H14"/><circle cx="7" cy="18" r="1.7"/><circle cx="17" cy="18" r="1.7"/></symbol><symbol id="i-support" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 14v-2a7.5 7.5 0 0 1 15 0v2"/><rect x="3.5" y="13" width="3.8" height="6" rx="1.5"/><rect x="16.7" y="13" width="3.8" height="6" rx="1.5"/><path d="M18.6 19v.3a2.7 2.7 0 0 1-2.7 2.7H13"/></symbol><symbol id="i-probe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5h4v7l3.5 3.4v3.1a5.5 2.6 0 0 1-11 0v-3.1L10 9.5z"/><path d="M7.5 21c3 1.2 6 1.2 9 0"/></symbol><symbol id="i-heat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="4" rx="2"/><rect x="3.5" y="16.5" width="17" height="4" rx="2"/><path d="M6.5 12c1.3-1.1 2.5-1.1 3.8 0s2.5 1.1 3.8 0 2.5-1.1 3.8 0"/></symbol><symbol id="i-legs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 2.5h5.5v12.6l4.6 3.1a1.6 1.6 0 0 1-.9 2.9H8.5z"/><path d="M8.5 6.6H14M8.5 10.7H14M8.5 14.8H14"/></symbol><symbol id="i-grid" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></symbol><symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.2v13.6L19 12z"/></symbol><symbol id="i-whatsapp" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm0 18.15a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48a.92.92 0 0 0-.66.31c-.22.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.16-.47-.28z"/></symbol></svg>
+<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false"><defs><linearGradient id="vgl" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#102850"/><stop offset=".55" stop-color="#2A6FA8"/><stop offset="1" stop-color="#48A0A8"/></linearGradient><linearGradient id="vgd" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2F7BD0"/><stop offset=".55" stop-color="#3FA8C8"/><stop offset="1" stop-color="#5CC8C8"/></linearGradient></defs><symbol id="logo" viewBox="0 0 1117 171"><g class="lg-m"><path d="M147.18.748C132.672 3.504 122.064 9.016 112.028 19c-8.112 8.06-12.116 14.82-23.348 39.52-3.744 8.268-6.032 13.104-10.088 21.684-.936 1.976-1.872 3.536-2.08 3.536s-4.368-8.112-9.308-18.096C49.576 29.868 39.124 8.548 38.032 6.104L36.94 3.66H18.792c-9.932 0-18.2.104-18.356.312-.312.26.52 1.924 16.484 32.968 4.888 9.568 19.864 39.364 33.228 66.196 13.416 26.78 24.492 48.724 24.7 48.724.468 0 4.316-8.06 8.528-17.68 1.56-3.588 4.94-11.18 7.54-16.9a3285 3285 0 0 1 8.424-18.72c2.028-4.576 5.46-12.064 7.54-16.64s5.46-12.116 7.488-16.796c8.58-19.448 10.92-23.504 17.368-29.952 14.716-14.664 40.82-14.04 57.98 1.456 2.08 1.872 3.952 3.432 4.212 3.432.208 0 1.768-1.56 3.484-3.484 1.664-1.924 5.252-5.824 7.904-8.632 2.6-2.86 4.784-5.46 4.784-5.824 0-.832-5.356-5.772-8.476-7.852-1.196-.832-2.808-1.976-3.588-2.6-5.72-4.576-18.564-9.412-29.38-11.076-4.836-.728-17.16-.624-21.476.156"/><path d="M150.82 48.64c0 7.592.728 6.968-8.06 7.176l-5.72.104-.156 6.448c-.052 3.536.104 6.708.364 6.968.364.364 3.172.572 12.376.832 1.144.052 1.144.26 1.3 6.656l.156 6.656h14.04l.156-6.656c.052-3.64.312-6.604.52-6.656.208 0 3.12-.104 6.5-.156 3.38-.104 6.292-.312 6.448-.52.156-.156.312-3.276.364-6.916l.052-6.656-6.864-.156-6.916-.156V42.14h-14.56zm56.212 35.1-29.38.26-3.796 4.42c-8.632 10.036-14.976 17.784-15.132 18.512-.156.624 3.276.728 24.804.728 20.696 0 25.012.104 25.012.728 0 1.872-6.032 12.74-9.152 16.484-26.364 31.616-72.332 24.908-90.168-13.208-1.3-2.756-2.496-4.992-2.756-5.044-.676 0-12.844 26.364-12.844 27.924 0 1.82 6.708 9.984 12.064 14.768 20.28 17.94 41.756 24.18 67.756 19.708 27.404-4.732 52.052-26.988 60.736-54.86 4.576-14.612 6.084-31.564 2.704-30.784-.26.052-13.728.208-29.848.364"/></g><path d="M631.2 8.5c-.3.7-.4 27.2-.3 58.8l.3 57.5h20l.3-58.8.2-58.7h-10c-7.1 0-10.2.4-10.5 1.2m-358 3.8c-.3.5.5 3.6 1.8 6.7 1.3 3.2 5.9 14.3 10.1 24.8 4.3 10.4 10 24.2 12.6 30.5 2.7 6.3 7.1 17.1 9.9 24 2.7 6.9 6.3 15.6 7.9 19.5l2.9 7h21.5l2.5-6c4.1-9.8 19.8-48.3 29.8-73 5.1-12.7 10.2-25.2 11.4-27.8 1.2-2.7 1.9-5.3 1.5-5.8-.3-.5-5.5-.9-11.5-.9-10.4 0-11 .1-11.8 2.2-6.5 16.3-18.5 47.2-24.2 61.8-3.9 10.2-7.4 18.9-7.8 19.3s-3.6-6.6-7.1-15.5c-3.5-9-10.5-26.9-15.5-39.8-5.1-12.9-9.6-24.5-9.9-25.8-.7-2.1-1.2-2.2-12.1-2.2-6.4 0-11.6.4-12 1m208.5 17.5v11.5h-9l-.1 6.2c-.1 3.5-.2 7.4-.2 8.8-.1 2.3.3 2.5 4.5 2.8l4.7.3.3 25.2c.4 29.7 1.1 32.5 10.3 38.2 6.6 4.1 22.2 4.5 29.3.7l4.3-2.3-.3-7.7c-.3-7.6-.3-7.7-2.8-7.4-20.4 2.4-19.4 3.7-19.8-24.9l-.3-21.8 11.3-.3 11.3-.3v-17l-11.2-.3-11.3-.3V18.3h-21zm75.5 13.9c-12.7 4.1-12.8 4.2-9.3 12.7 3 7.4 2.9 7.4 9.9 5 8.6-2.9 23-3 27.6-.1 4.1 2.5 6.3 5.9 7 11 .6 4.5.7 4.5-6.7 2.5-12.5-3.4-28.9-.9-37.8 5.6-14.8 10.9-12.7 34.4 3.9 42.9 10.9 5.7 27.7 4.1 36.5-3.3 4.1-3.5 4.2-3.4 4.6 1l.3 3.8h19v-60l-3.3-6.8c-6-12.2-15.4-16.7-34.3-16.7-8 .1-12 .6-17.4 2.4M589 89.3c3.5 1 3.7 1.3 3.7 5.3 0 9.3-8.6 16.7-19.2 16.7-9.4 0-14.8-4.3-14.8-11.7 0-10.4 13.6-15 30.3-10.3M382.1 44.9c.4 1.4 3.9 9.9 7.7 18.8 3.9 8.8 7.9 18.5 8.9 21.4 1.1 2.9 5.2 12.7 9.1 21.8 6.9 15.8 7.1 16.7 6 20.4-2.3 7.7-8.3 10.4-16.6 7.5-2.1-.8-4-1.3-4.1-1.2-1.1 1.3-6.4 13-6.4 14.1 0 3.7 18.4 6.9 26.8 4.7 4.7-1.3 11-6.4 14.1-11.4 1.1-1.8 9.3-21.6 18.4-44.2s17.6-43.6 19.1-46.9c1.4-3.2 2.6-6.2 2.6-6.7s-4.9-.9-11-.9c-6 0-11 .2-11 .3 0 .8-12 34.8-16.1 45.6l-4.3 11.5-1.8-4.4c-1.7-4-7-18.2-16.2-43l-3.4-9.5-11.2-.3-11.2-.3z" class="lg-a"/><path d="M710.5 12.7c-15.4 5.5-26.7 15.6-33.5 29.6-19.5 40.7 8.2 85 53.2 85 12.8 0 33.4-7.5 41.6-15.2l3.5-3.3-.2-20.5c-.1-11.3-.2-21.3-.3-22.3-.1-1.6-1.7-1.7-23.8-1.5l-23.8.3v13l16 .5 16 .5v24.9l-7.6 3.8c-29.2 14.5-60.1-.9-64.2-32.1-2.6-20.1 6-37.9 22.7-46.8 7.1-3.7 7.2-3.7 19.1-3.7 13.2 0 19.2 2 28.9 9.6l3.9 3.1 4.3-4.9c2.4-2.7 4.2-5.6 4.1-6.4-.3-2.1-12.9-10.6-19.6-13.2-9-3.5-31.2-3.7-40.3-.4m168.7 30c-32.1 7.8-43.9 46.4-21.7 70.7 26 28.4 74.2 9.9 74.2-28.5 0-28.5-25.3-48.8-52.5-42.2m20.5 14.7c6 2.7 10.7 6.4 12.5 9.8 11.6 22.5-.2 46.1-22.9 46.1-22.5 0-35.1-22.8-24.5-44 5.7-11.5 22.9-17.4 34.9-11.9m168.8-14.7c-6 1.7-12.5 5.5-16.3 9.6l-3 3.2-.5-5.9-.5-5.8-6.6-.3-6.6-.3-.6 12.8c-.5 10.7-.4 40.3.2 88.5l.1 8.8h14v-19.5c0-10.7.4-19.5.8-19.5s2.3 1.5 4.1 3.3c6.9 7.2 20.3 11.1 30.7 8.9 23.8-4.9 37.2-28.5 31-54.5-5.1-20.9-27.3-34.9-46.8-29.3m18.7 15.6c9.4 5.2 13.6 12.2 14.3 23.6 1.2 21.8-14.2 35.4-34.3 30.3-19.5-4.9-25.1-37.4-8.7-50.9 7.7-6.3 20.4-7.7 28.7-3M825.5 44.2c-6.3 2.5-10.4 5.6-13.8 10.3l-2.9 4-.3-7.4-.3-7.3h-14v81h14l.5-22.5c.5-19.6.9-23.2 2.6-27.6 4.1-10.1 11.4-15.5 22.8-16.9 6.4-.8 6.9-1.7 6.4-10.1l-.3-4.9-5-.2c-3-.2-6.9.5-9.7 1.6m118.6.5c-.3.8-.4 14-.2 29.3.4 30.4.9 33.2 6.9 42 9.3 13.4 33.6 14.7 47 2.5l3.8-3.3.3 4.8.3 4.8h14v-81h-14l-.5 26c-.6 28.7-1.2 31.6-7.6 37.7-7.4 6.9-22.7 7.7-28.5 1.5-6-6.3-6.3-8-6.9-37.7l-.5-27.5-6.8-.3c-5.2-.2-6.9 0-7.3 1.2" class="lg-b"/></symbol><symbol id="sig" viewBox="-64 114 3592 1230"><path fill="currentColor" d="M281 748q46 35 136 35h4q56-104 107-192-153 90-247 157m590-473q0-34-46-40-87 101-192 266 117-70 178-123 60-53 60-103M261 729q94-66 291-180 120-206 217-314-105 7-206 52T393 395 281 528t-43 121 23 80m149 74h-21q-88 0-142-31Q-9 961-9 1143q0 112 78 112 37 0 75-38l40-40q17-19 43-58l42-65 46-79 46-82zm485-530q-1 59-74 122T606 544q-78 126-141 236 97-15 164-71 4-3 9-3t5 6-22 22-68 36-98 28q-159 270-219 346-81 103-130 130-30 16-58 16-43 0-67-38-25-38-25-86 0-210 269-411-39-35-39-95 0-61 47-135 46-75 124-141 77-66 192-113 114-47 236-54 47-49 82-75 12-8 31-8 18 0 18 10 0 5-14 15l-21 16-41 43q23 5 39 21t16 34M780 786q-6 0-6-4 0-5 7-11 33-27 33-49 0-14-25-16-45 1-107 65-63 64-63 96 0 11 13 11 12 0 33-17 19-12 71-60 12-12 23-12 14 0 14 13 0 5-3 8l-11 13-14 17q-18 26-18 34 0 20 16 20 21 0 79-38 58-39 106-78l48-38q7-5 13-5t6 7v2q-77 65-162 122-86 57-113 57-32 0-32-34 0-8 3-15l3-10q0-3-2-4-3 0-38 27-36 27-62 27-27 0-27-28t38-75 100-87 123-39q14 0 24 7 9 7 9 22 0 14-29 43t-50 29m373-39-16-7q-19 0-207 163-18 16-26 16-9 0-13-6-5-6-5-13 0-8 34-68 34-61 34-65 0-5-4-5-14 7-21 7t-7-4 4-9q42-33 59-33 16 0 16 19t-25 62-25 49 4 7 8-4l53-46q163-128 178-128h1q6 0 12 4t6 12-23 29-37 20m188-143q9 0 15 6 5 6 5 17t-15 28-26 17-16-6-5-15 16-28 26-19m82 135q8-5 13-5 4 0 4 6v3q4 0-53 44-58 44-123 88-66 44-83 44-29 0-29-24 0-29 50-109 50-81 73-81 17 0 17 13t-46 71-46 83q0 14 11 14 10 0 52-28 75-50 138-101Zm255 1q7-5 13-5t6 7v2q-104 86-173 129t-125 43q-45 0-45-44 0-65 66-133 66-69 111-69 25 0 25 28-5 55-158 148v10q0 33 35 33 34 0 74-23 78-46 146-105Zm-173-39q-22 0-56 37-35 37-47 84 48-29 81-61 33-33 33-46 0-14-11-14m395 39q7-5 13-5t6 7v2q-75 60-148 113-73 52-107 52-25 0-25-27t24-54 48-47 23-26-7-15-13-12q-17 17-74 62l-4-15q63-50 73-67v-9q0-25 5-34t24-25 26-16 13 5 5 10-3 12l-7 11-10 11q-6 6-7 9-2 2-3 8-2 6-7 10t-5 10 8 27 8 30-37 45-37 57q0 12 11 12 14 0 52-25l12-8q65-45 122-91Zm566-261q0-9-16-10-50 101-144 224-94 122-177 203-84 81-112 81-29 0-29-24 0-56 139-225 138-170 310-316 17-49 17-87 0-39-21-66-22-28-58-41-64-23-135-23-164 0-166 55 0 21 25 37 25 15 62 27 36 12 73 27 36 14 62 41 25 27 25 58t-9 31-10-12q0-37-42-64t-92-41-92-39-42-51 21-45 53-27q64-16 116-16t95 7 83 24 66 48 25 76q0 16-5 39 238-189 381-189 53 0 53 40 0 47-63 127-64 79-149 141t-140 62q-34 0-60-14l-4-1q-3 0-3 31l2 61q1 30 8 82 7 51 20 88 13 36 39 64t60 28 104-32q10-5 18-5 7 0 7 4 0 9-15 16-86 45-134 45t-79-34-44-93-16-113-4-117-3-82m11-72q-8 23-18 44h32q5 0 6 9l2 22q1 13 7 22 6 8 24 18 17 10 40 10 46 0 119-62 72-63 125-137 53-75 53-109 0-18-18-18-125 0-372 201m-446 540q23 0 98-77t162-197 130-219q-158 136-276 281-119 145-119 205 0 7 5 7m876-54q0-15 15-39 14-24 15-28t-2-4-8 6l-61 42q-56 36-77 36-14 0-14-18t56-93 79-75q5 0 10 5 4 4 4 7 0 2-51 61-52 59-52 76 0 4 4 4 19 0 82-51t90-79 41-28 15 13q0 8-6 16l-22 29-31 38q-39 50-39 63 0 12 11 12 10 0 51-28 76-50 139-101l22-18q7-5 12-5t5 6v3q4 0-53 44-58 44-123 88-66 44-83 44-29 0-29-26m377-289q9 0 15 6 5 6 5 17t-15 28-26 17-16-6-5-15 16-28 26-19m82 135q8-5 13-5 4 0 4 6v3q4 0-53 44-58 44-123 88-66 44-83 44-29 0-29-24 0-29 50-109 50-81 73-81 17 0 17 13t-46 71-46 83q0 14 11 14 10 0 52-28 75-50 138-101Zm-260 559q24 0 80-56t107-135 58-135q-103 67-179 152-77 84-77 159 0 15 11 15m355-386q-33 12-77 40v5q0 60-62 150t-134 154-107 63q-26 0-26-29 0-42 29-91 28-50 74-96 90-93 195-159-5-52-67-56-15 0-15-9 0-3 14-11l45-28q31-19 77-58 46-40 46-63 0-11-10-11-23 0-88 52l-31 25-4-15 27-21q90-74 134-74 27 0 27 29 0 59-182 160-8 4-8 8t2 4q50 13 61 51 23-14 50-26 26-13 34-13t8 7-12 12"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol><symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol><symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></symbol><symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol><symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol><symbol id="i-whatsapp" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2zm0 18.15a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24 2.2 0 4.27.86 5.83 2.42a8.18 8.18 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48a.92.92 0 0 0-.66.31c-.22.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.16-.47-.28z"/></symbol></svg>
+<a class="skip" href="#main">Saltar al contenido</a>
 
-<a class="skip" href="#contenido">Saltar al contenido</a>
-
-<!-- Animación de entrada (solo primera visita de la sesión y sin reduced motion) -->
-<div class="intro-overlay" aria-hidden="true">
-  <div class="intro-overlay__core">
-    <span class="intro-overlay__ring"></span><span class="intro-overlay__ring"></span><span class="intro-overlay__ring"></span>
-    <svg class="intro-overlay__logo" viewBox="0 0 1117 171"><use href="#logo"/></svg>
-  </div>
-  <span class="intro-overlay__line"></span>
-</div>
-
-<header class="header" id="header">
-  <div class="header__inner container">
-    <a class="header__logo" href="#inicio" aria-label="VytalGroup, volver al inicio">
-      <svg class="logo" viewBox="0 0 1117 171" aria-hidden="true"><use href="#logo"/></svg>
-    </a>
-    <nav class="nav" aria-label="Principal">
-      <ul class="nav__list">
-        <li><a class="nav__link" href="#ecografos">Ecógrafos</a></li>
-        <li><a class="nav__link" href="#diatermias">Diatermias</a></li>
-        <li><a class="nav__link" href="#como-trabajamos">Cómo trabajamos</a></li>
-        <li><a class="nav__link" href="#preguntas">Preguntas</a></li>
-      </ul>
-    </nav>
-    <a class="btn btn--primary btn--sm header__cta" href="#asesoramiento" data-cta><span class="hide-sm">Pedir asesoramiento</span><span class="show-sm">Asesórame</span></a>
-    <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menú">
-      <span class="burger__lines" aria-hidden="true"><span></span><span></span></span>
-    </button>
+<header class="hd" data-header>
+  <div class="hd__bar wrap">
+    <a class="hd__logo" href="#inicio" aria-label="VytalGroup, volver al inicio"><svg class="logo" viewBox="0 0 1117 171" aria-hidden="true"><use href="#logo"/></svg></a>
+    <a class="btn btn--primary btn--sm" href="#asesoramiento" data-cta>Quiero asesoramiento</a>
   </div>
 </header>
 
-<div class="menu" id="menu" hidden>
-  <div class="menu__inner">
-    <nav aria-label="Menú móvil">
-      <ul class="menu__list">
-        <li><a class="menu__link" href="#ecografos"><span>01</span>Ecógrafos</a></li>
-        <li><a class="menu__link" href="#diatermias"><span>02</span>Diatermias</a></li>
-        <li><a class="menu__link" href="#como-trabajamos"><span>03</span>Cómo trabajamos</a></li>
-        <li><a class="menu__link" href="#preguntas"><span>04</span>Preguntas</a></li>
-      </ul>
-    </nav>
-    <div class="menu__actions">
-      <a class="btn btn--primary btn--block" href="#asesoramiento" data-cta>Pedir asesoramiento <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-      <a class="btn btn--wa btn--block" href="https://wa.me/34616372644?text=Hola%20Javier%2C%20vengo%20de%20la%20web%20y%20quiero%20informaci%C3%B3n%20sobre..." target="_blank" rel="noopener" data-whatsapp><svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg> Escribir por WhatsApp</a>
-    </div>
-    <p class="menu__foot">Información dirigida a profesionales sanitarios.</p>
-  </div>
-</div>
-
-<main id="contenido">
-
-  <!-- ============================== HERO -->
-  <section class="hero section-dark" id="inicio" aria-labelledby="hero-title">
-    <div class="hero__bg" aria-hidden="true">
-      <span class="glow glow--a"></span><span class="glow glow--b"></span>
-      <svg class="hero__rings" viewBox="0 0 800 800"><g><circle cx="400" cy="400" r="120"/><circle cx="400" cy="400" r="200"/><circle cx="400" cy="400" r="280"/><circle cx="400" cy="400" r="360"/></g></svg>
-      <span class="hero__gridlines"></span>
-    </div>
-    <div class="hero__inner container">
+<main id="main">
+  <!-- 1 · Hero -->
+  <section class="hero" id="inicio" aria-labelledby="hero-title">
+    <div class="wrap hero__grid">
       <div class="hero__copy">
-        <p class="eyebrow eyebrow--live hero__in" style="--d:0"><span class="eyebrow__dot"></span>De fisio a fisio</p>
-        <h1 class="hero__title" id="hero-title">
-          <span class="line"><span class="hero__in" style="--d:1">Ecógrafos y diatermias,</span></span>
-          <span class="line"><span class="hero__in text-grad" style="--d:2">elegidos por un fisio.</span></span>
-        </h1>
-        <p class="hero__sub hero__in" style="--d:3">Equipos certificados, 2 años de garantía y mantenimiento sin letra pequeña.</p>
-        <div class="hero__ctas hero__in" style="--d:4">
-          <a class="btn btn--primary btn--lg" href="#asesoramiento" data-cta>Pedir asesoramiento <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-          <a class="btn btn--outline btn--lg" href="/assets/docs/catalogo-vytalgroup-2026.pdf" download data-catalog><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Descargar catálogo</a>
-        </div>
-        <p class="hero__person hero__in" style="--d:5">
-          <picture>
-            <source type="image/avif" srcset="/assets/img/javier-avatar-160.avif">
-            <img src="/assets/img/javier-avatar-160.webp" width="40" height="40" alt="" decoding="async">
-          </picture>
-          <span>Te responde <strong>Javier Ruiz</strong>, fisioterapeuta</span>
-        </p>
+        <h1 class="h1" id="hero-title"><span class="w" style="--i:0"><span>Ecógrafos</span></span> <span class="w" style="--i:1"><span>y</span></span> <span class="w" style="--i:2"><span>diatermias,</span></span> <em><span class="w" style="--i:3"><span>sin</span></span> <span class="w" style="--i:4"><span>letra</span></span> <span class="w" style="--i:5"><span>pequeña.</span></span></em></h1>
+        <p class="hero__lead">Te asesora Javier, fisioterapeuta. No un comercial.</p>
+        <a class="btn btn--primary btn--lg hero__cta" href="#asesoramiento" data-cta data-magnetic>Quiero asesoramiento</a>
+        <p class="hero__trust">Certificados CE · 2 años de garantía · Mantenimiento asegurado</p>
       </div>
-
       <div class="hero__visual">
-        <svg class="hero__fan" viewBox="0 0 600 600" aria-hidden="true">
-          <defs><linearGradient id="fan-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4FC1C7" stop-opacity=".55"/><stop offset="1" stop-color="#4FC1C7" stop-opacity="0"/></linearGradient></defs>
-          <path class="hero__fan-shape" d="M300 40 L520 520 A420 420 0 0 1 80 520 Z"/>
-          <g class="hero__fan-arcs"><path d="M178 306 A200 200 0 0 0 422 306"/><path d="M134 404 A300 300 0 0 0 466 404"/><path d="M90 502 A400 400 0 0 0 510 502"/></g>
-        </svg>
-        <figure class="scan hero__in hero__in--visual" style="--d:3">
-          <picture>
-            <source media="(min-width: 1024px)" type="image/avif" srcset="/assets/img/hero-diatermia-400.avif 400w, /assets/img/hero-diatermia-640.avif 640w" sizes="460px">
-            <source media="(min-width: 1024px)" type="image/webp" srcset="/assets/img/hero-diatermia-400.webp 400w, /assets/img/hero-diatermia-640.webp 640w" sizes="460px">
-            <source type="image/avif" srcset="/assets/img/hero-diatermia-m-400.avif 400w, /assets/img/hero-diatermia-m-640.avif 640w" sizes="(min-width: 600px) 520px, 92vw">
-            <img class="scan__img" src="/assets/img/hero-diatermia-m-640.webp" srcset="/assets/img/hero-diatermia-m-400.webp 400w, /assets/img/hero-diatermia-m-640.webp 640w" sizes="(min-width: 600px) 520px, 92vw" width="640" height="512" alt="Diatermia Multifunción VytaMeD de VytalGroup con pantalla táctil y mapa corporal" fetchpriority="high">
-          </picture>
-          <span class="scan__grid" aria-hidden="true"></span>
-          <span class="scan__sweep" aria-hidden="true"></span>
-          <span class="scan__corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-          <figcaption class="scan__label"><span class="pulse-dot" aria-hidden="true"></span>Diatermia Multifunción <span class="muted">· VytaMeD</span></figcaption>
-        </figure>
-        <div class="float-tile hero__in hero__in--pop" style="--d:6">
-          <picture>
-            <source type="image/avif" srcset="/assets/img/hero-ax8-200.avif 200w, /assets/img/hero-ax8-320.avif 320w" sizes="120px">
-            <img src="/assets/img/hero-ax8-200.webp" srcset="/assets/img/hero-ax8-200.webp 200w, /assets/img/hero-ax8-320.webp 320w" sizes="120px" width="200" height="200" alt="Ecógrafo portátil Acclarix AX8" loading="lazy" decoding="async">
-          </picture>
-          <span class="float-tile__txt"><strong>Acclarix AX8</strong><span>Ecógrafo portátil</span></span>
-        </div>
-        <div class="float-chip hero__in hero__in--pop" style="--d:7" aria-hidden="true">
-          <svg class="icon" aria-hidden="true"><use href="#i-award"/></svg><span><strong>2 años</strong> de garantía</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="trust hero__in" style="--d:8">
-      <ul class="trust__list container" aria-label="Garantías principales">
-        <li class="trust__item"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><span>Certificación MDR / CE</span></li>
-        <li class="trust__item"><svg class="icon" aria-hidden="true"><use href="#i-award"/></svg><span>2 años de garantía</span></li>
-        <li class="trust__item"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg><span>Mantenimiento asegurado</span></li>
-        <li class="trust__item"><svg class="icon" aria-hidden="true"><use href="#i-globe"/></svg><span>Envío UE · USA · LATAM</span></li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- ============================== DE FISIO A FISIO -->
-  <section class="story section-light sheet cv" id="javier" aria-labelledby="story-title">
-    <div class="container story__inner">
-      <div class="story__media" data-reveal>
-        <div class="story__photo">
-          <picture>
-            <source type="image/avif" srcset="/assets/img/javier-320.avif 320w, /assets/img/javier-384.avif 384w" sizes="(min-width: 1024px) 360px, min(270px, 72vw)">
-            <img src="/assets/img/javier-320.webp" srcset="/assets/img/javier-320.webp 320w, /assets/img/javier-384.webp 384w" sizes="(min-width: 1024px) 360px, min(270px, 72vw)" width="384" height="432" alt="Javier Ruiz, fisioterapeuta y fundador de VytalGroup" loading="lazy" decoding="async">
-          </picture>
-          <span class="story__scan" aria-hidden="true"></span>
-        </div>
-        <a class="story__ig" href="https://www.instagram.com/fisioruiz_/" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-instagram"/></svg>@fisioruiz_</a>
-      </div>
-      <div class="story__copy">
-        <p class="eyebrow" data-reveal>Quién te asesora</p>
-        <h2 class="h2" id="story-title" data-reveal>De fisio a fisio.</h2>
-        <div class="story__text" data-stagger>
-          <p data-reveal>Soy Javier, fisioterapeuta. Trabajé como fisio hasta que las jornadas de 10 a 12 horas me llevaron al burnout.</p>
-          <p data-reveal>Me fui a Luxemburgo y monté VytalGroup para que a otros profesionales no les engañen con los equipos ni con el mantenimiento.</p>
-          <p data-reveal>Hoy te asesoro yo, como me habría gustado que me asesoraran a mí.</p>
-        </div>
-        <p class="signature" data-reveal><svg class="signature__name" viewBox="-64 114 3592 1230" role="img" aria-label="Firma de Javier Ruiz"><use href="#sig"/></svg><span class="signature__role">Javier Ruiz, fisioterapeuta y fundador</span></p>
-        <a class="btn btn--dark" href="#asesoramiento" data-cta data-reveal>Habla con Javier <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <picture>
+          <source type="image/avif" srcset="/assets/img/hero-vytamed-400.avif 400w, /assets/img/hero-vytamed-560.avif 560w, /assets/img/hero-vytamed-760.avif 760w" sizes="(min-width: 1024px) 540px, (min-width: 640px) 480px, calc(100vw - 32px)">
+          <img class="hero__img" src="/assets/img/hero-vytamed-560.webp" srcset="/assets/img/hero-vytamed-400.webp 400w, /assets/img/hero-vytamed-560.webp 560w, /assets/img/hero-vytamed-760.webp 760w" sizes="(min-width: 1024px) 540px, (min-width: 640px) 480px, calc(100vw - 32px)" width="776" height="733" alt="Diatermia Multifunción VytaMeD, con pantalla táctil y mapa corporal" fetchpriority="high" decoding="async">
+        </picture>
+        <span class="scan" aria-hidden="true"><span class="scan__fan"></span></span>
       </div>
     </div>
   </section>
 
-  <!-- ============================== ECÓGRAFOS -->
-  <section class="products section-soft sheet cv" id="ecografos" aria-labelledby="eco-title" data-viewcontent="Ecógrafos">
-    <div class="container">
-      <header class="section-head">
-        <p class="eyebrow" data-reveal>Ecografía</p>
-        <h2 class="h2" id="eco-title" data-reveal>Ecógrafos para tu consulta.</h2>
-        <p class="lead" data-reveal>Inalámbricos, portátiles y de carro. Te ayudo a elegir según cómo trabajas.</p>
-      </header>
-
-      <div class="carousel" data-carousel>
-        <ul class="carousel__track cards-4" data-stagger>
-          <!-- Eco Wireless -->
-          <li class="carousel__item" data-reveal>
-            <article class="pcard" aria-labelledby="t-ecow">
-              <div class="pcard__media pcard__media--photo">
-                <picture>
-                  <source type="image/avif" srcset="/assets/img/eco-wireless-320.avif 320w, /assets/img/eco-wireless-480.avif 480w, /assets/img/eco-wireless-640.avif 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw">
-                  <img src="/assets/img/eco-wireless-480.webp" srcset="/assets/img/eco-wireless-320.webp 320w, /assets/img/eco-wireless-480.webp 480w, /assets/img/eco-wireless-640.webp 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw" width="640" height="512" alt="Ecógrafo de sonda inalámbrica Eco Wireless VytaMeD en su estuche de aluminio" loading="lazy" decoding="async">
-                </picture>
-                <span class="tag">Inalámbrico</span>
-                <span class="badge">Marca propia</span>
-              </div>
-              <div class="pcard__body">
-                <p class="pcard__brand">VytaMeD</p>
-                <h3 class="pcard__title" id="t-ecow">Eco Wireless</h3>
-                <p class="pcard__ideal">Ideal para consulta, domicilio y campo.</p>
-                <ul class="pcard__points">
-                  <li>Wi-Fi 5 GHz y USB-C</li>
-                  <li>iOS, Android, Windows y macOS</li>
-                  <li>Modos B, M y Doppler color</li>
-                </ul>
-                <div class="pcard__actions">
-                  <button class="btn btn--ghost btn--sm" type="button" aria-expanded="false" aria-controls="ficha-ecow" data-ficha>Ver ficha</button>
-                  <button class="btn btn--primary btn--sm" type="button" data-interest data-product="Ecógrafo" data-model="Eco Wireless (VytaMeD)">Me interesa</button>
-                </div>
-              </div>
-              <div class="ficha" id="ficha-ecow" role="region" aria-label="Ficha técnica de Eco Wireless" hidden>
-                <div class="ficha__head"><p class="ficha__title">Ficha técnica</p><button class="ficha__close" type="button" aria-label="Cerrar ficha"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
-                <dl class="ficha__list">
-                  <div><dt>Sonda</dt><dd>Lineal o convexa inalámbrica, banda ancha multifrecuencia</dd></div>
-                  <div><dt>Frecuencia</dt><dd>2 a 12 MHz según modelo de sonda</dd></div>
-                  <div><dt>Imagen</dt><dd>Modo B, M, Color Doppler y PW Doppler</dd></div>
-                  <div><dt>Conexión</dt><dd>Wi-Fi 5 GHz y USB-C. iOS, Android, Windows y macOS</dd></div>
-                  <div><dt>Batería</dt><dd>Recargable por USB-C, hasta 60 min de uso continuo</dd></div>
-                  <div><dt>Guardado</dt><dd>En el dispositivo conectado. Compatible DICOM</dd></div>
-                  <div><dt>Incluye</dt><dd>Sonda, estuche de aluminio, cable USB-C, cargador y guía rápida</dd></div>
-                  <div><dt>Normativa</dt><dd>CE · MDR (UE) 2017/745 · Clase IIa</dd></div>
-                  <div><dt>Usos</dt><dd>Musculoesquelético y partes blandas, abdominal, mama y tiroides, vascular periférico, urgencias y atención domiciliaria</dd></div>
-                </dl>
-              </div>
-            </article>
-          </li>
-          <!-- Acclarix AX8 -->
-          <li class="carousel__item" data-reveal>
-            <article class="pcard" aria-labelledby="t-ax8">
-              <div class="pcard__media">
-                <picture>
-                  <source type="image/avif" srcset="/assets/img/eco-ax8-320.avif 320w, /assets/img/eco-ax8-480.avif 480w, /assets/img/eco-ax8-640.avif 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw">
-                  <img src="/assets/img/eco-ax8-480.webp" srcset="/assets/img/eco-ax8-320.webp 320w, /assets/img/eco-ax8-480.webp 480w, /assets/img/eco-ax8-640.webp 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw" width="640" height="512" alt="Ecógrafo portátil EDAN Acclarix AX8 con doble pantalla táctil" loading="lazy" decoding="async">
-                </picture>
-                <span class="tag">Portátil</span>
-                <span class="badge badge--teal">El más afín a fisio</span>
-              </div>
-              <div class="pcard__body">
-                <p class="pcard__brand">EDAN</p>
-                <h3 class="pcard__title" id="t-ax8">Acclarix AX8</h3>
-                <p class="pcard__ideal">Ideal para procedimientos ecoguiados, dolor y deporte.</p>
-                <ul class="pcard__points">
-                  <li>Monitor HD de 15" basculante</li>
-                  <li>Doble pantalla táctil</li>
-                  <li>Panel sellado, fácil de desinfectar</li>
-                </ul>
-                <div class="pcard__actions">
-                  <button class="btn btn--ghost btn--sm" type="button" aria-expanded="false" aria-controls="ficha-ax8" data-ficha>Ver ficha</button>
-                  <button class="btn btn--primary btn--sm" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix AX8">Me interesa</button>
-                </div>
-              </div>
-              <div class="ficha" id="ficha-ax8" role="region" aria-label="Ficha técnica de Acclarix AX8" hidden>
-                <div class="ficha__head"><p class="ficha__title">Ficha técnica</p><button class="ficha__close" type="button" aria-label="Cerrar ficha"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
-                <dl class="ficha__list">
-                  <div><dt>Monitor</dt><dd>15" HD (1920 × 1080), basculante y giratorio, con cierre magnético</dd></div>
-                  <div><dt>Control</dt><dd>Doble pantalla táctil con control gestual</dd></div>
-                  <div><dt>Plataforma</dt><dd>Intel i7, 16 GB de memoria y 500 GB de almacenamiento</dd></div>
-                  <div><dt>Arquitectura</dt><dd>128 canales con formación de haz cuádruple</dd></div>
-                  <div><dt>Higiene</dt><dd>Panel de control totalmente sellado</dd></div>
-                  <div><dt>Batería</dt><dd>Extraíble, aprox. 60 min de uso típico</dd></div>
-                  <div><dt>Peso</dt><dd>9,25 kg con batería</dd></div>
-                  <div><dt>Usos</dt><dd>Musculoesquelético, medicina deportiva, manejo del dolor, cirugía ortopédica, anestesia regional y urgencias (eFAST)</dd></div>
-                </dl>
-              </div>
-            </article>
-          </li>
-          <!-- Acclarix AX3 -->
-          <li class="carousel__item" data-reveal>
-            <article class="pcard" aria-labelledby="t-ax3">
-              <div class="pcard__media">
-                <picture>
-                  <source type="image/avif" srcset="/assets/img/eco-ax3-320.avif 320w, /assets/img/eco-ax3-480.avif 480w, /assets/img/eco-ax3-640.avif 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw">
-                  <img src="/assets/img/eco-ax3-480.webp" srcset="/assets/img/eco-ax3-320.webp 320w, /assets/img/eco-ax3-480.webp 480w, /assets/img/eco-ax3-640.webp 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw" width="640" height="512" alt="Ecógrafo portátil compacto EDAN Acclarix AX3" loading="lazy" decoding="async">
-                </picture>
-                <span class="tag">Portátil</span>
-              </div>
-              <div class="pcard__body">
-                <p class="pcard__brand">EDAN</p>
-                <h3 class="pcard__title" id="t-ax3">Acclarix AX3</h3>
-                <p class="pcard__ideal">Ideal si trabajas con dos sondas.</p>
-                <ul class="pcard__points">
-                  <li>4,5 kg, aleación de magnesio</li>
-                  <li>2 puertos de sonda activos</li>
-                  <li>Más de 2 h de exploración</li>
-                </ul>
-                <div class="pcard__actions">
-                  <button class="btn btn--ghost btn--sm" type="button" aria-expanded="false" aria-controls="ficha-ax3" data-ficha>Ver ficha</button>
-                  <button class="btn btn--primary btn--sm" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix AX3">Me interesa</button>
-                </div>
-              </div>
-              <div class="ficha" id="ficha-ax3" role="region" aria-label="Ficha técnica de Acclarix AX3" hidden>
-                <div class="ficha__head"><p class="ficha__title">Ficha técnica</p><button class="ficha__close" type="button" aria-label="Cerrar ficha"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
-                <dl class="ficha__list">
-                  <div><dt>Peso</dt><dd>4,5 kg, cuerpo de aleación de magnesio</dd></div>
-                  <div><dt>Monitor</dt><dd>LCD médico de 15,6" con apertura hasta 180°</dd></div>
-                  <div><dt>Táctil</dt><dd>Pantalla de 10,1" con control gestual</dd></div>
-                  <div><dt>Puertos</dt><dd>2 puertos de transductor activos y teclado completo</dd></div>
-                  <div><dt>Conexión</dt><dd>Exportación USB y DICOM</dd></div>
-                  <div><dt>Batería</dt><dd>Doble, más de 2 horas de exploración continua</dd></div>
-                  <div><dt>Usos</dt><dd>Musculoesquelético, partes pequeñas, abdomen, vascular, cardiología, ginecología y obstetricia</dd></div>
-                </dl>
-              </div>
-            </article>
-          </li>
-          <!-- Acclarix LX9 -->
-          <li class="carousel__item" data-reveal>
-            <article class="pcard" aria-labelledby="t-lx9">
-              <div class="pcard__media">
-                <picture>
-                  <source type="image/avif" srcset="/assets/img/eco-lx9-320.avif 320w, /assets/img/eco-lx9-480.avif 480w, /assets/img/eco-lx9-640.avif 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw">
-                  <img src="/assets/img/eco-lx9-480.webp" srcset="/assets/img/eco-lx9-320.webp 320w, /assets/img/eco-lx9-480.webp 480w, /assets/img/eco-lx9-640.webp 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw" width="640" height="512" alt="Ecógrafo de carro EDAN Acclarix LX9 con monitor en brazo articulado" loading="lazy" decoding="async">
-                </picture>
-                <span class="tag">Carro</span>
-              </div>
-              <div class="pcard__body">
-                <p class="pcard__brand">EDAN</p>
-                <h3 class="pcard__title" id="t-lx9">Acclarix LX9</h3>
-                <p class="pcard__ideal">Ideal para una consulta de ecografía completa.</p>
-                <ul class="pcard__points">
-                  <li>Monitor de 21,5" articulado</li>
-                  <li>5 puertos de sonda activos</li>
-                  <li>Doble batería integrada</li>
-                </ul>
-                <div class="pcard__actions">
-                  <button class="btn btn--ghost btn--sm" type="button" aria-expanded="false" aria-controls="ficha-lx9" data-ficha>Ver ficha</button>
-                  <button class="btn btn--primary btn--sm" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix LX9">Me interesa</button>
-                </div>
-              </div>
-              <div class="ficha" id="ficha-lx9" role="region" aria-label="Ficha técnica de Acclarix LX9" hidden>
-                <div class="ficha__head"><p class="ficha__title">Ficha técnica</p><button class="ficha__close" type="button" aria-label="Cerrar ficha"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
-                <dl class="ficha__list">
-                  <div><dt>Monitor</dt><dd>LCD de 21,5" de alta resolución sobre brazo articulado</dd></div>
-                  <div><dt>Panel</dt><dd>Giratorio y con altura regulable, más pantalla táctil de 14"</dd></div>
-                  <div><dt>Puertos</dt><dd>5 puertos de transductor activos</dd></div>
-                  <div><dt>Batería</dt><dd>Doble batería integrada</dd></div>
-                  <div><dt>Imagen</dt><dd>Plataforma EIS+ con eTAI, eView, eCrystal y eSRI</dd></div>
-                  <div><dt>Extras</dt><dd>Calentador de gel integrado y teclado retráctil con iluminación</dd></div>
-                  <div><dt>Usos</dt><dd>Musculoesquelético, partes pequeñas, mama, abdomen, vascular, cardiología, ginecología y obstetricia</dd></div>
-                </dl>
-              </div>
-            </article>
-          </li>
-        </ul>
-        <div class="carousel__dots" role="group" aria-label="Posición del carrusel"></div>
-      </div>
-
-      <!-- Gama completa -->
-      <div class="range" data-range>
-        <button class="range__toggle" type="button" aria-expanded="false" aria-controls="gama-eco">
-          <span>Ver toda la gama</span><span class="range__count">10 modelos</span><svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg>
-        </button>
-        <div class="range__panel" id="gama-eco" data-collapse>
-          <div class="range__inner">
-            <div class="chips" role="group" aria-label="Filtrar ecógrafos">
-              <button class="chip is-active" type="button" aria-pressed="true" data-filter="all">Todos</button>
-              <button class="chip" type="button" aria-pressed="false" data-filter="inalambrico">Inalámbricos</button>
-              <button class="chip" type="button" aria-pressed="false" data-filter="portatil">Portátiles</button>
-              <button class="chip" type="button" aria-pressed="false" data-filter="carro">De carro</button>
-            </div>
-            <ul class="range__list" aria-live="polite">
-              <li class="ritem" data-type="inalambrico">
-                <picture><source type="image/avif" srcset="/assets/img/eco-wireless-320.avif"><img src="/assets/img/eco-wireless-320.webp" width="320" height="256" alt="Eco Wireless" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Eco Wireless <span>VytaMeD</span></p><p class="ritem__line">Sonda inalámbrica de 2 a 12 MHz. Hasta 60 min de uso.</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Eco Wireless (VytaMeD)" aria-label="Me interesa Eco Wireless"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-              <li class="ritem" data-type="portatil">
-                <picture><source type="image/avif" srcset="/assets/img/eco-ax2-320.avif"><img src="/assets/img/eco-ax2-320.webp" width="320" height="256" alt="Acclarix AX2" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Acclarix AX2 <span>Portátil</span></p><p class="ritem__line">Punto de atención. 4,5 kg, 1 puerto y arranque en 30 s.</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix AX2" aria-label="Me interesa Acclarix AX2"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-              <li class="ritem" data-type="portatil">
-                <picture><source type="image/avif" srcset="/assets/img/eco-ax3-320.avif"><img src="/assets/img/eco-ax3-320.webp" width="320" height="256" alt="Acclarix AX3" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Acclarix AX3 <span>Portátil</span></p><p class="ritem__line">Compacto de doble puerto, 4,5 kg y doble batería.</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix AX3" aria-label="Me interesa Acclarix AX3"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-              <li class="ritem" data-type="portatil">
-                <picture><source type="image/avif" srcset="/assets/img/eco-ax8-320.avif"><img src="/assets/img/eco-ax8-320.webp" width="320" height="256" alt="Acclarix AX8" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Acclarix AX8 <span>Portátil</span></p><p class="ritem__line">Premium, doble pantalla táctil y panel sellado.</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix AX8" aria-label="Me interesa Acclarix AX8"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-              <li class="ritem" data-type="portatil">
-                <picture><source type="image/avif" srcset="/assets/img/eco-ax9-320.avif"><img src="/assets/img/eco-ax9-320.webp" width="320" height="256" alt="Acclarix AX9" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Acclarix AX9 <span>Portátil</span></p><p class="ritem__line">Cardiología y vascular. 4,8 kg, Auto EF, Auto LVOT-D y Auto VTI.</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix AX9" aria-label="Me interesa Acclarix AX9"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-              <li class="ritem" data-type="carro">
-                <picture><source type="image/avif" srcset="/assets/img/eco-lx3-320.avif"><img src="/assets/img/eco-lx3-320.webp" width="320" height="256" alt="Acclarix LX3" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Acclarix LX3 <span>Carro</span></p><p class="ritem__line">Carro de entrada. Panel completo, trackball y táctil de 14".</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix LX3" aria-label="Me interesa Acclarix LX3"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-              <li class="ritem" data-type="carro">
-                <picture><source type="image/avif" srcset="/assets/img/eco-lx9-320.avif"><img src="/assets/img/eco-lx9-320.webp" width="320" height="256" alt="Acclarix LX9" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Acclarix LX9 <span>Carro</span></p><p class="ritem__line">Consulta integral. 21,5", 5 puertos y doble batería.</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix LX9" aria-label="Me interesa Acclarix LX9"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-              <li class="ritem" data-type="carro">
-                <picture><source type="image/avif" srcset="/assets/img/eco-lx25-320.avif"><img src="/assets/img/eco-lx25-320.webp" width="320" height="256" alt="Acclarix LX25" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Acclarix LX25 <span>Carro</span></p><p class="ritem__line">3D/4D, 21,5", táctil de 14" y 3 puertos. MSK y nervio periférico.</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix LX25" aria-label="Me interesa Acclarix LX25"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-              <li class="ritem" data-type="carro">
-                <picture><source type="image/avif" srcset="/assets/img/eco-gx9-320.avif"><img src="/assets/img/eco-gx9-320.webp" width="320" height="256" alt="Acclarix GX9" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Acclarix GX9 <span>Carro</span></p><p class="ritem__line">Carro compacto de salud de la mujer y punto de atención.</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix GX9" aria-label="Me interesa Acclarix GX9"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-              <li class="ritem" data-type="carro">
-                <picture><source type="image/avif" srcset="/assets/img/eco-lx85-320.avif"><img src="/assets/img/eco-lx85-320.webp" width="320" height="256" alt="Acclarix LX85" loading="lazy" decoding="async"></picture>
-                <div class="ritem__txt"><p class="ritem__name">Acclarix LX85 <span>Carro</span></p><p class="ritem__line">Buque insignia. SynSight, IA LinSync, 5 puertos y consola de 180°.</p></div>
-                <button class="ritem__cta" type="button" data-interest data-product="Ecógrafo" data-model="Acclarix LX85" aria-label="Me interesa Acclarix LX85"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg></button>
-              </li>
-            </ul>
-          </div>
+  <!-- 2 · Equipos -->
+  <section class="sec equipos" id="equipos" aria-labelledby="eq-title">
+    <div class="wrap">
+      <div class="sec__head">
+        <h2 class="h2" id="eq-title" data-rv>Elige tu <em>equipo.</em></h2>
+        <div class="seg" role="tablist" aria-label="Tipo de equipo" data-seg data-rv>
+          <span class="seg__ind" aria-hidden="true"></span>
+          <button class="seg__btn" type="button" role="tab" id="tab-eco" aria-controls="panel-eco" aria-selected="true">Ecógrafos</button>
+          <button class="seg__btn" type="button" role="tab" id="tab-dia" aria-controls="panel-dia" aria-selected="false" tabindex="-1">Diatermias</button>
         </div>
       </div>
 
-      <!-- Physio Invasiva -->
-      <aside class="combo" data-reveal aria-labelledby="t-epi">
-        <div class="combo__media">
-          <picture>
-            <source type="image/avif" srcset="/assets/img/physio-invasiva-240.avif 240w, /assets/img/physio-invasiva-400.avif 400w, /assets/img/physio-invasiva-560.avif 560w" sizes="(min-width: 768px) 280px, 88vw">
-            <img src="/assets/img/physio-invasiva-400.webp" srcset="/assets/img/physio-invasiva-240.webp 240w, /assets/img/physio-invasiva-400.webp 400w, /assets/img/physio-invasiva-560.webp 560w" sizes="(min-width: 768px) 280px, 88vw" width="560" height="448" alt="Equipo Physio Invasiva 2.0 de EasyTech para electrólisis percutánea ecoguiada" loading="lazy" decoding="async">
-          </picture>
-        </div>
-        <div class="combo__copy">
-          <p class="eyebrow">Ecógrafo + EPI</p>
-          <h3 class="h3" id="t-epi">La combinación natural: Physio Invasiva 2.0.</h3>
-          <p>De EasyTech, para electrólisis percutánea ecoguiada (USGET) y neuromodulación percutánea.</p>
-          <ul class="ticks">
-            <li>Pantalla táctil de 7"</li>
-            <li>Portátil, 1,05 kg sin cables</li>
-            <li>Conforme al Reglamento (UE) 2017/745</li>
+      <div class="panels" data-rv>
+        <div class="panel is-active" role="tabpanel" id="panel-eco" aria-labelledby="tab-eco" data-cat="Ecógrafos">
+          <ul class="cards" data-carousel>
+            <li class="card">
+              <picture>
+                <source type="image/avif" srcset="/assets/img/p-eco-wireless-320.avif 320w, /assets/img/p-eco-wireless-480.avif 480w, /assets/img/p-eco-wireless-640.avif 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw">
+                <img class="card__img" src="/assets/img/p-eco-wireless-480.webp" srcset="/assets/img/p-eco-wireless-320.webp 320w, /assets/img/p-eco-wireless-480.webp 480w, /assets/img/p-eco-wireless-640.webp 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw" width="640" height="480" alt="Sonda inalámbrica Eco Wireless de VytaMeD" loading="lazy" decoding="async">
+              </picture>
+              <h3 class="card__name" id="n-wireless">Eco Wireless</h3>
+              <p class="card__for">Para llevarlo contigo.</p>
+              <dl class="card__data"><div><dt>Frecuencia</dt><dd>2 a 12 MHz</dd></div><div><dt>Batería máx.</dt><dd>60 min</dd></div></dl>
+              <a class="btn btn--line" href="#asesoramiento" data-want="Eco Wireless (VytaMeD)" data-equipo="Ecógrafo" aria-describedby="n-wireless">Lo quiero</a>
+            </li>
+            <li class="card">
+              <picture>
+                <source type="image/avif" srcset="/assets/img/p-ax8-320.avif 320w, /assets/img/p-ax8-480.avif 480w, /assets/img/p-ax8-640.avif 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw">
+                <img class="card__img" src="/assets/img/p-ax8-480.webp" srcset="/assets/img/p-ax8-320.webp 320w, /assets/img/p-ax8-480.webp 480w, /assets/img/p-ax8-640.webp 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw" width="640" height="480" alt="Ecógrafo portátil Acclarix AX8 de EDAN con doble pantalla" loading="lazy" decoding="async">
+              </picture>
+              <h3 class="card__name" id="n-ax8">Acclarix AX8</h3>
+              <p class="card__for">Para ecoguiados, dolor y deporte.</p>
+              <dl class="card__data"><div><dt>Monitor HD</dt><dd>15″</dd></div><div><dt>Canales</dt><dd>128</dd></div></dl>
+              <a class="btn btn--line" href="#asesoramiento" data-want="Acclarix AX8 (EDAN)" data-equipo="Ecógrafo" aria-describedby="n-ax8">Lo quiero</a>
+            </li>
+            <li class="card">
+              <picture>
+                <source type="image/avif" srcset="/assets/img/p-lx9-320.avif 320w, /assets/img/p-lx9-480.avif 480w, /assets/img/p-lx9-640.avif 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw">
+                <img class="card__img" src="/assets/img/p-lx9-480.webp" srcset="/assets/img/p-lx9-320.webp 320w, /assets/img/p-lx9-480.webp 480w, /assets/img/p-lx9-640.webp 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw" width="640" height="480" alt="Ecógrafo de carro Acclarix LX9 de EDAN con monitor articulado" loading="lazy" decoding="async">
+              </picture>
+              <h3 class="card__name" id="n-lx9">Acclarix LX9</h3>
+              <p class="card__for">Para una consulta completa.</p>
+              <dl class="card__data"><div><dt>Monitor</dt><dd>21,5″</dd></div><div><dt>Puertos de sonda</dt><dd>5</dd></div></dl>
+              <a class="btn btn--line" href="#asesoramiento" data-want="Acclarix LX9 (EDAN)" data-equipo="Ecógrafo" aria-describedby="n-lx9">Lo quiero</a>
+            </li>
           </ul>
-          <button class="btn btn--dark btn--sm" type="button" data-interest data-product="Otro equipo del catálogo" data-model="Physio Invasiva 2.0 (EasyTech)">Me interesa</button>
+          <div class="dots" aria-hidden="true"><span class="is-on"></span><span></span><span></span></div>
         </div>
-      </aside>
 
-      <div class="section-cta" data-reveal>
-        <button class="btn btn--dark btn--lg" type="button" data-interest data-product="Ecógrafo" data-model="Aún no lo sé, quiero asesoramiento">No sé cuál elegir <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+        <div class="panel" role="tabpanel" id="panel-dia" aria-labelledby="tab-dia" data-cat="Diatermias">
+          <ul class="cards" data-carousel>
+            <li class="card">
+              <picture>
+                <source type="image/avif" srcset="/assets/img/p-vytamed-320.avif 320w, /assets/img/p-vytamed-480.avif 480w, /assets/img/p-vytamed-640.avif 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw">
+                <img class="card__img" src="/assets/img/p-vytamed-480.webp" srcset="/assets/img/p-vytamed-320.webp 320w, /assets/img/p-vytamed-480.webp 480w, /assets/img/p-vytamed-640.webp 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw" width="640" height="480" alt="Diatermia Multifunción VytaMeD con 4 canales" loading="lazy" decoding="async">
+              </picture>
+              <h3 class="card__name" id="n-vytamed">Diatermia Multifunción</h3>
+              <p class="card__for">Diatermia y electro en uno.</p>
+              <dl class="card__data"><div><dt>Canales</dt><dd>4</dd></div><div><dt>Electrodos máx.</dt><dd>8</dd></div></dl>
+              <a class="btn btn--line" href="#asesoramiento" data-want="Diatermia Multifunción (VytaMeD)" data-equipo="Diatermia" aria-describedby="n-vytamed">Lo quiero</a>
+            </li>
+            <li class="card">
+              <picture>
+                <source type="image/avif" srcset="/assets/img/p-reatherm-320.avif 320w, /assets/img/p-reatherm-480.avif 480w, /assets/img/p-reatherm-640.avif 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw">
+                <img class="card__img" src="/assets/img/p-reatherm-480.webp" srcset="/assets/img/p-reatherm-320.webp 320w, /assets/img/p-reatherm-480.webp 480w, /assets/img/p-reatherm-640.webp 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw" width="640" height="480" alt="Diatermia Reatherm de I-Tech con dos manípulos" loading="lazy" decoding="async">
+              </picture>
+              <h3 class="card__name" id="n-reatherm">Reatherm</h3>
+              <p class="card__for">Para rehabilitación, deporte y estética.</p>
+              <dl class="card__data"><div><dt>Potencia</dt><dd>200 W</dd></div><div><dt>Frecuencias</dt><dd>400</dd></div></dl>
+              <a class="btn btn--line" href="#asesoramiento" data-want="Reatherm (I-Tech)" data-equipo="Diatermia" aria-describedby="n-reatherm">Lo quiero</a>
+            </li>
+            <li class="card">
+              <picture>
+                <source type="image/avif" srcset="/assets/img/p-hrtek-320.avif 320w, /assets/img/p-hrtek-480.avif 480w, /assets/img/p-hrtek-640.avif 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw">
+                <img class="card__img" src="/assets/img/p-hrtek-480.webp" srcset="/assets/img/p-hrtek-320.webp 320w, /assets/img/p-hrtek-480.webp 480w, /assets/img/p-hrtek-640.webp 640w" sizes="(min-width: 1200px) 360px, (min-width: 900px) 29vw, 78vw" width="640" height="480" alt="Diatermia HR Tek de EME con pantalla táctil" loading="lazy" decoding="async">
+              </picture>
+              <h3 class="card__name" id="n-hrtek">HR Tek</h3>
+              <p class="card__for">Atermia, homeotermia e hipertermia.</p>
+              <dl class="card__data"><div><dt>Potencia</dt><dd>250 W</dd></div><div><dt>Protocolos</dt><dd>47</dd></div></dl>
+              <a class="btn btn--line" href="#asesoramiento" data-want="HR Tek (EME)" data-equipo="Diatermia" aria-describedby="n-hrtek">Lo quiero</a>
+            </li>
+          </ul>
+          <div class="dots" aria-hidden="true"><span class="is-on"></span><span></span><span></span></div>
+        </div>
       </div>
+
+      <p class="equipos__more" data-rv><a class="link" href="/assets/docs/catalogo-vytalgroup-2026.pdf" download data-catalog>Ver catálogo completo (PDF)</a></p>
     </div>
   </section>
 
-  <!-- ============================== DIATERMIAS -->
-  <section class="products section-dark sheet cv" id="diatermias" aria-labelledby="dia-title" data-viewcontent="Diatermias">
-    <div class="section-dark__bg" aria-hidden="true"><span class="glow glow--c"></span></div>
-    <div class="container">
-      <header class="section-head">
-        <p class="eyebrow eyebrow--light" data-reveal>Diatermia / Tecarterapia</p>
-        <h2 class="h2" id="dia-title" data-reveal>Diatermias que trabajan contigo.</h2>
-        <p class="lead" data-reveal>Capacitivas y resistivas. De marca propia y de fabricantes italianos.</p>
-      </header>
-
-      <div class="demo" data-reveal>
-        <video class="demo__video" muted loop playsinline preload="none" width="832" height="384" data-poster="/assets/img/diatermia-loop-poster-832.webp" data-webm="/assets/video/diatermia-loop.webm" data-mp4="/assets/video/diatermia-loop.mp4" aria-hidden="true" tabindex="-1"></video>
-        <div class="demo__shade" aria-hidden="true"></div>
-        <div class="demo__overlay">
-          <p class="demo__kicker"><span class="pulse-dot" aria-hidden="true"></span>En acción</p>
-          <p class="demo__title">Diatermia Multifunción · VytaMeD</p>
-          <button class="demo__play" type="button" data-video-open>
-            <span class="demo__play-icon" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg></span>
-            <span>Mira la demostración <small>1:47</small></span>
-          </button>
-        </div>
-      </div>
-
-      <div class="carousel" data-carousel>
-        <ul class="carousel__track cards-4" data-stagger>
-          <!-- Diatermia Multifunción VytaMeD -->
-          <li class="carousel__item" data-reveal>
-            <article class="pcard pcard--dark" aria-labelledby="t-dvm">
-              <div class="pcard__media pcard__media--photo">
-                <picture>
-                  <source type="image/avif" srcset="/assets/img/dia-vytamed-320.avif 320w, /assets/img/dia-vytamed-480.avif 480w, /assets/img/dia-vytamed-640.avif 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw">
-                  <img src="/assets/img/dia-vytamed-480.webp" srcset="/assets/img/dia-vytamed-320.webp 320w, /assets/img/dia-vytamed-480.webp 480w, /assets/img/dia-vytamed-640.webp 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw" width="640" height="512" alt="Diatermia Multifunción VytaMeD con 4 canales y mapa corporal en pantalla" loading="lazy" decoding="async">
-                </picture>
-                <span class="tag">Diatermia + electro</span>
-                <span class="badge">Marca propia</span>
-              </div>
-              <div class="pcard__body">
-                <p class="pcard__brand">VytaMeD</p>
-                <h3 class="pcard__title" id="t-dvm">Diatermia Multifunción</h3>
-                <p class="pcard__ideal">Ideal para clínicas con mucha demanda de tratamientos combinados.</p>
-                <ul class="pcard__points">
-                  <li>RET/CET, TENS e IFC en un equipo</li>
-                  <li>4 canales, hasta 8 electrodos</li>
-                  <li>Táctil con mapa corporal</li>
-                </ul>
-                <div class="pcard__actions">
-                  <button class="btn btn--ghost btn--sm" type="button" aria-expanded="false" aria-controls="ficha-dvm" data-ficha>Ver ficha</button>
-                  <button class="btn btn--primary btn--sm" type="button" data-interest data-product="Diatermia / Tecar" data-model="Diatermia Multifunción (VytaMeD)">Me interesa</button>
-                </div>
-              </div>
-              <div class="ficha" id="ficha-dvm" role="region" aria-label="Ficha técnica de Diatermia Multifunción" hidden>
-                <div class="ficha__head"><p class="ficha__title">Ficha técnica</p><button class="ficha__close" type="button" aria-label="Cerrar ficha"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
-                <dl class="ficha__list">
-                  <div><dt>Modalidades</dt><dd>RET, CET, TENS, IFC, electroterapia y modo Body Parts</dd></div>
-                  <div><dt>Canales</dt><dd>4 independientes (A, B, C y D), hasta 8 electrodos</dd></div>
-                  <div><dt>Pantalla</dt><dd>Táctil a color de gran formato con mapa corporal anatómico interactivo</dd></div>
-                  <div><dt>Temporizador</dt><dd>Independiente para diatermia y electroterapia</dd></div>
-                  <div><dt>Conexiones</dt><dd>4 salidas frontales y cabezal de diatermia lateral articulado</dd></div>
-                  <div><dt>Accesorios</dt><dd>Electrodos de diatermia, kit de electrodos adhesivos y anillo de gran superficie</dd></div>
-                  <div><dt>Normativa</dt><dd>CE · MDR (UE) 2017/745 · Clase IIb</dd></div>
-                </dl>
-              </div>
-            </article>
-          </li>
-          <!-- Reatherm -->
-          <li class="carousel__item" data-reveal>
-            <article class="pcard pcard--dark" aria-labelledby="t-rth">
-              <div class="pcard__media">
-                <picture>
-                  <source type="image/avif" srcset="/assets/img/dia-reatherm-320.avif 320w, /assets/img/dia-reatherm-480.avif 480w, /assets/img/dia-reatherm-640.avif 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw">
-                  <img src="/assets/img/dia-reatherm-480.webp" srcset="/assets/img/dia-reatherm-320.webp 320w, /assets/img/dia-reatherm-480.webp 480w, /assets/img/dia-reatherm-640.webp 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw" width="640" height="512" alt="Diatermia capacitiva resistiva Reatherm de I-Tech" loading="lazy" decoding="async">
-                </picture>
-                <span class="tag">Capacitiva y resistiva</span>
-              </div>
-              <div class="pcard__body">
-                <p class="pcard__brand">I-Tech · Italia</p>
-                <h3 class="pcard__title" id="t-rth">Reatherm</h3>
-                <p class="pcard__ideal">Ideal para personalizar cada tratamiento, crónico o agudo.</p>
-                <ul class="pcard__points">
-                  <li>200 W de potencia</li>
-                  <li>400 frecuencias, de 300 a 700 kHz</li>
-                  <li>Efecto neuromodulador</li>
-                </ul>
-                <div class="pcard__actions">
-                  <button class="btn btn--ghost btn--sm" type="button" aria-expanded="false" aria-controls="ficha-rth" data-ficha>Ver ficha</button>
-                  <button class="btn btn--primary btn--sm" type="button" data-interest data-product="Diatermia / Tecar" data-model="Reatherm (I-Tech)">Me interesa</button>
-                </div>
-              </div>
-              <div class="ficha" id="ficha-rth" role="region" aria-label="Ficha técnica de Reatherm" hidden>
-                <div class="ficha__head"><p class="ficha__title">Ficha técnica</p><button class="ficha__close" type="button" aria-label="Cerrar ficha"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
-                <dl class="ficha__list">
-                  <div><dt>Potencia</dt><dd>200 W</dd></div>
-                  <div><dt>Frecuencia</dt><dd>400 frecuencias, de 300 a 700 kHz</dd></div>
-                  <div><dt>Modulación</dt><dd>Hasta 100 Hz</dd></div>
-                  <div><dt>Programas</dt><dd>35 de rehabilitación, 10 de deporte y 5 de estética, más 10 memorias libres</dd></div>
-                  <div><dt>Manípulo</dt><dd>Resistivo, capacitivo y bipolar (Ø 50 mm)</dd></div>
-                  <div><dt>Incluye</dt><dd>Kit de electrodos de 35 y 60 mm, placa de acero y acceso a un curso online teórico y práctico</dd></div>
-                  <div><dt>Clase</dt><dd>Dispositivo médico Clase IIb · CE0068</dd></div>
-                </dl>
-              </div>
-            </article>
-          </li>
-          <!-- Reacare -->
-          <li class="carousel__item" data-reveal>
-            <article class="pcard pcard--dark" aria-labelledby="t-rcr">
-              <div class="pcard__media">
-                <picture>
-                  <source type="image/avif" srcset="/assets/img/dia-reacare-320.avif 320w, /assets/img/dia-reacare-480.avif 480w, /assets/img/dia-reacare-640.avif 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw">
-                  <img src="/assets/img/dia-reacare-480.webp" srcset="/assets/img/dia-reacare-320.webp 320w, /assets/img/dia-reacare-480.webp 480w, /assets/img/dia-reacare-640.webp 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw" width="640" height="512" alt="Diatermia capacitiva resistiva Reacare de I-Tech" loading="lazy" decoding="async">
-                </picture>
-                <span class="tag">Capacitiva y resistiva</span>
-              </div>
-              <div class="pcard__body">
-                <p class="pcard__brand">I-Tech · Italia</p>
-                <h3 class="pcard__title" id="t-rcr">Reacare</h3>
-                <p class="pcard__ideal">Ideal para rehabilitación y deporte.</p>
-                <ul class="pcard__points">
-                  <li>160 W de potencia</li>
-                  <li>De 400 a 600 kHz</li>
-                  <li>24 programas de rehabilitación</li>
-                </ul>
-                <div class="pcard__actions">
-                  <button class="btn btn--ghost btn--sm" type="button" aria-expanded="false" aria-controls="ficha-rcr" data-ficha>Ver ficha</button>
-                  <button class="btn btn--primary btn--sm" type="button" data-interest data-product="Diatermia / Tecar" data-model="Reacare (I-Tech)">Me interesa</button>
-                </div>
-              </div>
-              <div class="ficha" id="ficha-rcr" role="region" aria-label="Ficha técnica de Reacare" hidden>
-                <div class="ficha__head"><p class="ficha__title">Ficha técnica</p><button class="ficha__close" type="button" aria-label="Cerrar ficha"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
-                <dl class="ficha__list">
-                  <div><dt>Potencia</dt><dd>160 W</dd></div>
-                  <div><dt>Frecuencia</dt><dd>De 400 a 600 kHz</dd></div>
-                  <div><dt>Modulación</dt><dd>Hasta 100 Hz</dd></div>
-                  <div><dt>Programas</dt><dd>24 de rehabilitación, 10 de deporte y personalizado, más 10 memorias libres</dd></div>
-                  <div><dt>Manípulo</dt><dd>Resistivo y capacitivo</dd></div>
-                  <div><dt>Incluye</dt><dd>Kit de electrodos de 35 y 60 mm y placa de acero</dd></div>
-                  <div><dt>Clase</dt><dd>Dispositivo médico Clase IIb · CE0068</dd></div>
-                </dl>
-              </div>
-            </article>
-          </li>
-          <!-- HR Tek -->
-          <li class="carousel__item" data-reveal>
-            <article class="pcard pcard--dark" aria-labelledby="t-hrt">
-              <div class="pcard__media">
-                <picture>
-                  <source type="image/avif" srcset="/assets/img/dia-hrtek-320.avif 320w, /assets/img/dia-hrtek-480.avif 480w, /assets/img/dia-hrtek-640.avif 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw">
-                  <img src="/assets/img/dia-hrtek-480.webp" srcset="/assets/img/dia-hrtek-320.webp 320w, /assets/img/dia-hrtek-480.webp 480w, /assets/img/dia-hrtek-640.webp 640w" sizes="(min-width: 1100px) 290px, (min-width: 768px) 45vw, 82vw" width="640" height="512" alt="Equipo de tecarterapia HR Tek de EME" loading="lazy" decoding="async">
-                </picture>
-                <span class="tag">Tecarterapia</span>
-              </div>
-              <div class="pcard__body">
-                <p class="pcard__brand">EME · Italia</p>
-                <h3 class="pcard__title" id="t-hrt">HR Tek / HR Tek SP</h3>
-                <p class="pcard__ideal">Ideal si quieres trabajar con varias frecuencias.</p>
-                <ul class="pcard__points">
-                  <li>250 W de potencia</li>
-                  <li>445, 900 y 1200 kHz (SP: 445 kHz)</li>
-                  <li>47 protocolos predefinidos</li>
-                </ul>
-                <div class="pcard__actions">
-                  <button class="btn btn--ghost btn--sm" type="button" aria-expanded="false" aria-controls="ficha-hrt" data-ficha>Ver ficha</button>
-                  <button class="btn btn--primary btn--sm" type="button" data-interest data-product="Diatermia / Tecar" data-model="HR Tek / HR Tek SP (EME)">Me interesa</button>
-                </div>
-              </div>
-              <div class="ficha" id="ficha-hrt" role="region" aria-label="Ficha técnica de HR Tek" hidden>
-                <div class="ficha__head"><p class="ficha__title">Ficha técnica</p><button class="ficha__close" type="button" aria-label="Cerrar ficha"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
-                <dl class="ficha__list">
-                  <div><dt>Potencia</dt><dd>250 W</dd></div>
-                  <div><dt>Frecuencias</dt><dd>HR Tek: 445, 900 y 1200 kHz. HR Tek SP: 445 kHz</dd></div>
-                  <div><dt>Pantalla</dt><dd>Táctil a color de 10,1" con mapas anatómicos navegables</dd></div>
-                  <div><dt>Protocolos</dt><dd>47 predefinidos, 200 memorizables y 200 fichas de paciente</dd></div>
-                  <div><dt>Cabezales</dt><dd>Resistivo, capacitivo y bipolar (50 mm)</dd></div>
-                  <div><dt>Modos</dt><dd>Atermia, homeotermia e hipertermia</dd></div>
-                  <div><dt>Canales</dt><dd>2 independientes (capacitivo y resistivo o bipolar)</dd></div>
-                  <div><dt>Clase</dt><dd>Directiva 93/42/CEE Clase IIB · EN 60601-1</dd></div>
-                </dl>
-              </div>
-            </article>
-          </li>
+  <!-- 3 · Por qué VytalGroup -->
+  <section class="sec why" id="por-que" aria-labelledby="why-title">
+    <div class="wrap why__grid">
+      <figure class="why__photo" data-rv>
+        <picture>
+          <source type="image/avif" srcset="/assets/img/javier-320.avif 320w, /assets/img/javier-384.avif 384w" sizes="(min-width: 1024px) 400px, 320px">
+          <img src="/assets/img/javier-384.webp" srcset="/assets/img/javier-320.webp 320w, /assets/img/javier-384.webp 384w" sizes="(min-width: 1024px) 400px, 320px" width="384" height="440" alt="Javier Ruiz, fisioterapeuta y fundador de VytalGroup" loading="lazy" decoding="async">
+        </picture>
+      </figure>
+      <div class="why__copy">
+        <h2 class="h2" id="why-title" data-rv>De fisio <em>a fisio.</em></h2>
+        <p class="why__story" data-rv>Me quemé en jornadas de 12 horas. Monté VytalGroup para que no te engañen.</p>
+        <ul class="why__list" data-count-list data-rv>
+          <li><strong><span data-count="2">2</span> años</strong><span>Garantía en piezas y mano de obra</span></li>
+          <li><strong><span data-count="0" data-from="9">0</span> sorpresas</strong><span>Mantenimiento claro desde el principio</span></li>
+          <li><strong><span data-count="1">1</span> fisio</strong><span>Un sanitario, no un comercial</span></li>
         </ul>
-        <div class="carousel__dots" role="group" aria-label="Posición del carrusel"></div>
-      </div>
-
-      <!-- Comparativa -->
-      <div class="compare" data-reveal>
-        <h3 class="compare__title">Comparativa rápida</h3>
-        <table class="compare__table">
-          <caption class="sr-only">Comparativa de potencia, frecuencia y uso de las cuatro diatermias</caption>
-          <thead>
-            <tr><th scope="col">Modelo</th><th scope="col">Potencia</th><th scope="col">Frecuencia</th><th scope="col">Para quién</th></tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">Multifunción <span>VytaMeD</span></th>
-              <td colspan="2" data-label="Tecnología">RET/CET + TENS/IFC en 4 canales</td>
-              <td data-label="Para quién">Clínicas con tratamientos combinados</td>
-            </tr>
-            <tr>
-              <th scope="row">Reatherm <span>I-Tech</span></th>
-              <td data-label="Potencia"><strong>200 W</strong></td>
-              <td data-label="Frecuencia">300 a 700 kHz</td>
-              <td data-label="Para quién">Personalizar cada tratamiento</td>
-            </tr>
-            <tr>
-              <th scope="row">Reacare <span>I-Tech</span></th>
-              <td data-label="Potencia"><strong>160 W</strong></td>
-              <td data-label="Frecuencia">400 a 600 kHz</td>
-              <td data-label="Para quién">Rehabilitación y deporte</td>
-            </tr>
-            <tr>
-              <th scope="row">HR Tek <span>EME</span></th>
-              <td data-label="Potencia"><strong>250 W</strong></td>
-              <td data-label="Frecuencia">445, 900 y 1200 kHz</td>
-              <td data-label="Para quién">Trabajar con varias frecuencias</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="section-cta" data-reveal>
-        <button class="btn btn--primary btn--lg" type="button" data-interest data-product="Diatermia / Tecar" data-model="Aún no lo sé, quiero asesoramiento">Te ayudo a elegir tu diatermia <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================== TAMBIÉN TE EQUIPAMOS CON -->
-  <section class="more section-light sheet cv" id="mas-equipos" aria-labelledby="more-title">
-    <div class="container">
-      <header class="section-head section-head--row">
-        <div>
-          <p class="eyebrow" data-reveal>Y además</p>
-          <h2 class="h2" id="more-title" data-reveal>También te equipamos con.</h2>
-        </div>
-      </header>
-      <ul class="tiles" data-stagger>
-        <li class="tile" data-reveal>
-          <picture><source type="image/avif" srcset="/assets/img/sec-presoterapia-240.avif 240w, /assets/img/sec-presoterapia-400.avif 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw"><img src="/assets/img/sec-presoterapia-400.webp" srcset="/assets/img/sec-presoterapia-240.webp 240w, /assets/img/sec-presoterapia-400.webp 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw" width="400" height="320" alt="Botas de presoterapia VytalGroup" loading="lazy" decoding="async"></picture>
-          <h3 class="tile__title">Presoterapia</h3>
-          <p class="tile__line">Compresión neumática secuencial. I-Press de I-Tech: 200 mmHg, piernas y brazo.</p>
-          <button class="tile__cta" type="button" data-interest data-product="Presoterapia">Me interesa <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-        </li>
-        <li class="tile" data-reveal>
-          <picture><source type="image/avif" srcset="/assets/img/sec-superinductiva-240.avif 240w, /assets/img/sec-superinductiva-400.avif 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw"><img src="/assets/img/sec-superinductiva-400.webp" srcset="/assets/img/sec-superinductiva-240.webp 240w, /assets/img/sec-superinductiva-400.webp 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw" width="400" height="320" alt="Equipo de superinducción VytaMeD con aplicador circular" loading="lazy" decoding="async"></picture>
-          <h3 class="tile__title">Superinductiva VytaMeD</h3>
-          <p class="tile__line">Magnetoterapia de alta intensidad (HILT-Mag).</p>
-          <button class="tile__cta" type="button" data-interest data-product="Otro equipo del catálogo" data-model="Superinductiva (VytaMeD)">Me interesa <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-        </li>
-        <li class="tile" data-reveal>
-          <picture><source type="image/avif" srcset="/assets/img/sec-ondas-240.avif 240w, /assets/img/sec-ondas-400.avif 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw"><img src="/assets/img/sec-ondas-400.webp" srcset="/assets/img/sec-ondas-240.webp 240w, /assets/img/sec-ondas-400.webp 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw" width="400" height="320" alt="Equipo de ondas de choque radiales Shock Med de EME" loading="lazy" decoding="async"></picture>
-          <h3 class="tile__title">Ondas de choque</h3>
-          <p class="tile__line">Radiales de EME Shock Med y gama LiKAWAVE.</p>
-          <button class="tile__cta" type="button" data-interest data-product="Otro equipo del catálogo" data-model="Ondas de choque (EME Shock Med / LiKAWAVE)">Me interesa <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-        </li>
-        <li class="tile" data-reveal>
-          <picture><source type="image/avif" srcset="/assets/img/sec-laser-240.avif 240w, /assets/img/sec-laser-400.avif 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw"><img src="/assets/img/sec-laser-400.webp" srcset="/assets/img/sec-laser-240.webp 240w, /assets/img/sec-laser-400.webp 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw" width="400" height="320" alt="Láser terapéutico de alta potencia VytalGroup" loading="lazy" decoding="async"></picture>
-          <h3 class="tile__title">Láser de alta potencia</h3>
-          <p class="tile__line">Para fisioterapia y medicina deportiva.</p>
-          <button class="tile__cta" type="button" data-interest data-product="Otro equipo del catálogo" data-model="Láser de alta potencia">Me interesa <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-        </li>
-        <li class="tile" data-reveal>
-          <picture><source type="image/avif" srcset="/assets/img/sec-camillas-240.avif 240w, /assets/img/sec-camillas-400.avif 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw"><img src="/assets/img/sec-camillas-400.webp" srcset="/assets/img/sec-camillas-240.webp 240w, /assets/img/sec-camillas-400.webp 400w" sizes="(min-width: 1100px) 220px, (min-width: 640px) 30vw, 44vw" width="400" height="320" alt="Camilla eléctrica de fisioterapia" loading="lazy" decoding="async"></picture>
-          <h3 class="tile__title">Camillas</h3>
-          <p class="tile__line">Eléctricas e hidráulicas, con garantía de 2 años o más.</p>
-          <button class="tile__cta" type="button" data-interest data-product="Otro equipo del catálogo" data-model="Camillas de fisioterapia">Me interesa <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-        </li>
-      </ul>
-      <div class="more__foot" data-reveal>
-        <p>Y más de 50 páginas de equipos en el catálogo.</p>
-        <a class="btn btn--dark" href="/assets/docs/catalogo-vytalgroup-2026.pdf" download data-catalog><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Descargar catálogo completo</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================== CÓMO TRABAJAMOS -->
-  <section class="steps section-dark sheet cv" id="como-trabajamos" aria-labelledby="steps-title">
-    <div class="section-dark__bg" aria-hidden="true"><span class="glow glow--d"></span></div>
-    <div class="container">
-      <header class="section-head">
-        <p class="eyebrow eyebrow--light" data-reveal>Cómo trabajamos</p>
-        <h2 class="h2" id="steps-title" data-reveal>Así de sencillo.</h2>
-      </header>
-      <div class="timeline" data-timeline>
-        <span class="timeline__rail" aria-hidden="true"><span class="timeline__fill"></span></span>
-        <ol class="timeline__list">
-        <li class="tstep" data-reveal>
-          <span class="tstep__node"><svg class="icon" aria-hidden="true"><use href="#i-stetho"/></svg></span>
-          <p class="tstep__num">01</p>
-          <h3 class="tstep__title">Asesoramiento</h3>
-          <p class="tstep__text">Te escucha un fisio y te recomienda lo que necesitas.</p>
-        </li>
-        <li class="tstep" data-reveal>
-          <span class="tstep__node"><svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg></span>
-          <p class="tstep__num">02</p>
-          <h3 class="tstep__title">Configuración</h3>
-          <p class="tstep__text">Equipo, sondas y accesorios a tu medida.</p>
-        </li>
-        <li class="tstep" data-reveal>
-          <span class="tstep__node"><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg></span>
-          <p class="tstep__num">03</p>
-          <h3 class="tstep__title">Entrega e instalación</h3>
-          <p class="tstep__text">En España y fuera, con gestión aduanera.</p>
-        </li>
-        <li class="tstep" data-reveal>
-          <span class="tstep__node"><svg class="icon" aria-hidden="true"><use href="#i-support"/></svg></span>
-          <p class="tstep__num">04</p>
-          <h3 class="tstep__title">Formación y soporte</h3>
-          <p class="tstep__text">2 años de garantía y mantenimiento sin sorpresas.</p>
-        </li>
-        </ol>
-      </div>
-      <div class="section-cta" data-reveal>
-        <a class="btn btn--primary btn--lg" href="#asesoramiento" data-cta>Empezar ahora <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================== GARANTÍAS -->
-  <section class="why section-light sheet cv" id="garantias" aria-labelledby="why-title">
-    <div class="container">
-      <header class="section-head">
-        <p class="eyebrow" data-reveal>Por qué VytalGroup</p>
-        <h2 class="h2" id="why-title" data-reveal>Tu inversión, bien cubierta.</h2>
-      </header>
-      <ul class="why__grid" data-stagger>
-        <li class="why__item" data-reveal>
-          <span class="why__icon"><svg class="icon" aria-hidden="true"><use href="#i-award"/></svg></span>
-          <h3 class="why__title">2 años de garantía</h3>
-          <p>En piezas y mano de obra. Sin letra pequeña.</p>
-        </li>
-        <li class="why__item" data-reveal>
-          <span class="why__icon"><svg class="icon" aria-hidden="true"><use href="#i-wrench"/></svg></span>
-          <h3 class="why__title">Mantenimiento asegurado</h3>
-          <p>Servicio técnico especializado. Sabes lo que incluye desde el principio.</p>
-        </li>
-        <li class="why__item" data-reveal>
-          <span class="why__icon"><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg></span>
-          <h3 class="why__title">Equipos certificados</h3>
-          <p>Marcado CE y documentación técnica y regulatoria de cada equipo.</p>
-        </li>
-        <li class="why__item" data-reveal>
-          <span class="why__icon"><svg class="icon" aria-hidden="true"><use href="#i-stetho"/></svg></span>
-          <h3 class="why__title">Te asesora un sanitario</h3>
-          <p>Un fisioterapeuta, no un comercial.</p>
-        </li>
-      </ul>
-      <div class="section-cta" data-reveal>
-        <a class="btn btn--dark btn--lg" href="#asesoramiento" data-cta>Pedir asesoramiento <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================== CATÁLOGO -->
-  <section class="catalog section-dark sheet cv" id="catalogo" aria-labelledby="cat-title">
-    <div class="section-dark__bg" aria-hidden="true"><span class="glow glow--e"></span></div>
-    <div class="container catalog__inner">
-      <div class="catalog__mock" data-reveal>
-        <div class="catalog__book">
-          <picture>
-            <source type="image/avif" srcset="/assets/img/catalogo-portada-280.avif 280w, /assets/img/catalogo-portada-420.avif 420w, /assets/img/catalogo-portada-560.avif 560w" sizes="(min-width: 900px) 300px, 58vw">
-            <img src="/assets/img/catalogo-portada-420.webp" srcset="/assets/img/catalogo-portada-280.webp 280w, /assets/img/catalogo-portada-420.webp 420w, /assets/img/catalogo-portada-560.webp 560w" sizes="(min-width: 900px) 300px, 58vw" width="420" height="594" alt="Portada del catálogo internacional de equipamiento médico 2026 de ADC Global Tech y VytalGroup" loading="lazy" decoding="async">
-          </picture>
-          <span class="catalog__shine" aria-hidden="true"></span>
-        </div>
-        <span class="catalog__shadow" aria-hidden="true"></span>
-      </div>
-      <div class="catalog__copy">
-        <p class="eyebrow eyebrow--light" data-reveal>Catálogo 2026</p>
-        <h2 class="h2" id="cat-title" data-reveal>Todo el equipamiento en un PDF.</h2>
-        <p class="catalog__meta" data-reveal><span>PDF</span><span>53 páginas</span><span>1,2 MB</span><span>Sin datos, descarga directa</span></p>
-        <div class="catalog__ctas" data-reveal>
-          <a class="btn btn--primary btn--lg" href="/assets/docs/catalogo-vytalgroup-2026.pdf" download data-catalog><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Descargar catálogo</a>
-          <a class="btn btn--outline btn--lg" href="#asesoramiento" data-cta>Prefiero que me asesoren</a>
+        <div class="why__foot" data-rv>
+          <p class="sign"><svg class="sign__svg" viewBox="-64 114 3592 1230" role="img" aria-label="Firma de Javier Ruiz"><use href="#sig"/></svg><span>Javier Ruiz, fisioterapeuta y fundador</span></p>
+          <a class="btn btn--primary" href="#asesoramiento" data-cta>Quiero asesoramiento</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================== PREGUNTAS -->
-  <section class="faq section-light sheet cv" id="preguntas" aria-labelledby="faq-title">
-    <div class="container faq__inner">
-      <header class="section-head faq__head">
-        <p class="eyebrow" data-reveal>Preguntas frecuentes</p>
-        <h2 class="h2" id="faq-title" data-reveal>Lo que más me preguntáis.</h2>
-        <a class="faq__wa" href="https://wa.me/34616372644?text=Hola%20Javier%2C%20vengo%20de%20la%20web%20y%20tengo%20una%20duda%20sobre..." target="_blank" rel="noopener" data-whatsapp data-reveal><svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg> ¿Otra duda? Escríbeme por WhatsApp</a>
-      </header>
-      <div class="accordion" data-stagger>
-        <div class="acc" data-reveal>
-          <h3 class="acc__h"><button class="acc__btn" type="button" aria-expanded="false" aria-controls="faq-1" id="faq-1-b">¿Qué ecógrafo me conviene para fisioterapia?<span class="acc__icon" aria-hidden="true"></span></button></h3>
-          <div class="acc__panel" id="faq-1" role="region" aria-labelledby="faq-1-b" data-collapse><div class="acc__body"><p>Depende de cómo trabajes. Si te mueves entre consulta y domicilio, el Eco Wireless. Si haces procedimientos ecoguiados y musculoesquelético, el Acclarix AX8. Cuéntame tu caso y te recomiendo uno.</p></div></div>
+  <!-- 4 · Dudas -->
+  <section class="sec faq" id="dudas" aria-labelledby="faq-title">
+    <div class="wrap wrap--narrow">
+      <h2 class="h2" id="faq-title" data-rv>Lo que <em>me preguntáis.</em></h2>
+      <div class="acc" data-acc data-rv>
+        <div class="acc__item">
+          <h3 class="acc__h"><button class="acc__btn" type="button" id="q1" aria-expanded="false" aria-controls="a1">¿Cuál me conviene?<span class="acc__icon" aria-hidden="true"></span></button></h3>
+          <div class="acc__panel" id="a1" role="region" aria-labelledby="q1" hidden><p>Depende de cómo trabajas. Me lo cuentas y te recomiendo uno.</p></div>
         </div>
-        <div class="acc" data-reveal>
-          <h3 class="acc__h"><button class="acc__btn" type="button" aria-expanded="false" aria-controls="faq-2" id="faq-2-b">¿Qué diferencia hay entre las diatermias?<span class="acc__icon" aria-hidden="true"></span></button></h3>
-          <div class="acc__panel" id="faq-2" role="region" aria-labelledby="faq-2-b" data-collapse><div class="acc__body"><p>La Multifunción VytaMeD une diatermia RET/CET y electroterapia TENS/IFC en 4 canales. Reatherm (200 W) y Reacare (160 W) son capacitivas y resistivas de I-Tech. HR Tek (250 W) de EME trabaja a 445, 900 y 1200 kHz.</p></div></div>
+        <div class="acc__item">
+          <h3 class="acc__h"><button class="acc__btn" type="button" id="q2" aria-expanded="false" aria-controls="a2">¿Qué garantía tienen?<span class="acc__icon" aria-hidden="true"></span></button></h3>
+          <div class="acc__panel" id="a2" role="region" aria-labelledby="q2" hidden><p>2 años en piezas y mano de obra, sin letra pequeña.</p></div>
         </div>
-        <div class="acc" data-reveal>
-          <h3 class="acc__h"><button class="acc__btn" type="button" aria-expanded="false" aria-controls="faq-3" id="faq-3-b">¿Los equipos están certificados?<span class="acc__icon" aria-hidden="true"></span></button></h3>
-          <div class="acc__panel" id="faq-3" role="region" aria-labelledby="faq-3-b" data-collapse><div class="acc__body"><p>Sí. Son productos sanitarios con marcado CE y su clase aparece en cada ficha. Con cada operación recibes la documentación técnica y regulatoria aplicable.</p></div></div>
+        <div class="acc__item">
+          <h3 class="acc__h"><button class="acc__btn" type="button" id="q3" aria-expanded="false" aria-controls="a3">¿Y el mantenimiento?<span class="acc__icon" aria-hidden="true"></span></button></h3>
+          <div class="acc__panel" id="a3" role="region" aria-labelledby="q3" hidden><p>Está asegurado, y sabes lo que incluye desde el principio.</p></div>
         </div>
-        <div class="acc" data-reveal>
-          <h3 class="acc__h"><button class="acc__btn" type="button" aria-expanded="false" aria-controls="faq-4" id="faq-4-b">¿Qué garantía tienen?<span class="acc__icon" aria-hidden="true"></span></button></h3>
-          <div class="acc__panel" id="faq-4" role="region" aria-labelledby="faq-4-b" data-collapse><div class="acc__body"><p>2 años de garantía en piezas y mano de obra, sin letra pequeña.</p></div></div>
+        <div class="acc__item">
+          <h3 class="acc__h"><button class="acc__btn" type="button" id="q4" aria-expanded="false" aria-controls="a4">¿Están certificados?<span class="acc__icon" aria-hidden="true"></span></button></h3>
+          <div class="acc__panel" id="a4" role="region" aria-labelledby="q4" hidden><p>Sí. Son productos sanitarios con marcado CE y su documentación.</p></div>
         </div>
-        <div class="acc" data-reveal>
-          <h3 class="acc__h"><button class="acc__btn" type="button" aria-expanded="false" aria-controls="faq-5" id="faq-5-b">¿Cómo funciona el mantenimiento?<span class="acc__icon" aria-hidden="true"></span></button></h3>
-          <div class="acc__panel" id="faq-5" role="region" aria-labelledby="faq-5-b" data-collapse><div class="acc__body"><p>Tienes el mantenimiento asegurado con servicio técnico especializado. Te explico desde el principio qué incluye, sin sorpresas.</p></div></div>
-        </div>
-        <div class="acc" data-reveal>
-          <h3 class="acc__h"><button class="acc__btn" type="button" aria-expanded="false" aria-controls="faq-6" id="faq-6-b">¿Enviáis fuera de España?<span class="acc__icon" aria-hidden="true"></span></button></h3>
-          <div class="acc__panel" id="faq-6" role="region" aria-labelledby="faq-6-b" data-collapse><div class="acc__body"><p>Sí. Enviamos a la Unión Europea, Estados Unidos y Latinoamérica, con la gestión aduanera incluida.</p></div></div>
-        </div>
-        <div class="acc" data-reveal>
-          <h3 class="acc__h"><button class="acc__btn" type="button" aria-expanded="false" aria-controls="faq-7" id="faq-7-b">¿Incluye instalación y formación?<span class="acc__icon" aria-hidden="true"></span></button></h3>
-          <div class="acc__panel" id="faq-7" role="region" aria-labelledby="faq-7-b" data-collapse><div class="acc__body"><p>La instalación, la formación y el soporte se definen según cada proyecto. Te lo concreto en la propuesta.</p></div></div>
-        </div>
-        <div class="acc" data-reveal>
-          <h3 class="acc__h"><button class="acc__btn" type="button" aria-expanded="false" aria-controls="faq-8" id="faq-8-b">¿Cómo es el proceso de compra?<span class="acc__icon" aria-hidden="true"></span></button></h3>
-          <div class="acc__panel" id="faq-8" role="region" aria-labelledby="faq-8-b" data-collapse><div class="acc__body"><p>Me cuentas qué necesitas, te recomiendo el equipo y su configuración y recibes una propuesta con las condiciones. Después coordinamos la entrega.</p></div></div>
+        <div class="acc__item">
+          <h3 class="acc__h"><button class="acc__btn" type="button" id="q5" aria-expanded="false" aria-controls="a5">¿Enviáis fuera de España?<span class="acc__icon" aria-hidden="true"></span></button></h3>
+          <div class="acc__panel" id="a5" role="region" aria-labelledby="q5" hidden><p>Sí, a la UE, USA y LATAM, con la aduana gestionada.</p></div>
         </div>
       </div>
+      <p class="faq__more" data-rv><a class="link" href="https://wa.me/34616372644?text=Hola%20Javier%2C%20vengo%20de%20la%20web%20y%20tengo%20una%20duda%3A%20" target="_blank" rel="noopener" data-wa="dudas" data-faq-wa>¿Otra duda? Escríbeme por WhatsApp</a></p>
     </div>
   </section>
 
-  <!-- ============================== FORMULARIO -->
-  <section class="lead-form section-dark sheet" id="asesoramiento" aria-labelledby="form-title">
-    <div class="section-dark__bg" aria-hidden="true"><span class="glow glow--f"></span></div>
-    <div class="container lead-form__inner">
-      <div class="lead-form__aside">
-        <p class="eyebrow eyebrow--light" data-reveal>Sin compromiso</p>
-        <h2 class="h2" id="form-title" data-reveal>Cuéntame qué necesitas y te asesoro.</h2>
-        <div class="lead-form__person" data-reveal>
-          <picture>
-            <source type="image/avif" srcset="/assets/img/javier-avatar-160.avif 160w, /assets/img/javier-avatar-240.avif 240w" sizes="72px">
-            <img src="/assets/img/javier-avatar-160.webp" srcset="/assets/img/javier-avatar-160.webp 160w, /assets/img/javier-avatar-240.webp 240w" sizes="72px" width="160" height="160" alt="Javier Ruiz" loading="lazy" decoding="async">
-          </picture>
-          <p><strong>Respuesta personal, sin compromiso.</strong><span>Te contesta Javier, no un comercial.</span></p>
-        </div>
-      </div>
+  <!-- 5 · Formulario -->
+  <section class="sec lead" id="asesoramiento" aria-labelledby="form-title">
+    <div class="wrap wrap--form">
+      <h2 class="h2" id="form-title" data-rv>Cuéntame qué <em>necesitas.</em></h2>
+      <p class="lead__sub" data-rv><picture><source type="image/avif" srcset="/assets/img/javier-avatar-96.avif"><img src="/assets/img/javier-avatar-96.webp" width="96" height="96" alt="" loading="lazy" decoding="async"></picture>Te respondo yo personalmente.</p>
 
-      <div class="fcard" data-reveal>
-        <form class="qform" id="qform" novalidate>
-          <div class="qform__top">
-            <p class="qform__count" aria-hidden="true"><span data-step-now>Paso 1</span> <span class="muted" data-step-total>de 9</span></p>
-            <div class="qform__progress" role="progressbar" aria-label="Progreso del formulario" aria-valuemin="1" aria-valuemax="9" aria-valuenow="1"><span class="qform__bar"></span></div>
+      <div class="fcard" data-rv>
+        <form class="qf" id="qf" novalidate aria-labelledby="form-title">
+          <div class="qf__bar" role="progressbar" aria-label="Progreso del formulario" aria-valuemin="1" aria-valuemax="6" aria-valuenow="1" aria-valuetext="Paso 1 de 6"><span data-progress></span></div>
+          <div class="qf__nav"><button class="qf__back" type="button" data-back aria-label="Volver a la pregunta anterior" hidden><svg class="icon icon--flip" aria-hidden="true"><use href="#i-arrow"/></svg></button><span class="qf__count" aria-hidden="true" data-count-step>1/6</span></div>
+
+          <fieldset class="qf__step is-active" data-step="1">
+            <legend class="qf__q">¿Qué equipo buscas?</legend>
+            <div class="qf__picked" data-picked-box hidden>
+              <p>Te interesa: <strong data-picked></strong></p>
+              <button class="link" type="button" data-change>Cambiar</button>
+            </div>
+            <div class="opts" data-opts>
+              <label class="opt"><input type="radio" name="equipo" value="Ecógrafo"><span>Ecógrafo</span></label>
+              <label class="opt"><input type="radio" name="equipo" value="Diatermia"><span>Diatermia</span></label>
+              <label class="opt"><input type="radio" name="equipo" value="Otro equipo"><span>Otro equipo</span></label>
+            </div>
+            <p class="qf__err" data-error></p>
+            <button class="btn btn--primary btn--block qf__next" type="button" data-next>Siguiente</button>
+          </fieldset>
+
+          <fieldset class="qf__step" data-step="2">
+            <legend class="qf__q">¿Cuál es tu perfil?</legend>
+            <div class="opts opts--2">
+              <label class="opt"><input type="radio" name="perfil" value="Fisioterapeuta"><span>Fisioterapeuta</span></label>
+              <label class="opt"><input type="radio" name="perfil" value="Clínica o centro"><span>Clínica o centro</span></label>
+              <label class="opt"><input type="radio" name="perfil" value="Médico"><span>Médico</span></label>
+              <label class="opt"><input type="radio" name="perfil" value="Otro"><span>Otro</span></label>
+            </div>
+            <p class="qf__err" data-error></p>
+            <button class="btn btn--primary btn--block qf__next" type="button" data-next>Siguiente</button>
+          </fieldset>
+
+          <fieldset class="qf__step" data-step="3">
+            <legend class="qf__q">¿Para cuándo?</legend>
+            <div class="opts">
+              <label class="opt"><input type="radio" name="plazo" value="Lo antes posible"><span>Lo antes posible</span></label>
+              <label class="opt"><input type="radio" name="plazo" value="En 1 a 3 meses"><span>En 1 a 3 meses</span></label>
+              <label class="opt"><input type="radio" name="plazo" value="Solo miro"><span>Solo miro</span></label>
+            </div>
+            <p class="qf__err" data-error></p>
+            <button class="btn btn--primary btn--block qf__next" type="button" data-next>Siguiente</button>
+          </fieldset>
+
+          <div class="qf__step" data-step="4" role="group" aria-labelledby="q-name">
+            <label class="qf__q" id="q-name" for="f-name">¿Cómo te llamas?</label>
+            <input class="field" id="f-name" name="nombre" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" maxlength="80" aria-describedby="e-name">
+            <p class="qf__err" id="e-name" data-error></p>
+            <button class="btn btn--primary btn--block qf__next is-shown" type="button" data-next>Siguiente</button>
           </div>
+
+          <div class="qf__step" data-step="5" role="group" aria-labelledby="q-tel">
+            <label class="qf__q" id="q-tel" for="f-tel">Tu WhatsApp</label>
+            <div class="tel">
+              <div class="tel__prefix" data-prefix></div>
+              <input class="field" id="f-tel" name="telefono" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="next" maxlength="22" placeholder="612 345 678" aria-describedby="e-tel">
+            </div>
+            <p class="qf__err" id="e-tel" data-error></p>
+            <button class="btn btn--primary btn--block qf__next is-shown" type="button" data-next>Siguiente</button>
+          </div>
+
+          <div class="qf__step" data-step="6" role="group" aria-labelledby="q-email">
+            <label class="qf__q" id="q-email" for="f-email">Tu email</label>
+            <input class="field" id="f-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="send" maxlength="120" aria-describedby="e-email">
+            <p class="qf__suggest" data-suggest hidden></p>
+            <p class="qf__err" id="e-email" data-error></p>
+            <label class="check">
+              <input type="checkbox" name="consent" aria-describedby="e-consent">
+              <span class="check__box" aria-hidden="true"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span>
+              <span class="check__txt">Acepto la <a href="/privacidad" target="_blank" rel="noopener">política de privacidad</a> y que VytalGroup me contacte.</span>
+            </label>
+            <p class="qf__err" id="e-consent" data-error-consent></p>
+            <button class="btn btn--primary btn--block qf__send" type="submit" data-submit><span>Enviar</span></button>
+          </div>
+
+          <div class="hp" aria-hidden="true"><label>Web <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+
+          <div class="qf__end" data-done tabindex="-1" hidden>
+            <p class="qf__end-title" data-done-title>Gracias. Te escribo muy pronto.</p>
+            <p class="sign sign--dark"><svg class="sign__svg" viewBox="-64 114 3592 1230" role="img" aria-label="Firma de Javier"><use href="#sig"/></svg><span>Javier Ruiz, fisioterapeuta</span></p>
+            <a class="btn btn--primary btn--block" href="https://wa.me/34616372644" target="_blank" rel="noopener" data-done-wa data-wa="gracias"><svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg>Escríbeme ya por WhatsApp</a>
+            <a class="link" href="/assets/docs/catalogo-vytalgroup-2026.pdf" download data-catalog>Descargar el catálogo (PDF)</a>
+          </div>
+
+          <div class="qf__end" data-fail tabindex="-1" hidden>
+            <p class="qf__end-title">No se ha podido enviar.</p>
+            <p class="qf__end-text">Tus datos siguen aquí. Vuelve a intentarlo o escríbeme por WhatsApp.</p>
+            <button class="btn btn--primary btn--block" type="button" data-retry>Reintentar</button>
+            <a class="link" href="https://wa.me/34616372644" target="_blank" rel="noopener" data-fail-wa data-wa="error">Escribir por WhatsApp</a>
+          </div>
+
           <p class="sr-only" aria-live="polite" data-live></p>
-
-          <div class="qform__viewport">
-            <!-- Paso 1 -->
-            <fieldset class="qstep is-active" data-step="1" data-type="multi" data-name="productos">
-              <legend class="qstep__q" tabindex="-1">¿Qué equipo te interesa?</legend>
-              <p class="qstep__hint">Puedes elegir más de uno.</p>
-              <div class="opts opts--grid">
-                <label class="opt opt--card"><input type="checkbox" name="productos" value="Ecógrafo"><span class="opt__box"><svg class="opt__ico" aria-hidden="true"><use href="#i-probe"/></svg><span class="opt__label">Ecógrafo</span><span class="opt__check" aria-hidden="true"></span></span></label>
-                <label class="opt opt--card"><input type="checkbox" name="productos" value="Diatermia / Tecar"><span class="opt__box"><svg class="opt__ico" aria-hidden="true"><use href="#i-heat"/></svg><span class="opt__label">Diatermia / Tecar</span><span class="opt__check" aria-hidden="true"></span></span></label>
-                <label class="opt opt--card"><input type="checkbox" name="productos" value="Presoterapia"><span class="opt__box"><svg class="opt__ico" aria-hidden="true"><use href="#i-legs"/></svg><span class="opt__label">Presoterapia</span><span class="opt__check" aria-hidden="true"></span></span></label>
-                <label class="opt opt--card"><input type="checkbox" name="productos" value="Otro equipo del catálogo"><span class="opt__box"><svg class="opt__ico" aria-hidden="true"><use href="#i-grid"/></svg><span class="opt__label">Otro equipo del catálogo</span><span class="opt__check" aria-hidden="true"></span></span></label>
-              </div>
-              <p class="qstep__error" data-error role="alert"></p>
-            </fieldset>
-
-            <!-- Paso 2 -->
-            <fieldset class="qstep" data-step="2" data-type="models" data-name="modelos">
-              <legend class="qstep__q" tabindex="-1">¿Tienes algún modelo en mente?</legend>
-              <p class="qstep__hint">Opcional. Si dudas, déjalo en mis manos.</p>
-              <div class="dd-slot" data-dd="modelos"></div>
-              <p class="qstep__error" data-error role="alert"></p>
-            </fieldset>
-
-            <!-- Paso 3 -->
-            <fieldset class="qstep" data-step="3" data-type="single" data-name="perfil">
-              <legend class="qstep__q" tabindex="-1">¿Cuál es tu perfil?</legend>
-              <div class="opts">
-                <label class="opt"><input type="radio" name="perfil" value="Fisioterapeuta"><span class="opt__box"><span class="opt__label">Fisioterapeuta</span><span class="opt__radio" aria-hidden="true"></span></span></label>
-                <label class="opt"><input type="radio" name="perfil" value="Clínica o centro"><span class="opt__box"><span class="opt__label">Clínica o centro</span><span class="opt__radio" aria-hidden="true"></span></span></label>
-                <label class="opt"><input type="radio" name="perfil" value="Médico"><span class="opt__box"><span class="opt__label">Médico</span><span class="opt__radio" aria-hidden="true"></span></span></label>
-                <label class="opt"><input type="radio" name="perfil" value="Centro deportivo"><span class="opt__box"><span class="opt__label">Centro deportivo</span><span class="opt__radio" aria-hidden="true"></span></span></label>
-                <label class="opt"><input type="radio" name="perfil" value="Otro"><span class="opt__box"><span class="opt__label">Otro</span><span class="opt__radio" aria-hidden="true"></span></span></label>
-              </div>
-              <p class="qstep__error" data-error role="alert"></p>
-            </fieldset>
-
-            <!-- Paso 4 -->
-            <fieldset class="qstep" data-step="4" data-type="single" data-name="plazo">
-              <legend class="qstep__q" tabindex="-1">¿Para cuándo lo necesitas?</legend>
-              <div class="opts">
-                <label class="opt"><input type="radio" name="plazo" value="Lo antes posible"><span class="opt__box"><span class="opt__label">Lo antes posible</span><span class="opt__radio" aria-hidden="true"></span></span></label>
-                <label class="opt"><input type="radio" name="plazo" value="En 1 a 3 meses"><span class="opt__box"><span class="opt__label">En 1 a 3 meses</span><span class="opt__radio" aria-hidden="true"></span></span></label>
-                <label class="opt"><input type="radio" name="plazo" value="Solo me estoy informando"><span class="opt__box"><span class="opt__label">Solo me estoy informando</span><span class="opt__radio" aria-hidden="true"></span></span></label>
-              </div>
-              <p class="qstep__error" data-error role="alert"></p>
-            </fieldset>
-
-            <!-- Paso 5 -->
-            <fieldset class="qstep" data-step="5" data-type="text" data-name="nombre">
-              <legend class="qstep__q" tabindex="-1"><label for="f-nombre">¿Cómo te llamas?</label></legend>
-              <div class="field">
-                <input class="input" id="f-nombre" name="nombre" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" placeholder="Nombre y apellidos" minlength="2" maxlength="80" required aria-describedby="e-nombre">
-              </div>
-              <p class="qstep__error" id="e-nombre" data-error role="alert"></p>
-            </fieldset>
-
-            <!-- Paso 6 -->
-            <fieldset class="qstep" data-step="6" data-type="phone" data-name="telefono">
-              <legend class="qstep__q" tabindex="-1"><label for="f-tel">Teléfono / WhatsApp</label></legend>
-              <p class="qstep__hint">Te escribo por WhatsApp o te llamo, como prefieras.</p>
-              <div class="field field--phone">
-                <div class="dd-slot" data-dd="prefijo"></div>
-                <input class="input" id="f-tel" name="telefono" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="next" placeholder="612 345 678" maxlength="20" required aria-describedby="e-tel">
-              </div>
-              <p class="qstep__error" id="e-tel" data-error role="alert"></p>
-            </fieldset>
-
-            <!-- Paso 7 -->
-            <fieldset class="qstep" data-step="7" data-type="email" data-name="email">
-              <legend class="qstep__q" tabindex="-1"><label for="f-email">¿Tu email?</label></legend>
-              <div class="field">
-                <input class="input" id="f-email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" placeholder="tu@email.com" maxlength="120" required aria-describedby="e-email">
-              </div>
-              <p class="qstep__suggest" data-suggest hidden></p>
-              <p class="qstep__error" id="e-email" data-error role="alert"></p>
-            </fieldset>
-
-            <!-- Paso 8 -->
-            <fieldset class="qstep" data-step="8" data-type="location" data-name="ubicacion">
-              <legend class="qstep__q" tabindex="-1">¿Dónde estás?</legend>
-              <div class="dd-slot" data-dd="provincia"></div>
-              <div class="field field--country" data-country hidden>
-                <label class="field__label" for="f-pais">País</label>
-                <input class="input" id="f-pais" name="pais" type="text" autocomplete="country-name" enterkeyhint="next" placeholder="Por ejemplo, Portugal" maxlength="60">
-              </div>
-              <p class="qstep__error" data-error role="alert"></p>
-            </fieldset>
-
-            <!-- Paso 9 -->
-            <fieldset class="qstep" data-step="9" data-type="confirm" data-name="consentimiento">
-              <legend class="qstep__q" tabindex="-1">Revisa y envía</legend>
-              <dl class="summary" data-summary></dl>
-              <label class="consent">
-                <input type="checkbox" name="consentimiento" value="si" required>
-                <span class="consent__box" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></svg></span>
-                <span class="consent__txt">Acepto la <a href="/privacidad.html" target="_blank" rel="noopener">política de privacidad</a> y que VytalGroup me contacte para asesorarme.</span>
-              </label>
-              <p class="qstep__error" data-error role="alert"></p>
-            </fieldset>
-
-            <!-- Resultado -->
-            <div class="qdone" data-done hidden tabindex="-1">
-              <svg class="qdone__check" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg>
-              <p class="qdone__title" data-done-title>Gracias. Te escribo muy pronto.</p>
-              <p class="qdone__sign"><svg viewBox="-64 114 3592 1230" role="img" aria-label="Firma de Javier"><use href="#sig"/></svg></p>
-              <div class="qdone__ctas">
-                <a class="btn btn--wa btn--block" href="https://wa.me/34616372644" target="_blank" rel="noopener" data-whatsapp data-done-wa><svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg> Escríbeme ya por WhatsApp</a>
-                <a class="btn btn--outline btn--block" href="/assets/docs/catalogo-vytalgroup-2026.pdf" download data-catalog><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg> Descargar catálogo</a>
-              </div>
-            </div>
-            <div class="qerror" data-fail hidden tabindex="-1">
-              <p class="qerror__title">Vaya, no se ha podido enviar.</p>
-              <p>Tus datos siguen aquí. Vuelve a intentarlo o escríbeme por WhatsApp y lo vemos.</p>
-              <div class="qdone__ctas">
-                <button class="btn btn--primary btn--block" type="button" data-retry>Reintentar</button>
-                <a class="btn btn--wa btn--block" href="https://wa.me/34616372644" target="_blank" rel="noopener" data-whatsapp data-fail-wa><svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg> Escribir por WhatsApp</a>
-              </div>
-            </div>
-          </div>
-
-          <div class="hp" aria-hidden="true">
-            <label for="f-web">No rellenes este campo</label>
-            <input id="f-web" type="text" name="website" tabindex="-1" autocomplete="off">
-          </div>
-
-          <div class="qform__nav">
-            <button class="btn btn--ghost-light qform__back" type="button" data-back hidden><svg class="icon icon--flip" aria-hidden="true"><use href="#i-arrow"/></svg> Atrás</button>
-            <button class="btn btn--primary qform__next" type="button" data-next disabled>Siguiente <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-            <button class="btn btn--primary qform__submit" type="submit" data-submit hidden disabled><span class="btn__label">Enviar</span><span class="btn__spinner" aria-hidden="true"></span></button>
-          </div>
         </form>
-        <noscript><p class="qform__noscript">Para usar el formulario necesitas JavaScript. Escríbeme a <a href="mailto:vytalkinetech@gmail.com">vytalkinetech@gmail.com</a> o por WhatsApp al +34 616 372 644.</p></noscript>
       </div>
     </div>
   </section>
 </main>
 
-<footer class="footer">
-  <div class="container footer__inner">
-    <div class="footer__brand">
-      <a href="#inicio" aria-label="VytalGroup, volver al inicio"><svg class="logo logo--footer" viewBox="0 0 1117 171" aria-hidden="true"><use href="#logo"/></svg></a>
-      <p class="footer__claim">Salud · Bienestar · Rendimiento</p>
-      <p class="footer__notice">Información dirigida a profesionales sanitarios.</p>
-    </div>
-    <div class="footer__col">
-      <p class="footer__h">Contacto</p>
-      <ul class="footer__list">
-        <li><a href="tel:+34616372644"><svg class="icon" aria-hidden="true"><use href="#i-phone"/></svg>+34 616 372 644</a></li>
-        <li><a href="https://wa.me/34616372644?text=Hola%20Javier%2C%20vengo%20de%20la%20web%20y%20quiero%20informaci%C3%B3n%20sobre..." target="_blank" rel="noopener" data-whatsapp><svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg>WhatsApp</a></li>
-        <li><a href="mailto:vytalkinetech@gmail.com"><svg class="icon" aria-hidden="true"><use href="#i-mail"/></svg>vytalkinetech@gmail.com</a></li>
-      </ul>
-    </div>
-    <div class="footer__col">
-      <p class="footer__h">Instagram</p>
-      <ul class="footer__list">
-        <li><a href="https://www.instagram.com/vytalgroup/" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-instagram"/></svg>@VytalGroup</a></li>
-        <li><a href="https://www.instagram.com/fisioruiz_/" target="_blank" rel="noopener"><svg class="icon" aria-hidden="true"><use href="#i-instagram"/></svg>@fisioruiz_</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="container footer__legal">
-    <ul class="footer__links">
-      <li><a href="/aviso-legal.html">Aviso legal</a></li>
-      <li><a href="/privacidad.html">Política de privacidad</a></li>
-      <li><a href="/cookies.html">Política de cookies</a></li>
-      <li><button type="button" class="linklike" data-cookie-settings>Configurar cookies</button></li>
+<footer class="ft">
+  <div class="wrap ft__in">
+    <a class="ft__logo" href="#inicio" aria-label="VytalGroup, volver al inicio"><svg class="logo logo--dark" viewBox="0 0 1117 171" aria-hidden="true"><use href="#logo"/></svg></a>
+    <p class="ft__note">Información dirigida a profesionales sanitarios.</p>
+    <ul class="ft__links">
+      <li><a href="tel:+34616372644">+34 616 372 644</a></li>
+      <li><a href="mailto:vytalkinetech@gmail.com">vytalkinetech@gmail.com</a></li>
+      <li><a href="https://www.instagram.com/vytalgroup/" target="_blank" rel="noopener">Instagram</a></li>
+      <li><a href="/assets/docs/catalogo-vytalgroup-2026.pdf" download data-catalog>Catálogo (PDF)</a></li>
     </ul>
-    <p>© 2026 VytalGroup</p>
+    <ul class="ft__legal">
+      <li><a href="/aviso-legal">Aviso legal</a></li>
+      <li><a href="/privacidad">Privacidad</a></li>
+      <li><a href="/cookies">Cookies</a></li>
+      <li><button type="button" data-cookie-settings>Configurar cookies</button></li>
+      <li>© 2026 VytalGroup</li>
+    </ul>
   </div>
 </footer>
 
-<!-- Barra CTA fija (móvil) -->
-<div class="ctabar" id="ctabar" aria-hidden="true">
-  <a class="btn btn--primary ctabar__main" href="#asesoramiento" data-cta tabindex="-1">Pedir asesoramiento</a>
-  <a class="ctabar__wa" href="https://wa.me/34616372644?text=Hola%20Javier%2C%20vengo%20de%20la%20web%20y%20quiero%20informaci%C3%B3n%20sobre..." target="_blank" rel="noopener" data-whatsapp tabindex="-1" aria-label="Escribir por WhatsApp"><svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg></a>
+<div class="mbar" data-mbar inert>
+  <a class="btn btn--primary mbar__cta" href="#asesoramiento" data-cta>Quiero asesoramiento</a>
+  <a class="mbar__wa" href="https://wa.me/34616372644?text=Hola%20Javier%2C%20vengo%20de%20la%20web%20y%20quiero%20informaci%C3%B3n." target="_blank" rel="noopener" aria-label="Escríbeme por WhatsApp" data-wa="barra"><svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg></a>
 </div>
 
-<!-- WhatsApp flotante (escritorio) -->
-<a class="wa-float" href="https://wa.me/34616372644?text=Hola%20Javier%2C%20vengo%20de%20la%20web%20y%20quiero%20informaci%C3%B3n%20sobre..." target="_blank" rel="noopener" data-whatsapp aria-label="Escribir a Javier por WhatsApp">
-  <svg class="icon" aria-hidden="true"><use href="#i-whatsapp"/></svg><span class="wa-float__tip">¿Hablamos?</span>
-</a>
-
-<!-- Vídeo de demostración -->
-<dialog class="vdialog" id="video-dialog" aria-label="Demostración de la Diatermia Multifunción VytaMeD">
-  <div class="vdialog__inner">
-    <button class="vdialog__close" type="button" data-video-close aria-label="Cerrar vídeo"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
-    <video class="vdialog__video" controls playsinline preload="none" width="832" height="464" data-poster="/assets/img/diatermia-demo-poster-832.webp" data-webm="/assets/video/diatermia-demo.webm" data-mp4="/assets/video/diatermia-demo.mp4"></video>
-  </div>
-</dialog>
-
-<!-- Cookies -->
-<div class="cookie" id="cookie-banner" role="region" aria-label="Aviso de cookies" hidden>
-  <p class="cookie__text">Uso cookies propias para que la web funcione y, si me dejas, de Meta para medir anuncios. <a href="/cookies.html">Ver la política de cookies</a>.</p>
-  <div class="cookie__btns">
-    <button class="btn btn--cookie" type="button" data-cookie="accept">Aceptar</button>
-    <button class="btn btn--cookie" type="button" data-cookie="reject">Rechazar</button>
-    <button class="btn btn--cookie" type="button" data-cookie="config">Configurar</button>
+<div class="ck" id="cookie-banner" role="region" aria-label="Aviso de cookies" hidden>
+  <p>Uso cookies propias para que la web funcione y, si aceptas, de Meta para medir anuncios. <a href="/cookies">Política de cookies</a>.</p>
+  <div class="ck__btns">
+    <button class="btn btn--line btn--sm" type="button" data-cookie="accept">Aceptar</button>
+    <button class="btn btn--line btn--sm" type="button" data-cookie="reject">Rechazar</button>
+    <button class="btn btn--line btn--sm" type="button" data-cookie="config">Configurar</button>
   </div>
 </div>
-<dialog class="cpanel" id="cookie-panel" aria-labelledby="cpanel-title">
-  <form method="dialog" class="cpanel__inner">
-    <div class="cpanel__head">
-      <p class="cpanel__title" id="cpanel-title">Configurar cookies</p>
-      <button class="cpanel__close" type="button" data-cpanel-close aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
-    </div>
-    <div class="cpanel__row">
-      <div><p class="cpanel__name">Necesarias</p><p class="cpanel__desc">Guardan tu elección de cookies y el origen de la visita para tu solicitud. Siempre activas.</p></div>
-      <span class="switch is-locked"><input type="checkbox" checked disabled aria-label="Necesarias, siempre activas"><span class="switch__ui" aria-hidden="true"></span></span>
-    </div>
-    <div class="cpanel__row">
-      <div><p class="cpanel__name" id="c-an-l">Analítica</p><p class="cpanel__desc">Medición anónima de uso. Ahora mismo no uso ninguna herramienta de analítica.</p></div>
-      <label class="switch"><input type="checkbox" data-consent="analytics" aria-labelledby="c-an-l"><span class="switch__ui" aria-hidden="true"></span></label>
-    </div>
-    <div class="cpanel__row">
-      <div><p class="cpanel__name" id="c-mk-l">Marketing</p><p class="cpanel__desc">Píxel de Meta para medir los anuncios de Instagram y Facebook.</p></div>
-      <label class="switch"><input type="checkbox" data-consent="marketing" aria-labelledby="c-mk-l"><span class="switch__ui" aria-hidden="true"></span></label>
-    </div>
-    <div class="cpanel__btns">
-      <button class="btn btn--cookie" type="button" data-cookie="save">Guardar selección</button>
-      <button class="btn btn--cookie" type="button" data-cookie="accept">Aceptar todas</button>
-    </div>
-  </form>
-</dialog>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog class="cp" id="cookie-panel" aria-labelledby="cp-title">
+  <div class="cp__in">
+    <div class="cp__head">
+      <h2 class="cp__title" id="cp-title">Configurar cookies</h2>
+      <button class="cp__close" type="button" data-cpanel-close aria-label="Cerrar"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="cp__row">
+      <div><p class="cp__name" id="ck-nec">Necesarias</p><p class="cp__desc">Guardan tu elección de cookies. Siempre activas.</p></div>
+      <input class="switch" type="checkbox" role="switch" checked disabled aria-labelledby="ck-nec">
+    </div>
+    <div class="cp__row">
+      <div><p class="cp__name" id="ck-mkt">Marketing</p><p class="cp__desc">Píxel de Meta para medir los anuncios.</p></div>
+      <input class="switch" type="checkbox" role="switch" data-consent="marketing" aria-labelledby="ck-mkt">
+    </div>
+    <button class="btn btn--primary btn--block" type="button" data-cookie="save">Guardar</button>
+  </div>
+</dialog>
 </body>
 </html>

@@ -2,8 +2,9 @@
 // · Sin META_PIXEL_ID en config.js no se carga nada.
 // · El script de Meta no se descarga hasta aceptar "Marketing"; si se acepta más tarde,
 //   se inicializa en ese momento; si se retira, deja de enviar eventos.
-// · Eventos: PageView, ViewContent (una vez por sesión y sección), Lead (una sola vez,
-//   con eventID = event_id de la hoja), DescargaCatalogo (personalizado) y Contact.
+// · Eventos: PageView, ViewContent (una vez por sesión, al ver los equipos, con la categoría
+//   activa), Lead (una sola vez y solo tras un envío correcto, con eventID = event_id de la
+//   hoja), DescargaCatalogo (personalizado, no es un lead) y Contact (WhatsApp).
 
 import { consentState } from './consent.js';
 
@@ -74,17 +75,18 @@ export const track = (name, params, eventID) => send('track', name, params, even
 export const trackCustom = (name, params, eventID) => send('trackCustom', name, params, eventID);
 
 export function viewContent(category) {
-  const key = `vg_vc_${category}`;
-  if (ss(key)) return;
-  if (track('ViewContent', { content_category: category })) ss(key, '1');
+  if (ss('vg_vc')) return true;
+  const sent = track('ViewContent', { content_category: category, content_name: `Equipos: ${category}` });
+  if (sent) ss('vg_vc', '1');
+  return sent;
 }
 
 const leads = new Set();
-export function lead(eventId, productos) {
+export function lead(eventId, contentName, category) {
   if (!eventId || leads.has(eventId) || ss(`vg_lead_${eventId}`)) return;
   leads.add(eventId);
   ss(`vg_lead_${eventId}`, '1');
-  track('Lead', { content_name: productos.join(', '), content_category: 'Formulario de asesoramiento' }, eventId);
+  track('Lead', { content_name: contentName, content_category: category }, eventId);
 }
 
 export const catalogDownload = () => trackCustom('DescargaCatalogo', { content_name: 'Catálogo VytalGroup 2026' });
