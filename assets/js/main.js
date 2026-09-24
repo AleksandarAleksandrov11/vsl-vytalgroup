@@ -1,23 +1,32 @@
 // VytalGroup · landing
-// Cabecera, entradas al hacer scroll, control segmentado, carrusel, conteo, acordeón,
-// barra fija en móvil, botón magnético, carga diferida del formulario y eventos del píxel.
+// Cabecera y barra de progreso, entradas al hacer scroll (bloques, titulares por líneas e imágenes),
+// parallax y halo en escritorio, control segmentado, carrusel, categorías, conteo, comparador,
+// maqueta del catálogo, marquesinas, acordeón, barra fija en móvil, botones magnéticos,
+// carga diferida del formulario y eventos del píxel.
+// Solo se animan transform, opacity y variables CSS. Con prefers-reduced-motion quedan los fundidos.
 
 import { captureAttribution } from './attribution.js';
 import { initConsent } from './consent.js';
 import { initTracking, viewContent, catalogDownload, contact } from './tracking.js';
 
 const html = document.documentElement;
-const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const desktop = matchMedia('(min-width: 900px)');
+const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 const $ = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+const hasIO = 'IntersectionObserver' in window;
+const belowFold = (el) => el.getBoundingClientRect().top > window.innerHeight;
 
 captureAttribution();
 initTracking();
 initConsent();
 
-// ------------------------------------------------------------------ cabecera
+// ------------------------------------------------------------------ scroll: cabecera, progreso y parallax
 const header = $('[data-header]');
+const progress = $('[data-progress-bar]');
+const plx = fine && desktop.matches && !reduced ? $$('[data-parallax]') : [];
+plx.forEach((img) => { if (img.closest('.why__photo')) img.style.setProperty('--ps', '1.1'); });
 let lastY = window.scrollY;
 let ticking = false;
 function onScroll() {
@@ -29,6 +38,17 @@ function onScroll() {
     header.classList.toggle('is-hidden', !desktop.matches && dy > 0 && y > 320 && !header.contains(document.activeElement));
     lastY = y;
   }
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.setProperty('--p', max > 0 ? Math.min(1, y / max).toFixed(4) : 0);
+  progress.classList.toggle('is-top', header.classList.contains('is-hidden'));
+  // Parallax vertical muy leve (6 % del recorrido, máx. 16 px) medido sobre el contenedor
+  const vh = window.innerHeight;
+  plx.forEach((img) => {
+    const r = img.parentElement.getBoundingClientRect();
+    if (r.bottom < -80 || r.top > vh + 80) return;
+    const off = Math.max(-16, Math.min(16, -(r.top + r.height / 2 - vh / 2) * 0.06));
+    img.style.setProperty('--py', `${off.toFixed(1)}px`);
+  });
   ticking = false;
 }
 window.addEventListener('scroll', () => {
@@ -37,32 +57,104 @@ window.addEventListener('scroll', () => {
 onScroll();
 
 // ------------------------------------------------------------------ entradas al hacer scroll
-// Solo se ocultan los bloques que están por debajo de la primera pantalla: nada parpadea.
-if (!reduced.matches && 'IntersectionObserver' in window) {
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      if (!e.isIntersecting) return;
-      e.target.classList.add('is-in');
-      io.unobserve(e.target);
+// Solo se preparan los elementos que están por debajo de la primera pantalla: nada parpadea.
+const reveal = hasIO ? new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('is-in');
+    reveal.unobserve(e.target);
+  });
+}, { rootMargin: '0px 0px -8% 0px' }) : null;
+
+// Titulares de sección: se parten en palabras y cada línea sube dentro de su máscara
+function splitLines(el) {
+  const walk = (node) => {
+    [...node.childNodes].forEach((n) => {
+      if (n.nodeType === 1) { walk(n); return; }
+      if (n.nodeType !== 3 || !n.textContent.trim()) return;
+      const frag = document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach((t) => {
+        if (!t) return;
+        if (!t.trim()) { frag.appendChild(document.createTextNode(t)); return; }
+        const w = document.createElement('span');
+        const inner = document.createElement('span');
+        w.className = 'w';
+        inner.textContent = t;
+        w.appendChild(inner);
+        frag.appendChild(w);
+      });
+      n.replaceWith(frag);
     });
-  }, { rootMargin: '0px 0px -8% 0px' });
+  };
+  walk(el);
+  el.classList.add('is-split');
+  let line = -1;
+  let top = null;
+  $$('.w', el).forEach((w) => {
+    const t = w.getBoundingClientRect().top;
+    if (top === null || Math.abs(t - top) > 6) { line++; top = t; }
+    w.style.setProperty('--i', line);
+  });
+}
+
+if (reveal && !reduced) {
   const groups = new Map();
   $$('[data-rv]').forEach((el) => {
-    if (el.getBoundingClientRect().top < window.innerHeight) return;
+    if (!belowFold(el)) return;
     const parent = el.closest('section') || document.body;
     const i = groups.get(parent) || 0;
     groups.set(parent, i + 1);
     el.style.setProperty('--rd', `${Math.min(i, 4) * 70}ms`);
     el.classList.add('rv');
-    io.observe(el);
+    reveal.observe(el);
   });
+  $$('[data-lines]').forEach((el) => {
+    if (!belowFold(el)) return;
+    splitLines(el);
+    reveal.observe(el);
+  });
+  // Imágenes de producto: fundido y escala de 0,96 a 1, escalonadas dentro de su rejilla
+  $$('.card picture, .cat__media').forEach((el) => {
+    if (!belowFold(el)) return;
+    const li = el.closest('li');
+    const i = li ? [...li.parentElement.children].indexOf(li) : 0;
+    el.style.setProperty('--rd', `${(i % 3) * 90 + 120}ms`);
+    el.classList.add('rvi');
+    reveal.observe(el);
+  });
+}
+
+// ------------------------------------------------------------------ halo de luz en tarjetas (escritorio)
+if (fine && !reduced) {
+  let raf = 0;
+  document.addEventListener('pointermove', (e) => {
+    const card = e.target.closest('.card, .cat__btn');
+    if (!card) return;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--hx', `${Math.round(e.clientX - r.left)}px`);
+      card.style.setProperty('--hy', `${Math.round(e.clientY - r.top)}px`);
+    });
+  }, { passive: true });
 }
 
 // ------------------------------------------------------------------ control segmentado + carrusel
 const seg = $('[data-seg]');
 const tabs = $$('[role="tab"]', seg);
 const panels = tabs.map((t) => document.getElementById(t.getAttribute('aria-controls')));
+let currentTab = 0;
 function selectTab(i, focus = false) {
+  if (i !== currentTab) {
+    // Transición cruzada: la nueva entra desde el lado hacia el que se avanza
+    const dir = i > currentTab ? 1 : -1;
+    const next = panels[i];
+    next.classList.add('no-anim');
+    next.style.setProperty('--off', `${dir * 28}px`);
+    void next.offsetWidth;
+    next.classList.remove('no-anim');
+    panels[currentTab].style.setProperty('--off', `${-dir * 28}px`);
+  }
   tabs.forEach((t, j) => {
     const on = i === j;
     t.setAttribute('aria-selected', String(on));
@@ -70,6 +162,7 @@ function selectTab(i, focus = false) {
     panels[j].classList.toggle('is-active', on);
   });
   seg.dataset.active = String(i);
+  currentTab = i;
   const track = $('[data-carousel]', panels[i]);
   if (track) track.scrollLeft = 0;
   if (focus) tabs[i].focus();
@@ -101,22 +194,36 @@ $$('[data-carousel]').forEach((track) => {
   }, { passive: true });
 });
 
+// ------------------------------------------------------------------ más equipos: descripción al tocar
+const cats = $('[data-cats]');
+if (cats) {
+  cats.addEventListener('click', (e) => {
+    const btn = e.target.closest('.cat__btn');
+    if (!btn) return;
+    const item = btn.parentElement;
+    const open = !item.classList.contains('is-open');
+    $$('.cat.is-open', cats).forEach((c) => {
+      c.classList.remove('is-open');
+      $('.cat__btn', c).setAttribute('aria-expanded', 'false');
+    });
+    item.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+  });
+}
+
 // ------------------------------------------------------------------ conteo animado
 const counters = $('[data-count-list]');
-if (counters && 'IntersectionObserver' in window) {
+if (counters && hasIO && !reduced) {
   const nums = $$('[data-count]', counters);
   const run = () => {
-    if (reduced.matches) return;
     const t0 = performance.now();
-    const dur = 1100;
-    nums.forEach((el) => { el.textContent = el.dataset.from || '0'; });
+    const dur = 1400;
     const step = (t) => {
       const p = Math.min(1, (t - t0) / dur);
-      const e = 1 - (1 - p) ** 3;
+      const k = 1 - (1 - p) ** 4; // easeOutQuart: arranca rápido y se posa suave
       nums.forEach((el) => {
         const from = Number(el.dataset.from || 0);
-        const to = Number(el.dataset.count);
-        el.textContent = String(Math.round(from + (to - from) * e));
+        el.textContent = String(Math.round(from + (Number(el.dataset.count) - from) * k));
       });
       if (p < 1) requestAnimationFrame(step);
     };
@@ -127,7 +234,67 @@ if (counters && 'IntersectionObserver' in window) {
     io.disconnect();
     run();
   }, { threshold: .6 });
-  io.observe(counters);
+  if (belowFold(counters)) {
+    nums.forEach((el) => { el.textContent = el.dataset.from || '0'; });
+    io.observe(counters);
+  }
+}
+
+// ------------------------------------------------------------------ comparador: filas una a una y checks que se dibujan
+const cmp = $('[data-cmp]');
+if (cmp && reveal && !reduced && belowFold(cmp)) {
+  cmp.classList.add('is-armed');
+  const io = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    io.disconnect();
+    cmp.classList.add('is-in');
+  }, { threshold: .35 });
+  io.observe(cmp);
+}
+
+// ------------------------------------------------------------------ catálogo: abanico al entrar e inclinación con el cursor
+const book = $('[data-book]');
+if (book) {
+  if (hasIO && !reduced) {
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      book.classList.add('is-open');
+    }, { threshold: .4 });
+    io.observe(book);
+  } else {
+    book.classList.add('is-open');
+  }
+  if (fine && !reduced) {
+    const zone = book.closest('section');
+    const stack = $('.book__stack', book);
+    let raf = 0;
+    zone.addEventListener('pointermove', (e) => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const r = zone.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width - 0.5;
+        const y = (e.clientY - r.top) / r.height - 0.5;
+        book.classList.add('is-tilting');
+        stack.style.setProperty('--ry', `${(x * 14).toFixed(2)}deg`);
+        stack.style.setProperty('--rx', `${(-y * 10).toFixed(2)}deg`);
+      });
+    }, { passive: true });
+    zone.addEventListener('pointerleave', () => {
+      cancelAnimationFrame(raf);
+      book.classList.remove('is-tilting');
+      stack.style.removeProperty('--rx');
+      stack.style.removeProperty('--ry');
+    });
+  }
+}
+
+// ------------------------------------------------------------------ marquesinas: en pausa fuera de pantalla
+if (hasIO) {
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => e.target.classList.toggle('is-paused', !e.isIntersecting));
+  });
+  $$('[data-marquee]').forEach((el) => io.observe(el));
 }
 
 // ------------------------------------------------------------------ acordeón (FLIP: solo transform y opacity)
@@ -147,7 +314,7 @@ if (acc) {
     return list;
   };
   const slide = (els, dy) => {
-    if (reduced.matches || !dy) return;
+    if (reduced || !dy) return;
     els.forEach((el) => {
       el.style.transition = 'none';
       el.style.transform = `translateY(${dy}px)`;
@@ -171,21 +338,18 @@ if (acc) {
     btn.setAttribute('aria-expanded', String(open));
     panel.hidden = !open;
     panel.classList.toggle('is-opening', open);
-    const dy = before - item.getBoundingClientRect().height;
-    slide(els, dy);
+    slide(els, before - item.getBoundingClientRect().height);
   });
 }
 
 // ------------------------------------------------------------------ formulario (carga diferida)
 let formMod = null;
 const loadForm = () => {
-  if (!formMod) {
-    formMod = import('./form.js').then((m) => { m.initForm(); return m; });
-  }
+  if (!formMod) formMod = import('./form.js').then((m) => { m.initForm(); return m; });
   return formMod;
 };
 const formSec = $('#asesoramiento');
-if ('IntersectionObserver' in window) {
+if (hasIO) {
   const io = new IntersectionObserver(([e]) => {
     if (!e.isIntersecting) return;
     io.disconnect();
@@ -206,7 +370,7 @@ function afterScroll(fn) {
 }
 document.addEventListener('click', (e) => {
   const want = e.target.closest('[data-want]');
-  const cta = e.target.closest('[data-cta], [data-want]');
+  const cta = e.target.closest('[data-cta], [data-want], a[href="#asesoramiento"]');
   if (!cta) return;
   const mod = loadForm();
   if (want) mod.then((m) => m.preselect(want.dataset.want, want.dataset.equipo));
@@ -214,47 +378,52 @@ document.addEventListener('click', (e) => {
 });
 
 // ------------------------------------------------------------------ barra fija en móvil
+// Aparece al pasar el hero y se oculta en el catálogo (para no competir con "Descargar catálogo")
+// y en el formulario. El icono de WhatsApp se oculta cuando se ve el enlace de Dudas.
 const bar = $('[data-mbar]');
 const faqWa = $('[data-faq-wa]');
 const hero = $('#inicio');
-const vis = { hero: true, form: false, faqWa: false };
+const catalogSec = $('#catalogo');
+const vis = { hero: true, form: false, catalog: false, faqWa: false };
 function paintBar() {
-  const on = !vis.hero && !vis.form;
+  const on = !vis.hero && !vis.form && !vis.catalog;
   bar.classList.toggle('is-on', on);
   bar.inert = !on;
-  // Un solo enlace de WhatsApp visible a la vez
   bar.classList.toggle('no-wa', vis.faqWa);
 }
-if ('IntersectionObserver' in window) {
+if (hasIO) {
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (e.target === hero) vis.hero = e.isIntersecting;
       else if (e.target === formSec) vis.form = e.isIntersecting;
+      else if (e.target === catalogSec) vis.catalog = e.isIntersecting;
       else if (e.target === faqWa) vis.faqWa = e.isIntersecting;
     });
     paintBar();
   }, { rootMargin: '0px 0px -12% 0px' });
-  [hero, formSec, faqWa].forEach((el) => el && io.observe(el));
+  [hero, formSec, catalogSec, faqWa].forEach((el) => el && io.observe(el));
 }
 
-// ------------------------------------------------------------------ botón magnético (escritorio)
-const mag = $('[data-magnetic]');
-if (mag && matchMedia('(hover: hover) and (pointer: fine)').matches && !reduced.matches) {
-  const zone = mag.parentElement;
-  zone.addEventListener('pointermove', (e) => {
-    const r = mag.getBoundingClientRect();
-    const dx = e.clientX - (r.left + r.width / 2);
-    const dy = e.clientY - (r.top + r.height / 2);
-    if (Math.hypot(dx, dy) > 140) { mag.style.removeProperty('--mx'); mag.style.removeProperty('--my'); return; }
-    mag.style.setProperty('--mx', `${(dx * 0.14).toFixed(1)}px`);
-    mag.style.setProperty('--my', `${(dy * 0.2).toFixed(1)}px`);
+// ------------------------------------------------------------------ botones magnéticos (escritorio)
+if (fine && !reduced) {
+  $$('[data-magnetic]').forEach((btn) => {
+    const zone = btn.parentElement;
+    const reset = () => { btn.style.removeProperty('--mx'); btn.style.removeProperty('--my'); };
+    zone.addEventListener('pointermove', (e) => {
+      const r = btn.getBoundingClientRect();
+      const dx = e.clientX - (r.left + r.width / 2);
+      const dy = e.clientY - (r.top + r.height / 2);
+      if (Math.hypot(dx, dy) > 140) { reset(); return; }
+      btn.style.setProperty('--mx', `${(dx * 0.12).toFixed(1)}px`);
+      btn.style.setProperty('--my', `${(dy * 0.18).toFixed(1)}px`);
+    }, { passive: true });
+    zone.addEventListener('pointerleave', reset);
   });
-  zone.addEventListener('pointerleave', () => { mag.style.removeProperty('--mx'); mag.style.removeProperty('--my'); });
 }
 
 // ------------------------------------------------------------------ eventos del píxel
 const equipos = $('#equipos');
-if ('IntersectionObserver' in window) {
+if (hasIO) {
   let sent = false;
   const io = new IntersectionObserver(([e]) => {
     if (!e.isIntersecting || sent) return;

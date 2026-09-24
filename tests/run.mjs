@@ -1,9 +1,12 @@
 // Ejecuta las pruebas automáticas contra la versión compilada (dist/), servida con las
 // cabeceras de vercel.json (CSP incluida):
-//  · qa-form   → formulario de 6 pasos, validaciones, envío (Apps Script simulado), UTM, antispam,
-//                consentimiento y eventos del píxel (Meta simulado, sin salir a internet).
-//  · qa-ui     → minimalismo (secciones, palabras, CTA), cabecera, segmentado, carrusel, acordeón,
-//                conteo, barra móvil, fuentes, teclado, movimiento reducido, CSP, caché y metadatos.
+//  · qa-form   → formulario de 6 pasos (paso 1 ampliado y "Otro equipo"), validaciones, envío
+//                (Apps Script simulado), UTM, antispam, consentimiento y eventos del píxel
+//                (Meta simulado, sin salir a internet).
+//  · qa-ui     → estructura (secciones, palabras, un CTA por sección), cabecera, barra de progreso,
+//                línea de confianza, segmentado, carrusel, más equipos, comparador, testimonios,
+//                catálogo, acordeón, conteo, barra móvil, fuentes, teclado, movimiento reducido,
+//                CSP, caché y metadatos.
 //  · qa-layout → capturas de página completa en todos los anchos y comprobación por código de
 //                desbordamientos, textos cortados y áreas táctiles.
 // Uso: npm run build && npm test     (CHROME_PATH=/ruta/a/chrome si Playwright no trae navegador)

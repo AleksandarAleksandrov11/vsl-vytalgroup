@@ -35,7 +35,7 @@ const PAGES = [['/', 'index'], ['/privacidad', 'privacidad'], ['/cookies', 'cook
         const bad = [];
         document.querySelectorAll('body *').forEach((el) => {
           const r = el.getBoundingClientRect();
-          if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.pf__panel, .ck, .cp, .hp')) return;
+          if (!r.width || getComputedStyle(el).position === 'fixed' || el.closest('.sel__panel, .ck, .cp, .hp') || !el.checkVisibility({ visibilityProperty: true })) return;
           if ((r.right > vw + 1 || r.left < -1) && !clipped(el)) bad.push(`${el.tagName.toLowerCase()}.${String(el.className.baseVal ?? el.className).split(' ')[0]} [${Math.round(r.left)},${Math.round(r.right)}]`);
         });
         const cut = [];
@@ -45,7 +45,7 @@ const PAGES = [['/', 'index'], ['/privacidad', 'privacidad'], ['/cookies', 'cook
         });
         // Palabras partidas o que se salen de su caja (texto más ancho que su contenedor)
         const wide = [];
-        document.querySelectorAll('h1, h2, h3, .btn, .card__data dd, .card__data div, .why__list li, .hd__bar, .seg').forEach((el) => {
+        document.querySelectorAll('h1, h2, h3, .btn, .card__data dd, .card__data div, .why__list li, .hd__bar, .seg, .cat__name, .cmp__table td, .tst figure').forEach((el) => {
           if (!shown(el)) return;
           const box = el.getBoundingClientRect();
           const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
@@ -58,7 +58,7 @@ const PAGES = [['/', 'index'], ['/privacidad', 'privacidad'], ['/cookies', 'cook
           }
         });
         // Botones, datos y cifras en una sola línea (sin partirse)
-        document.querySelectorAll('.btn, .seg__btn, .card__data dd, .why__list strong, .pf__btn, .lhd__back, .hd__logo').forEach((el) => {
+        document.querySelectorAll('.btn, .seg__btn, .card__data dd, .why__list strong, .catalog__meta, .sel__btn, .lhd__back, .hd__logo').forEach((el) => {
           if (!shown(el)) return;
           const tops = new Set();
           const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
@@ -73,7 +73,7 @@ const PAGES = [['/', 'index'], ['/privacidad', 'privacidad'], ['/cookies', 'cook
         const small = [];
         document.querySelectorAll('a, button, input, [role="option"], [role="tab"]').forEach((el) => {
           const r = el.getBoundingClientRect();
-          if (!r.width || !r.height || !shown(el) || el.closest('.pf__panel:not(.is-open), .cp:not([open]), .ck[hidden]')) return;
+          if (!r.width || !r.height || !shown(el) || el.closest('.sel:not(.is-open) .sel__panel, .cp:not([open]), .ck[hidden]')) return;
           if (el.matches('.opt input, .check input, .switch, .hp input')) return;
           // Enlaces dentro de un párrafo: exentos (WCAG 2.5.8)
           if (el.tagName === 'A' && el.closest('p, li, dd, td') && !el.matches('.link, .btn') && getComputedStyle(el).display === 'inline') return;

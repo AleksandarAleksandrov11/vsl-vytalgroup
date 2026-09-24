@@ -2,10 +2,11 @@
 
 Fuentes:
   * Catálogo ADC Global Tech | VytalGroup 2026 (imágenes extraídas con `pdfimages -all -p`)
+  * Catálogo PDF comprimido (assets/docs): portada y páginas interiores para la maqueta 3D (pdftoppm)
   * Foto de Javier enviada por el cliente (`javier_foto.png`, 640 × 640)
 
 Uso:
-  pip install pillow numpy opencv-python-headless
+  pip install pillow numpy opencv-python-headless   (y poppler-utils para pdftoppm)
   python3 build_images.py <dir_pdfimages> <dir_fotos> <dir_salida>
 
 Tratamiento homogéneo de producto: cada equipo se recorta, se coloca sobre el mismo lienzo
@@ -14,7 +15,9 @@ solo existen en foto con fondo (Eco Wireless y Diatermia Multifunción) se recor
 Nunca se amplía por encima de la resolución original.
 """
 import os
+import subprocess
 import sys
+import tempfile
 
 import cv2
 import numpy as np
@@ -178,6 +181,103 @@ PRODUCTS = {
 }
 for name, (obj, opt) in PRODUCTS.items():
     save(stage(obj, **opt), name, [320, 480, 640])
+
+# ---------------------------------------------------------------- más equipos (6 categorías, mismo tratamiento)
+def superinductiva():
+    """Superinductiva VytaMeD: recorte de la escena del catálogo (pág. 7) con GrabCut y marcas a mano."""
+    img = cv2.imread(pdf('i-007-031.png'))
+    h, w = img.shape[:2]
+    mask = np.full((h, w), cv2.GC_BGD, np.uint8)
+    mask[290:920, 510:1300] = cv2.GC_PR_BGD
+    for x0, y0, x1, y1 in [(525, 365, 822, 540), (545, 540, 985, 820), (980, 320, 1020, 810), (1030, 295, 1290, 570),
+                           (1090, 530, 1240, 740), (1025, 615, 1260, 705), (850, 660, 1180, 915)]:
+        mask[y0:y1, x0:x1] = cv2.GC_PR_FGD
+    for x0, y0, x1, y1 in [(570, 395, 790, 505), (580, 585, 950, 785), (992, 360, 1008, 760), (1130, 575, 1195, 690)]:
+        mask[y0:y1, x0:x1] = cv2.GC_FGD
+    cv2.circle(mask, (1160, 432), 118, cv2.GC_FGD, 30)   # aro del aplicador
+    cv2.circle(mask, (1160, 432), 62, cv2.GC_BGD, -1)    # su hueco
+    for x0, y0, x1, y1 in [(800, 270, 975, 525), (1290, 440, 1536, 760), (0, 0, w, 290), (0, 930, w, h),
+                           (1018, 470, 1092, 600), (1238, 560, 1290, 615), (1240, 712, 1290, 760), (510, 822, 845, 930)]:
+        mask[y0:y1, x0:x1] = cv2.GC_BGD                  # estanterías, cama, pared y suelo
+    bgd, fgd = np.zeros((1, 65)), np.zeros((1, 65))
+    cv2.grabCut(img, mask, None, bgd, fgd, 10, cv2.GC_INIT_WITH_MASK)
+    m = np.where((mask == 1) | (mask == 3), 255, 0).astype(np.uint8)
+    yy, xx = np.mgrid[0:h, 0:w]
+    b, g, r = [img[..., i].astype(int) for i in range(3)]
+    lum = (r + g + b) / 3
+
+    def keep(m, k=5, minarea=2500):
+        m = cv2.morphologyEx(m, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
+        n, lab, st, _ = cv2.connectedComponentsWithStats(m)
+        return np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > minarea]).astype(np.uint8) * 255
+
+    m = keep(m, 5, 3000)
+    # restos de cama, pared y suelo alrededor del mástil y del aro
+    for x0, y0, x1, y1 in [(1016, 470, 1100, 615), (1016, 700, 1100, 760), (1232, 540, 1300, 612), (1232, 702, 1300, 770),
+                           (1263, 612, 1300, 702), (977, 530, 996, 765), (1014, 600, 1036, 760), (1036, 600, 1100, 614),
+                           (1014, 690, 1100, 745), (1225, 600, 1300, 632), (1014, 600, 1040, 660), (966, 340, 996, 530)]:
+        m[y0:y1, x0:x1] = 0
+    ring = np.hypot(xx - 1160, yy - 426) > 121
+    for x0, y0, x1, y1 in [(1016, 380, 1100, 600), (1222, 290, 1320, 612), (1070, 290, 1230, 330)]:
+        m[(xx >= x0) & (xx < x1) & (yy >= y0) & (yy < y1) & ring] = 0
+    m[(yy >= 740) & (yy < 900) & (xx >= 940) & (xx < 1180) & (((r - b) >= 5) & (lum > 125) | (lum > 162))] = 0
+    m = keep(m, 5)
+    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5)))
+    return cutout(img, m)
+
+
+def physio_invasiva():
+    """Physio Invasiva 2.0 (EasyTech): foto sobre fondo cian. Recorte guiado por un polígono y
+    corrección del tono cian para que el equipo quede blanco, como el resto."""
+    img = cv2.resize(cv2.imread(pdf('i-015-089.jpg')), None, fx=.25, fy=.25, interpolation=cv2.INTER_AREA)
+    h, w = img.shape[:2]
+    poly = np.array([(262, 293), (606, 353), (628, 363), (634, 402), (632, 562), (548, 585), (160, 537), (140, 520),
+                     (138, 430), (158, 398)], np.int32)
+    band = np.zeros((h, w), np.uint8)
+    cv2.fillPoly(band, [poly], 255)
+    mask = np.full((h, w), cv2.GC_BGD, np.uint8)
+    mask[cv2.dilate(band, np.ones((25, 25), np.uint8)) > 0] = cv2.GC_PR_BGD
+    mask[band > 0] = cv2.GC_PR_FGD
+    inner = cv2.erode(band, np.ones((31, 31), np.uint8)) > 0
+    mask[inner] = cv2.GC_FGD
+    bgd, fgd = np.zeros((1, 65)), np.zeros((1, 65))
+    cv2.grabCut(img, mask, None, bgd, fgd, 10, cv2.GC_INIT_WITH_MASK)
+    m = np.where((mask == 1) | (mask == 3), 255, 0).astype(np.uint8)
+    m = largest(m, 5)
+    body = img[inner & (cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) > 150)]
+    fix = np.clip(img.astype(np.float32) * (238.0 / np.median(body, axis=0)), 0, 255).astype(np.uint8)
+    return cutout(fix, m)
+
+
+def whiten(src, crop=None, cut=226):
+    """Lleva a blanco puro un fondo casi blanco o crema (para recortar después con from_white)."""
+    im = Image.open(pdf(src)).convert('RGB')
+    if crop:
+        im = im.crop(crop)
+    out = os.path.join(tempfile.mkdtemp(), 'w.png')
+    im.point(lambda v: 255 if v > cut else v).save(out)
+    return out
+
+
+
+CATEGORIES = {
+    'cat-presoterapia': (from_white(pdf('i-048-315.png')), dict(box=(0.66, 0.66), area=0.26)),
+    'cat-ondas': (from_white(pdf('i-032-207.jpg')), dict(box=(0.72, 0.76), area=0.3)),
+    'cat-magnetoterapia': (superinductiva(), dict(box=(0.8, 0.76), area=0.34)),
+    'cat-laser': (from_white(whiten('i-009-045.png', cut=240)), dict(box=(0.84, 0.7), area=0.36)),
+    'cat-electrolisis': (physio_invasiva(), dict(box=(0.8, 0.72), area=0.32)),
+    'cat-camillas': (from_white(whiten('i-014-082.jpg', (88, 36, 388, 238))), dict(box=(0.86, 0.72), area=0.36)),
+}
+for name, (obj, opt) in CATEGORIES.items():
+    save(stage(obj, **opt), name, [240, 360, 480])
+
+# ---------------------------------------------------------------- catálogo: portada y dos páginas para la maqueta 3D
+CATALOG = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'docs', 'catalogo-vytalgroup-2026.pdf')
+tmp = tempfile.mkdtemp()
+for page, name, widths in [(1, 'catalogo-portada', [300, 450, 600]), (6, 'catalogo-p06', [300, 450]), (8, 'catalogo-p08', [300, 450])]:
+    subprocess.run(['pdftoppm', '-r', '80', '-f', str(page), '-l', str(page), '-png', '-singlefile', CATALOG,
+                    os.path.join(tmp, name)], check=True)
+    save(Image.open(os.path.join(tmp, name + '.png')), name, widths)
 
 # ---------------------------------------------------------------- hero: la diatermia VytaMeD con alfa
 hero = Image.new('RGBA', (vytamed.width + 40, vytamed.height + 60), (0, 0, 0, 0))

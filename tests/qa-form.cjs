@@ -74,7 +74,7 @@ async function block(name, fn) {
     ok(btns.length === 3 && btns.map((x) => x.t).join('|') === 'Aceptar|Rechazar|Configurar' && new Set(btns.map((x) => `${x.c}${x.w}${x.h}`)).size === 1, 'Cookies: tres botones de igual peso', JSON.stringify(btns));
     ok(await p.evaluate(() => getComputedStyle(document.querySelector('[data-mbar]')).transform !== 'none' || !document.querySelector('[data-mbar]').classList.contains('is-on')), 'Cookies: la barra móvil no se muestra con el aviso abierto');
     for (let y = 0; y < 6000; y += 500) { await p.evaluate((y) => window.scrollTo(0, y), y); await p.waitForTimeout(80); }
-    await p.click('.equipos__more [data-catalog]').catch(() => {});
+    await p.click('#catalogo [data-catalog]').catch(() => {});
     await p.waitForTimeout(500);
     ok(fbReq.length === 0 && !(await p.evaluate(() => typeof window.fbq === 'function')), 'Tracking: nada de Facebook antes de aceptar (red interceptada)', fbReq.join(', '));
     // Configurar: el panel se abre con interruptor de marketing apagado; rechazar
@@ -111,7 +111,7 @@ async function block(name, fn) {
     calls = await fb(p);
     const vc = calls.filter((c) => c[1] === 'ViewContent');
     ok(vc.length === 1 && vc[0][2].content_category === 'Diatermias', 'Tracking: ViewContent una vez, con la categoría activa', JSON.stringify(vc));
-    const [dl] = await Promise.all([p.waitForEvent('download'), p.click('.equipos__more [data-catalog]')]);
+    const [dl] = await Promise.all([p.waitForEvent('download'), p.click('#catalogo [data-catalog]')]);
     ok(dl.suggestedFilename() === 'catalogo-vytalgroup-2026.pdf', 'Catálogo: se descarga el PDF', dl.suggestedFilename());
     await p.waitForTimeout(300);
     calls = await fb(p);
@@ -179,34 +179,34 @@ async function block(name, fn) {
     await p.waitForTimeout(600);
     ok((await step(p)) === '5', 'Formulario: Enter en el nombre avanza');
     // Teléfono
-    ok((await p.textContent('.pf__btn')).includes('+34'), 'Teléfono: +34 por defecto');
+    ok((await p.textContent('.sel--prefix .sel__btn')).includes('+34'), 'Teléfono: +34 por defecto');
     await p.fill('#f-tel', '51234567');
     await p.press('#f-tel', 'Enter');
     ok((await p.textContent('#e-tel')).startsWith('Revisa el número'), 'Validación: número español incorrecto');
     await p.fill('#f-tel', '612345678');
     ok((await p.inputValue('#f-tel')) === '612 345 678', 'Teléfono: formato por grupos al escribir', await p.inputValue('#f-tel'));
     // Buscador de prefijos
-    await p.click('.pf__btn');
+    await p.click('.sel--prefix .sel__btn');
     await p.waitForTimeout(400);
-    ok(await p.evaluate(() => document.activeElement.matches('.pf__search input')), 'Prefijo: el buscador recibe el foco');
+    ok(await p.evaluate(() => document.activeElement.matches('.sel--prefix .sel__search input')), 'Prefijo: el buscador recibe el foco');
     await p.keyboard.type('portu');
     await p.waitForTimeout(200);
-    const opts = await p.$$eval('.pf__opt', (els) => els.map((e) => e.textContent.trim()));
+    const opts = await p.$$eval('.sel--prefix .sel__opt', (els) => els.map((e) => e.textContent.trim()));
     ok(opts[0].startsWith('Portugal'), 'Prefijo: búsqueda por país', opts.join(' | '));
     await p.keyboard.press('Enter');
     await p.waitForTimeout(300);
-    ok((await p.textContent('.pf__btn')).includes('+351') && await p.evaluate(() => document.activeElement.id === 'f-tel'), 'Prefijo: Enter elige y vuelve al número');
+    ok((await p.textContent('.sel--prefix .sel__btn')).includes('+351') && await p.evaluate(() => document.activeElement.id === 'f-tel'), 'Prefijo: Enter elige y vuelve al número');
     ok((await p.textContent('#e-tel')) === '' || !(await p.isVisible('#e-tel')), 'Teléfono: sin error visible tras cambiar de país');
     await p.press('#f-tel', 'Enter');
     ok((await step(p)) === '5' && (await p.textContent('#e-tel')).startsWith('Revisa'), 'Validación: el número se valida con las reglas del país');
-    await p.click('.pf__btn');
+    await p.click('.sel--prefix .sel__btn');
     await p.keyboard.type('34');
     await p.keyboard.press('Enter');
     await p.waitForTimeout(300);
-    ok((await p.textContent('.pf__btn')).includes('+34'), 'Prefijo: búsqueda por número');
-    await p.click('.pf__btn');
+    ok((await p.textContent('.sel--prefix .sel__btn')).includes('+34'), 'Prefijo: búsqueda por número');
+    await p.click('.sel--prefix .sel__btn');
     await p.keyboard.press('Escape');
-    ok(await p.evaluate(() => !document.querySelector('.pf').classList.contains('is-open') && document.activeElement.matches('.pf__btn')), 'Prefijo: Escape cierra y devuelve el foco');
+    ok(await p.evaluate(() => !document.querySelector('.sel--prefix').classList.contains('is-open') && document.activeElement.matches('.sel--prefix .sel__btn')), 'Prefijo: Escape cierra y devuelve el foco');
     await p.press('#f-tel', 'Enter');
     await p.waitForTimeout(600);
     ok((await step(p)) === '6', 'Formulario: paso 6 (email)');
@@ -270,13 +270,13 @@ async function block(name, fn) {
     await p.fill('#f-name', 'Marta');
     await p.tap('.qf__step.is-active [data-next]');
     await p.waitForTimeout(600);
-    await p.tap('.pf__btn');
+    await p.tap('.sel--prefix .sel__btn');
     await p.waitForTimeout(700);
-    const sheet = await p.evaluate(() => { const r = document.querySelector('.pf__panel').getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, focus: document.activeElement.className }; });
-    ok(sheet.bottom <= sheet.vh + 1 && sheet.top > 0 && sheet.focus.includes('pf__list'), 'Móvil: prefijos en hoja inferior, sin abrir el teclado', JSON.stringify(sheet));
-    await p.tap('.pf__opt[data-iso="FR"]');
+    const sheet = await p.evaluate(() => { const r = document.querySelector('.sel--prefix .sel__panel').getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, focus: document.activeElement.className }; });
+    ok(sheet.bottom <= sheet.vh + 1 && sheet.top > 0 && sheet.focus.includes('sel__list'), 'Móvil: prefijos en hoja inferior, sin abrir el teclado', JSON.stringify(sheet));
+    await p.tap('.sel--prefix .sel__opt:has-text("Francia")');
     await p.waitForTimeout(600);
-    ok((await p.textContent('.pf__btn')).includes('+33'), 'Móvil: elegir Francia en la hoja');
+    ok((await p.textContent('.sel--prefix .sel__btn')).includes('+33'), 'Móvil: elegir Francia en la hoja');
     await p.fill('#f-tel', '0612345678');
     ok((await p.inputValue('#f-tel')) === '6 12 34 56 78', 'Teléfono: Francia quita el 0 y agrupa', await p.inputValue('#f-tel'));
     await p.tap('.qf__step.is-active [data-next]');
@@ -289,6 +289,59 @@ async function block(name, fn) {
     ok(d.telefono === '+33 6 12 34 56 78' && d.equipo === 'Diatermia' && d.modelo === 'Sin decidir' && d.dispositivo === 'Móvil · iOS · Instagram', 'Móvil: envío correcto (navegador de Instagram)', `${d.telefono} · ${d.modelo} · ${d.dispositivo}`);
     ok(await p.isVisible('[data-done]'), 'Móvil: pantalla de gracias');
     ok(!logs.length, 'Consola limpia (móvil)', logs.join(' / '));
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ 4b. Paso 1 ampliado: "Otro equipo" con desplegable propio
+  await block('Paso 1: "Otro equipo"', async () => {
+    fs.writeFileSync(LOG, '');
+    const { ctx, p, logs } = await open(b, { consent: false });
+    await toForm(p);
+    await p.waitForTimeout(3100);
+    const values = await p.$$eval('.qf__step.is-active input[name="equipo"]', (els) => els.map((e) => e.value));
+    ok(values.join('|') === 'Ecógrafo|Diatermia|Presoterapia|Ondas de choque|Otro equipo', 'Paso 1: 5 opciones (Ecógrafo, Diatermia, Presoterapia, Ondas de choque, Otro equipo)', values.join(', '));
+    ok(await p.isHidden('[data-other]'), 'Paso 1: el desplegable está oculto hasta elegir "Otro equipo"');
+    await p.click('.qf__step.is-active label.opt:has(input[value="Otro equipo"])');
+    await p.waitForTimeout(700);
+    const st = await p.evaluate(() => ({ step: document.querySelector('#qf .qf__step.is-active').dataset.step, open: document.querySelector('#otro-panel').closest('.sel').classList.contains('is-open'), focus: document.activeElement.matches('#otro-panel input, #otro-list') }));
+    ok(st.step === '1' && st.open && st.focus, 'Otro equipo: no avanza y abre el desplegable con el foco dentro', JSON.stringify(st));
+    const opts = await p.$$eval('#otro-list .sel__opt', (els) => els.map((e) => e.textContent.trim()));
+    ok(opts.join('|') === 'Magnetoterapia de alta intensidad|Láser de alta potencia|Electrólisis percutánea ecoguiada|Camillas de fisioterapia|Otro', 'Otro equipo: magnetoterapia, láser, electrólisis, camillas y otro', opts.join(', '));
+    await p.keyboard.press('Escape');
+    await p.waitForTimeout(200);
+    ok(await p.evaluate(() => document.activeElement.matches('[data-other] .sel__btn')), 'Otro equipo: Escape cierra y devuelve el foco al botón');
+    await p.click('.qf__step.is-active [data-next]');
+    ok((await p.textContent('.qf__step.is-active [data-error]')) === 'Elige qué equipo buscas.', 'Otro equipo: pide elegir cuál antes de seguir');
+    await p.click('[data-other] .sel__btn');
+    await p.waitForTimeout(300);
+    await p.keyboard.press('ArrowDown');
+    await p.keyboard.press('Enter');
+    await p.waitForTimeout(800);
+    ok((await step(p)) === '2' && (await p.textContent('[data-other] .sel__btn')).includes('Láser de alta potencia'), 'Otro equipo: con teclado elige "Láser de alta potencia" y avanza', await p.textContent('[data-other] .sel__btn'));
+    await fillToEnd(p, { name: 'Ana Ruiz' });
+    await p.click('[data-submit]');
+    await p.waitForTimeout(1600);
+    const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
+    ok(d.equipo === 'Láser de alta potencia' && d.modelo === '', 'Otro equipo: la hoja recibe la categoría elegida y sin modelo', `${d.equipo} · "${d.modelo}"`);
+    const wa = decodeURIComponent(await p.getAttribute('[data-done-wa]', 'href'));
+    ok(wa.includes('un láser de alta potencia'), 'Otro equipo: el WhatsApp de éxito nombra el equipo', wa);
+    ok(!logs.length, 'Consola limpia (otro equipo)', logs.join(' / '));
+    await ctx.close();
+  });
+
+  await block('Paso 1: Presoterapia', async () => {
+    fs.writeFileSync(LOG, '');
+    const { ctx, p } = await open(b, { consent: false, width: 390, height: 844, mobile: true });
+    await toForm(p);
+    await p.waitForTimeout(3100);
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Presoterapia"])');
+    await p.waitForTimeout(800);
+    ok((await step(p)) === '2', 'Presoterapia: avance automático al tocar');
+    await fillToEnd(p, { mobile: true, name: 'Pablo' });
+    await p.tap('[data-submit]');
+    await p.waitForTimeout(1600);
+    const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
+    ok(d.equipo === 'Presoterapia' && d.modelo === '', 'Presoterapia: equipo en la hoja y sin modelo', `${d.equipo} · "${d.modelo}"`);
     await ctx.close();
   });
 

@@ -28,7 +28,11 @@ const COLUMNS = [
   ['nombre', 'Nombre'],
   ['telefono', 'Teléfono'],
   ['email', 'Email'],
+  // Equipo: Ecógrafo, Diatermia, Presoterapia, Ondas de choque o, desde "Otro equipo", la categoría
+  // elegida (Magnetoterapia de alta intensidad, Láser de alta potencia, Electrólisis percutánea
+  // ecoguiada, Camillas de fisioterapia) u "Otro equipo".
   ['equipo', 'Equipo'],
+  // Modelo: solo en ecógrafos y diatermias (el de la tarjeta o "Sin decidir"); vacío en el resto.
   ['modelo', 'Modelo'],
   ['perfil', 'Perfil'],
   ['plazo', 'Plazo'],
@@ -141,7 +145,7 @@ function notify_(d) {
     'Teléfono: ' + d.telefono,
     'Email: ' + d.email,
     'Equipo: ' + d.equipo,
-    'Modelo: ' + (d.modelo || 'Sin decidir'),
+    'Modelo: ' + (d.modelo || 'No aplica'),
     'Perfil: ' + d.perfil,
     'Plazo: ' + d.plazo,
     'Campaña: ' + [d.utm_source, d.utm_medium, d.utm_campaign].filter(String).join(' / '),

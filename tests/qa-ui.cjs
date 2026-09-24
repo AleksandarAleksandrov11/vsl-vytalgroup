@@ -49,32 +49,39 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       nav: document.querySelectorAll('nav').length,
       ids: [...document.querySelectorAll('main > section')].map((x) => x.id),
     }));
-    ok(s.sections === 5 && s.footers === 1, 'Minimalismo: 5 secciones más el footer', s.ids.join(', '));
+    ok(s.ids.join(',') === 'inicio,equipos,mas-equipos,por-que,testimonios,catalogo,dudas,asesoramiento' && s.footers === 1, 'Estructura: las 7 secciones del brief más testimonios (petición del cliente) y el footer', s.ids.join(', '));
     ok(s.nav === 0, 'Minimalismo: sin menú de navegación');
+    // Palabras visibles del contenido: sin cabecera, footer, respuestas del acordeón, formulario ni la línea de confianza
     const words = await p.evaluate(() => {
-      const skip = '.acc__panel, #qf, .sr-only, .skip, .sprite, #cookie-banner, #cookie-panel, [data-mbar], script, style';
-      const out = [];
+      // Las descripciones de Más equipos (al pasar o tocar) cuentan como las respuestas del acordeón
+      const skip = '.acc__panel, .cat__desc, #qf, .sr-only, .skip, .sprite, #cookie-banner, #cookie-panel, [data-mbar], script, style, [aria-hidden="true"], .tsts__rail';
+      const out = { main: 0, ticker: 0, chrome: 0 };
       const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       while (w.nextNode()) {
         const el = w.currentNode.parentElement;
         if (!el || el.closest(skip)) continue;
         if (!el.checkVisibility({ visibilityProperty: true })) continue;
-        out.push(...w.currentNode.textContent.split(/\s+/).filter((t) => /[\p{L}\p{N}]/u.test(t)));
+        const n = w.currentNode.textContent.split(/\s+/).filter((t) => /[\p{L}\p{N}]/u.test(t)).length;
+        out[el.closest('.ticker') ? 'ticker' : el.closest('main') ? 'main' : 'chrome'] += n;
       }
       return out;
     });
-    ok(words.length < 180, 'Minimalismo: menos de 180 palabras visibles (sin acordeón ni formulario)', `${words.length} palabras`);
+    ok(words.main <= 260, 'Minimalismo: unas 250 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
+    // Un CTA por sección con el mismo texto; el catálogo es la única excepción
+    const perSec = await p.$$eval('main > section:not(#asesoramiento)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
+    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento', 'por-que:Quiero asesoramiento', 'testimonios:Quiero asesoramiento', 'catalogo:Descargar catálogo', 'dudas:Quiero asesoramiento'];
+    ok(perSec.join('|') === want.join('|'), 'CTA: uno por sección, "Quiero asesoramiento" en todas y "Descargar catálogo" en el catálogo', perSec.join(' | '));
     const cta = await p.$$eval('[data-cta]', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
-    const toForm = await p.$$eval('a[href="#asesoramiento"]:not([data-want])', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
-    ok(cta.length === 1 && cta[0] === 'Quiero asesoramiento' && toForm.length === 1, 'Minimalismo: un único texto de CTA', `${cta.join(' | ')} (tarjetas: "Lo quiero", según el brief)`);
+    ok(cta.length === 1 && cta[0] === 'Quiero asesoramiento', 'CTA: texto de asesoramiento idéntico en todas partes (cabecera, secciones y barra móvil)', cta.join(' | '));
     const badges = await p.evaluate(() => [...document.querySelectorAll('[class]')].map((e) => String(e.className.baseVal ?? e.className)).filter((c) => /badge|chip|tag\b|pill|label--|ribbon/.test(c)));
     ok(!badges.length, 'Minimalismo: sin badges, chips ni etiquetas', badges.join(', '));
     const perCard = await p.$$eval('.card', (els) => els.map((c) => c.querySelectorAll('a, button').length));
-    ok(perCard.length === 6 && perCard.every((n) => n === 1), 'Minimalismo: 6 tarjetas (3 por categoría) con un solo botón', perCard.join(','));
+    ok(perCard.length === 6 && perCard.every((n) => n === 1), 'Lo más pedido: 6 tarjetas (3 por categoría) con un solo botón', perCard.join(','));
     const html = await p.content();
-    const gone = ['Ver ficha', 'Physio Invasiva', 'También te equipamos', 'Cómo trabajamos', '<table', 'wa-float', 'Me interesa', 'Habla con Javier', 'No sé cuál elegir'].filter((x) => html.includes(x));
-    ok(!gone.length, 'Minimalismo: nada de lo eliminado vuelve a aparecer', gone.join(', '));
-    ok((await p.$$('.acc__item')).length === 5, 'Dudas: 5 preguntas');
+    const gone = ['Ver ficha', 'También te equipamos', 'Cómo trabajamos', 'wa-float', 'Me interesa', 'Habla con Javier', 'No sé cuál elegir', 'ISO 13485', 'FDA', 'veterinari'].filter((x) => html.includes(x));
+    ok(!gone.length, 'Contenido: nada de lo eliminado ni prohibido (ISO, FDA, veterinaria)', gone.join(', '));
+    const qs = await p.$$eval('.acc__btn', (els) => els.map((e) => e.textContent.trim()));
+    ok(qs.length === 5 && qs.includes('¿Solo vendéis ecógrafos y diatermias?'), 'Dudas: 5 preguntas, con "¿Solo vendéis ecógrafos y diatermias?"', qs.join(' · '));
     ok(!logs.length, 'Consola limpia (inicio)', logs.join(' / '));
     await ctx.close();
   });
@@ -180,6 +187,122 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await ctx.close();
   });
 
+  // ------------------------------------------------------------ bloques nuevos de la v3
+  await block('Línea de confianza y progreso', async () => {
+    const { ctx, p } = await page(b, {});
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await p.waitForTimeout(1200);
+    const t = await p.evaluate(() => {
+      const lists = document.querySelectorAll('.ticker__list');
+      const tr = document.querySelector('.ticker__track');
+      const hero = document.querySelector('#inicio').getBoundingClientRect();
+      const tk = document.querySelector('.ticker').getBoundingClientRect();
+      return { lists: lists.length, dup: lists[1] && lists[1].getAttribute('aria-hidden'), same: lists[0].textContent === lists[1].textContent, anim: getComputedStyle(tr).animationName, inHero: tk.bottom <= hero.bottom + 1, items: [...lists[0].children].map((li) => li.textContent.trim().replace(/\s+/g, ' ')) };
+    });
+    ok(t.lists === 2 && t.dup === 'true' && t.same && t.anim === 'marquee' && t.inHero, 'Línea de confianza: bajo el hero, en bucle y con la copia oculta a lectores', t.items.join(' · '));
+    const p0 = await p.evaluate(() => getComputedStyle(document.querySelector('.progress span')).transform);
+    await scrollToSel(p, '#por-que'); await p.waitForTimeout(400);
+    const p1 = await p.evaluate(() => { const s = document.querySelector('.progress span'); const r = s.getBoundingClientRect(); const hd = document.querySelector('[data-header]'); const h = hd.getBoundingClientRect(); const k = new DOMMatrix(getComputedStyle(hd, '::before').transform).d; return { w: Math.round(r.width), h: Math.round(r.height), top: Math.round(r.top), head: Math.round(h.top + h.height * k), bg: getComputedStyle(s).backgroundColor }; });
+    ok(/matrix\(0,/.test(p0) && p1.w > 200 && p1.h === 2 && Math.abs(p1.top + 2 - p1.head) <= 2, 'Barra de progreso: 2 px en turquesa bajo la cabecera, crece al bajar', JSON.stringify(p1));
+    await ctx.close();
+  });
+
+  await block('Más equipos', async () => {
+    const { ctx, p } = await page(b, {});
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await scrollToSel(p, '#mas-equipos'); await p.waitForTimeout(1400);
+    const r = await p.evaluate(() => ({
+      names: [...document.querySelectorAll('.cat__name')].map((e) => e.textContent.trim()),
+      imgs: [...document.querySelectorAll('.cat img')].filter((i) => i.complete && i.naturalWidth > 0 && i.alt).length,
+      cols: new Set([...document.querySelectorAll('.cat')].map((c) => Math.round(c.getBoundingClientRect().top))).size,
+      note: document.querySelector('.more__note').textContent.trim(),
+    }));
+    ok(r.names.join('|') === 'Presoterapia|Ondas de choque|Magnetoterapia de alta intensidad|Láser de alta potencia|Electrólisis percutánea ecoguiada|Camillas de fisioterapia' && r.imgs === 6 && r.cols === 2, 'Más equipos: 6 categorías con imagen y nombre (3 columnas en escritorio)', r.names.join(', '));
+    ok(r.note === 'Y más de 50 páginas de equipos en el catálogo.', 'Más equipos: nota del catálogo', r.note);
+    const op = () => p.evaluate(() => [...document.querySelectorAll('.cat__desc')].map((d) => getComputedStyle(d).opacity).join(','));
+    ok((await op()) === '0,0,0,0,0,0', 'Más equipos: descripción oculta al inicio');
+    await p.hover('.cat:nth-child(4) .cat__btn'); await p.waitForTimeout(800);
+    const hov = await p.evaluate(() => ({ op: getComputedStyle(document.querySelector('.cat:nth-child(4) .cat__desc')).opacity, scale: getComputedStyle(document.querySelector('.cat:nth-child(4) img')).scale, halo: getComputedStyle(document.querySelector('.cat:nth-child(4) .cat__btn'), '::after').opacity }));
+    ok(hov.op === '1' && hov.scale === '1.04' && hov.halo === '1', 'Más equipos: al pasar el ratón, descripción, zoom 1,04 y halo', JSON.stringify(hov));
+    await p.mouse.move(5, 5);
+    await ctx.close();
+    const { ctx: c2, p: m } = await page(b, { width: 390, height: 844, mobile: true });
+    await m.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await scrollToSel(m, '#mas-equipos'); await m.waitForTimeout(1200);
+    const cols = await m.evaluate(() => new Set([...document.querySelectorAll('.cat')].map((c) => Math.round(c.getBoundingClientRect().left))).size);
+    await m.tap('.cat:nth-child(2) .cat__btn'); await m.waitForTimeout(700);
+    const t1 = await m.evaluate(() => ({ exp: document.querySelector('.cat:nth-child(2) .cat__btn').getAttribute('aria-expanded'), op: getComputedStyle(document.querySelector('.cat:nth-child(2) .cat__desc')).opacity, txt: document.querySelector('.cat:nth-child(2) .cat__desc').textContent.trim() }));
+    ok(cols === 2 && t1.exp === 'true' && t1.op === '1', 'Más equipos (móvil): 2 columnas y la descripción aparece al tocar', t1.txt);
+    await m.tap('.cat:nth-child(3) .cat__btn'); await m.waitForTimeout(700);
+    const t2 = await m.evaluate(() => [...document.querySelectorAll('.cat__btn')].map((x) => x.getAttribute('aria-expanded')).join(','));
+    ok(t2 === 'false,false,true,false,false,false', 'Más equipos (móvil): solo una abierta a la vez', t2);
+    await m.tap('.cat:nth-child(3) .cat__btn'); await m.waitForTimeout(300);
+    ok((await m.getAttribute('.cat:nth-child(3) .cat__btn', 'aria-expanded')) === 'false', 'Más equipos (móvil): se cierra al volver a tocar');
+    await c2.close();
+  });
+
+  await block('Comparador', async () => {
+    const { ctx, p } = await page(b, {});
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const before = await p.evaluate(() => ({ armed: document.querySelector('[data-cmp]').classList.contains('is-armed'), op: getComputedStyle(document.querySelector('.cmp tbody tr')).opacity, dash: getComputedStyle(document.querySelector('.cmp__check')).strokeDashoffset }));
+    await scrollToSel(p, '[data-cmp]', 300); await p.waitForTimeout(2200);
+    const after = await p.evaluate(() => ({
+      rows: [...document.querySelectorAll('.cmp tbody tr')].map((tr) => [...tr.cells].map((c) => c.textContent.trim()).join(' → ')),
+      head: [...document.querySelectorAll('.cmp thead th')].map((th) => th.textContent.trim()).join(' | '),
+      op: [...document.querySelectorAll('.cmp tbody tr')].map((tr) => getComputedStyle(tr).opacity).join(','),
+      dash: [...document.querySelectorAll('.cmp__check')].map((c) => getComputedStyle(c).strokeDashoffset).join(','),
+      delays: [...document.querySelectorAll('.cmp tbody tr')].map((tr) => getComputedStyle(tr).transitionDelay.split(',')[0]).join(','),
+    }));
+    ok(after.head === 'Lo habitual | Con VytalGroup' && after.rows.length === 3, 'Comparador: 3 filas "Lo habitual" frente a "Con VytalGroup"', after.rows.join(' · '));
+    ok(before.armed && before.op === '0' && before.dash === '24px' && after.op === '1,1,1' && after.dash === '0px,0px,0px' && after.delays === '0s,0.22s,0.44s', 'Comparador: filas una a una y checks dibujados con stroke-dashoffset', JSON.stringify({ before, op: after.op, dash: after.dash, delays: after.delays }));
+    await ctx.close();
+  });
+
+  await block('Testimonios', async () => {
+    const { ctx, p } = await page(b, {});
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await scrollToSel(p, '#testimonios'); await p.waitForTimeout(700);
+    const r = await p.evaluate(() => {
+      const lists = document.querySelectorAll('.tsts__list');
+      const items = [...lists[0].querySelectorAll('.tst')];
+      const tr = document.querySelector('.tsts__track');
+      return { n: items.length, dup: lists[1].getAttribute('aria-hidden'), marked: items.every((t) => t.querySelector('figcaption small')?.textContent.trim() === 'Testimonio de ejemplo'), anyMark: items.some((t) => /de ejemplo/i.test(t.textContent)), flag: document.querySelector('#testimonios').hasAttribute('data-ejemplo'), anim: getComputedStyle(tr).animationName, dir: getComputedStyle(tr).animationDirection, paused: document.querySelector('.tsts__rail').classList.contains('is-paused') };
+    });
+    ok(r.n === 8 && r.dup === 'true' && r.anim === 'marquee' && r.dir === 'normal' && !r.paused, 'Testimonios: 8 en bucle infinito hacia la izquierda', JSON.stringify(r));
+    // Con testimonios de ejemplo (data-ejemplo en la sección) cada uno debe indicarlo; con los reales, ninguno
+    ok(r.flag ? r.marked : !r.anyMark, 'Testimonios: los de ejemplo llevan "Testimonio de ejemplo" hasta tener los reales', r.flag ? 'de ejemplo' : 'reales');
+    await scrollTo(p, 0); await p.waitForTimeout(500);
+    ok(await p.evaluate(() => document.querySelector('.tsts__rail').classList.contains('is-paused')), 'Testimonios: la marquesina se pausa fuera de pantalla');
+    await ctx.close();
+  });
+
+  await block('Catálogo', async () => {
+    const { ctx, p } = await page(b, {});
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    ok(!(await p.evaluate(() => document.querySelector('[data-book]').classList.contains('is-open'))), 'Catálogo: la maqueta empieza cerrada');
+    await scrollToSel(p, '#catalogo'); await p.waitForTimeout(1800);
+    const r = await p.evaluate(() => {
+      const a = document.querySelector('#catalogo .btn[data-catalog]');
+      const tf = (s) => getComputedStyle(document.querySelector(s)).transform;
+      return { open: document.querySelector('[data-book]').classList.contains('is-open'), cover: tf('.book__cover'), p3: tf('.book__page--3'), imgs: [...document.querySelectorAll('.book img')].filter((i) => i.complete && i.naturalWidth).length, meta: document.querySelector('.catalog__meta').textContent.trim(), dl: a.hasAttribute('download'), href: a.getAttribute('href'), txt: a.textContent.trim(), alt: document.querySelector('.catalog__actions .link').textContent.trim() };
+    });
+    ok(r.open && r.cover !== 'none' && r.p3 !== r.cover && r.imgs === 3, 'Catálogo: la maqueta se abre en abanico al entrar', `${r.cover} / ${r.p3}`);
+    ok(r.meta === 'PDF · 53 páginas · Descarga directa' && r.dl && /catalogo-vytalgroup-2026\.pdf$/.test(r.href) && r.txt === 'Descargar catálogo' && r.alt === '¿Prefieres que te asesore?', 'Catálogo: datos del PDF, "Descargar catálogo" (descarga directa) y "¿Prefieres que te asesore?"', JSON.stringify({ meta: r.meta, href: r.href }));
+    const box = await p.evaluate(() => { const r = document.querySelector('[data-book]').getBoundingClientRect(); return { x: r.left + r.width * 0.9, y: r.top + r.height * 0.2 }; });
+    await p.mouse.move(box.x, box.y, { steps: 4 }); await p.waitForTimeout(500);
+    const tilt = await p.evaluate(() => { const s = document.querySelector('.book__stack'); return { rx: s.style.getPropertyValue('--rx'), ry: s.style.getPropertyValue('--ry'), on: document.querySelector('[data-book]').classList.contains('is-tilting') }; });
+    ok(tilt.on && parseFloat(tilt.ry) !== 0 && parseFloat(tilt.rx) !== 0, 'Catálogo: inclinación con el cursor (escritorio)', JSON.stringify(tilt));
+    await ctx.close();
+    const { ctx: c2, p: m } = await page(b, { width: 390, height: 844, mobile: true });
+    await m.goto(BASE + '/', { waitUntil: 'networkidle' });
+    await scrollToSel(m, '[data-cmp]', 200); await m.waitForTimeout(700);
+    const onBefore = await m.evaluate(() => document.querySelector('[data-mbar]').classList.contains('is-on'));
+    await scrollToSel(m, '#catalogo .btn[data-catalog]', 400); await m.waitForTimeout(700);
+    const onCat = await m.evaluate(() => document.querySelector('[data-mbar]').classList.contains('is-on'));
+    ok(onBefore && !onCat, 'Barra móvil: se oculta en el catálogo', JSON.stringify({ onBefore, onCat }));
+    await c2.close();
+  });
+
   // ------------------------------------------------------------ fuentes, teclado y movimiento reducido
   await block('Fuentes', async () => {
     const { ctx, p } = await page(b, {});
@@ -212,12 +335,24 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       fan: getComputedStyle(document.querySelector('.scan__fan')).animationName,
       rv: document.querySelectorAll('.rv').length,
       smooth: getComputedStyle(document.documentElement).scrollBehavior,
+      marquee: [...document.querySelectorAll('.ticker__track, .tsts__track')].map((t) => getComputedStyle(t).animationName).join(','),
+      dups: [...document.querySelectorAll('.ticker__list[aria-hidden], .tsts__list[aria-hidden]')].every((l) => getComputedStyle(l).display === 'none'),
+      split: document.querySelectorAll('[data-lines].is-split, .rvi, .cmp.is-armed').length,
+      count: [...document.querySelectorAll('[data-count]')].map((e) => e.textContent).join(','),
     }));
-    ok(r.word === 'none' && r.fan === 'none' && r.rv === 0 && r.smooth === 'auto', 'Movimiento reducido: sin animaciones ni desplazamiento suave', JSON.stringify(r));
+    ok(r.word === 'none' && r.fan === 'none' && r.rv === 0 && r.split === 0 && r.smooth === 'auto', 'Movimiento reducido: sin animaciones de entrada ni desplazamiento suave', JSON.stringify(r));
+    ok(r.marquee === 'none,none' && r.dups && r.count === '2,0,1', 'Movimiento reducido: marquesinas quietas (sin copias) y cifras finales sin conteo', `${r.marquee} · ${r.count}`);
+    await scrollToSel(p, '#catalogo'); await p.waitForTimeout(400);
+    await p.mouse.move(700, 400, { steps: 3 }); await p.waitForTimeout(300);
+    const st = await p.evaluate(() => ({ open: document.querySelector('[data-book]').classList.contains('is-open'), tilt: document.querySelector('.book__stack').style.getPropertyValue('--ry'), py: [...document.querySelectorAll('[data-parallax]')].some((i) => i.style.getPropertyValue('--py')), tr: getComputedStyle(document.querySelector('.book__cover')).transitionProperty }));
+    ok(st.open && !st.tilt && !st.py && !/transform/.test(st.tr), 'Movimiento reducido: maqueta ya abierta, sin inclinación ni parallax', JSON.stringify(st));
     const { ctx: c2, p: p2 } = await page(b, {});
     await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
-    const anim = await p2.evaluate(() => ({ fan: getComputedStyle(document.querySelector('.scan__fan')).animationName, word: getComputedStyle(document.querySelector('.h1 .w > span')).animationName, rv: document.querySelectorAll('.rv').length }));
-    ok(anim.fan === 'sweep' && anim.word === 'word-up' && anim.rv > 5, 'Animaciones: barrido de ecografía, titular por palabras y entradas al hacer scroll', JSON.stringify(anim));
+    const anim = await p2.evaluate(() => ({ fan: getComputedStyle(document.querySelector('.scan__fan')).animationName, word: getComputedStyle(document.querySelector('.h1 .w > span')).animationName, rv: document.querySelectorAll('.rv').length, lines: document.querySelectorAll('[data-lines].is-split').length, rvi: document.querySelectorAll('.rvi').length }));
+    ok(anim.fan === 'sweep' && anim.word === 'word-up' && anim.rv > 5 && anim.lines >= 6 && anim.rvi >= 6, 'Animaciones: barrido de ecografía, titular por palabras, titulares por líneas y entradas al hacer scroll', JSON.stringify(anim));
+    await scrollToSel(p2, '.why__photo', 100); await p2.waitForTimeout(400);
+    const w = await p2.evaluate(() => ({ py: document.querySelector('.why__photo img').style.getPropertyValue('--py'), lines: new Set([...document.querySelectorAll('#por-que [data-lines] .w')].map((x) => x.style.getPropertyValue('--i'))).size, magnetic: document.querySelectorAll('[data-magnetic]').length }));
+    ok(w.py && w.py !== '0.0px' && w.lines >= 1 && w.magnetic >= 6, 'Animaciones: parallax leve en escritorio y botones magnéticos', JSON.stringify(w));
     await c2.close();
     await ctx.close();
   });
@@ -272,7 +407,8 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(local.status === 200 && size.join('x') === '1200x630', 'Metadatos: la imagen OG existe y mide 1200 × 630', size.join('x'));
     const title = (html.match(/<title>([^<]+)<\/title>/) || [])[1];
     const desc = (html.match(/name="description" content="([^"]+)"/) || [])[1];
-    ok(title && title.length <= 60 && desc && desc.length <= 160, 'Metadatos: title y description cortos', `${title} (${title.length}) · ${desc.length}`);
+    // El title es el que propone el brief v3 (65 caracteres, cabe en el ancho de Google)
+    ok(title && title.length <= 70 && desc && desc.length <= 160, 'Metadatos: title y description cortos', `${title} (${title.length}) · ${desc.length}`);
     const ld = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     const faq = ld['@graph'].find((x) => x['@type'] === 'FAQPage');
     const org = ld['@graph'].find((x) => x['@type'] === 'Organization');

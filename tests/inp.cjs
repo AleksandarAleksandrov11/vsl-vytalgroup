@@ -26,8 +26,8 @@ const { chromium } = require('playwright');
     ['plazo', () => p.tap('.qf__step.is-active label.opt:has(input[value="Lo antes posible"])')],
     ['nombre', async () => { await p.tap('#f-name'); await p.keyboard.type('Ana'); }],
     ['siguiente', () => p.tap('.qf__step.is-active [data-next]')],
-    ['prefijo', () => p.tap('.pf__btn')],
-    ['elegir país', () => p.tap('.pf__opt[data-iso="PT"]')],
+    ['prefijo', () => p.tap('.sel--prefix .sel__btn')],
+    ['elegir país', () => p.tap('.sel--prefix .sel__opt:has-text("Portugal")')],
     ['acordeón', async () => { await go('#q3'); await p.waitForTimeout(900); await p.tap('#q3'); }],
     ['acordeón (cerrar)', () => p.tap('#q3')],
   ];

@@ -162,4 +162,8 @@ console.log(`CSS de la landing (gzip): ${kb(cssIndex)} (presupuesto ${BUDGET.css
 console.log(`Catálogo PDF: ${kb(statSync(join(DIST, PDF)).size)}`);
 const over = [total > BUDGET.initial * 1024 && 'carga inicial', js > BUDGET.js * 1024 && 'JS', cssIndex > BUDGET.css * 1024 && 'CSS'].filter(Boolean);
 if (over.length) throw new Error(`Presupuesto superado: ${over.join(', ')}`);
+// Recordatorio: los testimonios siguen siendo de ejemplo hasta cambiarlos por los reales (ver README)
+if (readFileSync(join(ROOT, 'index.html'), 'utf8').includes('data-ejemplo')) {
+  console.warn('\nAviso: la sección de testimonios usa testimonios de ejemplo. Sustitúyelos por reales antes de lanzar anuncios.');
+}
 console.log('\nListo: dist/');
