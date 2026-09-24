@@ -20,9 +20,9 @@ Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", 
 2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con "Lo quiero". En móvil y tableta se ve una tarjeta cada vez, centrada; se pasa deslizando, con puntos. CTA de sección.
 3. **Más equipos** ("Todo lo que tu clínica necesita."). 6 categorías del catálogo con descripción al pasar o tocar, "Y más de 50 páginas de equipos en el catálogo." y dos botones: "Quiero asesoramiento" y **"Descargar catálogo"** (oscuro, con icono, para que destaque).
 4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") alineados a la izquierda; en móvil y tableta, centrado y con la foto debajo. Después, la firma de Javier y el CTA. Fondo marino a todo el ancho.
-5. **Lo habitual frente a VytalGroup** (sección propia, "Lo habitual *frente a VytalGroup.*" y "Lo que cambia cuando te asesoran fisioterapeutas."). Fondo turquesa claro con una trama de puntos suave, distinto del marino de arriba y del claro de Dudas; a todo el ancho. Una tabla pequeña y centrada en tarjeta blanca: aspas grises y texto tachado en "Lo habitual", checks blancos sobre turquesa en "Con VytalGroup" (columna resaltada). Sin líneas separadoras. CTA de sección.
+5. **¿Por qué elegir *VytalGroup?*** (sección propia). Fondo turquesa claro con una trama de puntos suave, distinto del marino de arriba y del claro de Dudas; a todo el ancho. Una tabla centrada en tarjeta blanca, con las cabeceras centradas "OTRAS MARCAS" y "VYTALGROUP": aspas grises y texto tachado en otras marcas, checks blancos sobre turquesa en VytalGroup (columna resaltada). 5 filas: comercial frente a fisioterapeutas · mantenimiento · garantía de 2 años · envío y aduana (UE, USA y LATAM, aduana gestionada) · todo el equipamiento en un solo sitio. En escritorio cada fila cabe en una línea. Sin líneas separadoras. CTA de sección.
 6. **Dudas** ("Lo que *nos preguntáis.*"). 6 preguntas: ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Escríbenos por WhatsApp".
-7. **Formulario** ("Cuéntanos qué *necesitas.*"). 4 preguntas, una por pantalla:
+7. **Formulario** ("Cuéntanos qué *necesitas.*", siempre en una línea; la sección empieza más cerca de Dudas porque las dos son claras). 4 preguntas, una por pantalla:
    1. ¿Qué equipo te interesa? Ecógrafo · Diatermia · Presoterapia · Ondas de choque · Otro equipo (desplegable con magnetoterapia, láser, electrólisis percutánea, camillas u otro).
    2. ¿Cuál es tu perfil? Clínica · Fisioterapeuta · Médico · Otro.
    3. ¿Cómo te llamas?
@@ -42,7 +42,13 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 
 ## 2. Cambios de las últimas rondas
 
-**v10 (esta ronda)**
+**v11 (esta ronda)**
+
+- **Transiciones:** vuelven los cortes rectos entre secciones, como antes. Solo Más equipos (la de la cuadrícula) se funde arriba con Lo más pedido; abajo su cuadrícula se desvanece, como siempre. Javier y la comparativa siguen a todo el ancho.
+- **Comparativa:** título "¿Por qué elegir *VytalGroup?*", sin subtítulo, tabla más grande (hasta 960 px, texto mayor e iconos de 30 px), cabeceras centradas "OTRAS MARCAS" y "VYTALGROUP" y dos filas nuevas con datos que ya estaban en la web: envío y aduana (UE, USA y LATAM, aduana gestionada) y todo el equipamiento en un solo sitio.
+- **Formulario:** "Cuéntanos qué *necesitas.*" en una línea en todos los anchos y la sección más cerca de Dudas (antes quedaba un hueco blanco muy grande entre las dos).
+
+**v10**
 
 - **Panel de cookies:** al abrirse asomaba un instante una barra de scroll (el diálogo tenía `overflow: auto` y la animación de entrada desbordaba su caja) y el foco inicial podía desplazarlo. Ahora el diálogo no hace scroll (solo su contenido, si no cabe), el foco no mueve nada, el fondo aparece con un fundido, en móvil sube como hoja desde abajo y se cierra con la misma suavidad (también con Escape).
 - **Transiciones entre secciones:** de Lo más pedido hacia abajo, cada sección empieza con el color de la anterior y se funde con el suyo en su margen superior, con una curva suave (sin línea recta ni bandas): Lo más pedido → Más equipos → Por qué VytalGroup → Lo habitual frente a VytalGroup → Dudas → Formulario. El pie mantiene su corte recto; de la cabecera a las garantías y de las garantías a Lo más pedido, como estaba.
@@ -273,7 +279,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 - El botón de descarga del catálogo es marino con el icono en turquesa: destaca junto al CTA sin competir con él.
 - El titular del hero se ajusta al ancho de pantalla para salir siempre en 3 líneas.
 - La foto del hero va difuminada en el propio archivo: pesa muy poco y no hay que difuminarla en el navegador.
-- Entre secciones, degradados con curva suave (varios pasos de opacidad) en el margen superior de cada sección: el color cambia sin línea recta y sin tapar el contenido.
+- Entre secciones, corte recto; solo Más equipos se funde arriba con Lo más pedido (curva suave de opacidad dentro de su margen).
 - Imágenes solo en WebP (decodificación rápida en cualquier móvil). La imagen OG sigue en JPG y los iconos de la web en PNG, porque Facebook, WhatsApp e iOS los piden así.
 - Nada puede salirse por la derecha: en móvil y tableta el cambio de pestaña se anima en vertical y el carrusel se recorta dentro de su sección.
 
@@ -295,7 +301,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 
 ## 10. Historial
 
-- **v10 (esta ronda)**, **v9**, **v8**, **v7**, **v6** y **v5:** ver apartado 2.
+- **v11 (esta ronda)**, **v10**, **v9**, **v8**, **v7**, **v6** y **v5:** ver apartado 2.
 - **v4:** hero con fotos y vídeo de clientes y sin testimonios. Sustituido en la v5.
 - **v3:**
   - enfoque "equipos médicos sin letra pequeña";
@@ -329,7 +335,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - doble clic sin duplicar;
   - Lead único con `eventID` = `event_id`;
   - endpoint vacío, error del servidor y antispam.
-- **Interfaz (127):**
+- **Interfaz (131):**
   - hero, franja de garantías y 5 secciones;
   - 6 dudas, iguales en la web y en el JSON-LD;
   - sin "no comerciales";
@@ -344,9 +350,10 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - segmentado;
   - carrusel de una tarjeta centrada, sin flechas;
   - Por qué VytalGroup: titular, historia, foto, firma y CTA, sin cifras ni tabla;
-  - transiciones: cada unión de Lo más pedido al formulario se funde del color de arriba al de abajo dentro del margen de la sección, sin tapar titulares; Javier y la comparativa a todo el ancho; el pie con su corte;
+  - transiciones: Más equipos se funde arriba con Lo más pedido (dentro de su margen); el resto de secciones y el pie, con corte recto; Javier y la comparativa a todo el ancho;
+  - titular del formulario en una línea de 320 a 1440 px y el formulario cerca de Dudas;
   - panel de cookies en escritorio, móvil y horizontal: se abre sin barra de scroll ni saltos (medido fotograma a fotograma), como hoja en móvil, se cierra con animación (también con Escape) y se puede volver a abrir;
-  - Lo habitual frente a VytalGroup: sección propia tras la de Javier, con título, subtítulo, CTA, fondo distinto del de arriba y del de abajo, y tabla pequeña centrada en tarjeta blanca;
+  - ¿Por qué elegir VytalGroup?: sección propia tras la de Javier, sin subtítulo, con CTA, fondo distinto del de arriba y del de abajo, cabeceras centradas "OTRAS MARCAS" y "VYTALGROUP", 5 filas y, en escritorio, todas en una línea a la misma altura;
   - pie: logo, columnas con título, enlaces, nombre en grande a todo el ancho con las letras animadas, y el mismo pie en las legales;
   - nada ensancha la página de 320 a 1024 px, con el texto al 100 y al 130 % y simulando un navegador sin `overflow: clip`: la cabecera y la barra fija nunca se cortan;
   - solo WebP;

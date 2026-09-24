@@ -306,7 +306,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       dash: [...document.querySelectorAll('.cmp__check')].map((c) => getComputedStyle(c).strokeDashoffset).join(','),
       delays: [...document.querySelectorAll('.cmp tbody tr')].map((tr) => getComputedStyle(tr).transitionDelay.split(',')[0]).join(','),
     }));
-    ok(after.head === 'Lo habitual | Con VytalGroup' && after.rows.length === 3, 'Comparador: 3 filas "Lo habitual" frente a "Con VytalGroup"', after.rows.join(' · '));
+    ok(after.head === 'Otras marcas | VytalGroup' && after.rows.length === 5, 'Comparador: 5 filas, "Otras marcas" frente a "VytalGroup"', after.rows.join(' · '));
     for (const [w, h, m] of [[1440, 900, false], [390, 844, true]]) {
       const { ctx: c3, p: q } = await page(b, { width: w, height: h, mobile: m });
       await q.goto(BASE + '/', { waitUntil: 'networkidle' });
@@ -321,18 +321,22 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
         const title = sec.querySelector('h2');
         const icons = [sec.querySelectorAll('.cmp__x').length, sec.querySelectorAll('.cmp__check').length];
         return {
-          title: title.textContent.replace(/\s+/g, ' ').trim(), lead: sec.querySelector('.vs__lead').textContent.trim(), cta: sec.querySelector('[data-cta]').textContent.trim(),
+          title: title.textContent.replace(/\s+/g, ' ').trim(), lead: !!sec.querySelector('.vs__lead, .sec__head p'), cta: sec.querySelector('[data-cta]').textContent.trim(),
+          th: [...sec.querySelectorAll('th')].map((x) => [x.textContent, getComputedStyle(x).textAlign, getComputedStyle(x).textTransform].join(':')),
+          rowsH: [...sec.querySelectorAll('tbody tr')].map((r) => Math.round(r.getBoundingClientRect().height)),
           bg: bgOf(sec), why: bgOf(document.querySelector('#por-que')), faq: bgOf(document.querySelector('#dudas')),
           off: Math.round(Math.abs((r.left + r.right) / 2 - vw / 2)), w: Math.round(r.width), card: cs.backgroundColor, radius: parseFloat(cs.borderTopLeftRadius), col, icons,
           after: sec.previousElementSibling.id, before: sec.nextElementSibling.id,
         };
       });
-      ok(t.title === 'Lo habitual frente a VytalGroup.' && t.lead === 'Lo que cambia cuando te asesoran fisioterapeutas.' && t.cta === 'Quiero asesoramiento' && t.after === 'por-que' && t.before === 'dudas', `Comparativa ${w}px: sección propia tras la de Javier, con título, subtítulo y CTA`, JSON.stringify({ title: t.title, after: t.after, before: t.before }));
+      ok(t.title === '¿Por qué elegir VytalGroup?' && !t.lead && t.cta === 'Quiero asesoramiento' && t.after === 'por-que' && t.before === 'dudas', `Comparativa ${w}px: "¿Por qué elegir VytalGroup?" tras la de Javier, sin subtítulo y con CTA`, JSON.stringify({ title: t.title, after: t.after, before: t.before }));
+      ok(t.th.join('|') === 'Otras marcas:center:uppercase|VytalGroup:center:uppercase', `Comparativa ${w}px: cabeceras centradas, "OTRAS MARCAS" y "VYTALGROUP"`, t.th.join(' | '));
+      if (!m) ok(t.w >= 900 && Math.max(...t.rowsH.slice(0, 4)) - Math.min(...t.rowsH.slice(0, 4)) <= 1, `Comparativa ${w}px: tabla más grande, con todas las filas en una línea y a la misma altura`, JSON.stringify({ w: t.w, rows: t.rowsH }));
       ok(/gradient/.test(t.bg) && t.bg !== t.why && t.bg !== t.faq, `Comparativa ${w}px: fondo propio (turquesa claro), distinto del de Javier y del de Dudas`, t.bg.slice(0, 60));
-      ok(t.off <= 2 && t.w <= 720 && t.card === 'rgb(255, 255, 255)' && t.radius >= 20 && t.col !== 'rgba(0, 0, 0, 0)' && t.icons.join() === '3,3', `Comparativa ${w}px: tabla pequeña y centrada, en tarjeta blanca, con aspas, checks y la columna de VytalGroup resaltada`, JSON.stringify({ off: t.off, w: t.w, col: t.col, icons: t.icons }));
+      ok(t.off <= 2 && t.w <= 960 && t.card === 'rgb(255, 255, 255)' && t.radius >= 20 && t.col !== 'rgba(0, 0, 0, 0)' && t.icons.join() === '5,5', `Comparativa ${w}px: tabla centrada, en tarjeta blanca, con aspas, checks y la columna de VytalGroup resaltada`, JSON.stringify({ off: t.off, w: t.w, col: t.col, icons: t.icons }));
       await c3.close();
     }
-    ok(before.armed && before.op === '0' && before.dash === '24px' && after.op === '1,1,1' && after.dash === '0px,0px,0px' && after.delays === '0s,0.22s,0.44s', 'Comparador: filas una a una y checks dibujados con stroke-dashoffset', JSON.stringify({ before, op: after.op, dash: after.dash, delays: after.delays }));
+    ok(before.armed && before.op === '0' && before.dash === '24px' && after.op === '1,1,1,1,1' && after.dash === '0px,0px,0px,0px,0px' && after.delays === '0s,0.16s,0.32s,0.48s,0.64s', 'Comparador: filas una a una y checks dibujados con stroke-dashoffset', JSON.stringify({ before, op: after.op, dash: after.dash, delays: after.delays }));
     await ctx.close();
   });
 
@@ -458,32 +462,44 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await ctx.close();
   });
 
-  // Entre secciones (de Lo más pedido hacia abajo) el color pasa de una a otra con un degradado;
-  // el pie mantiene su corte recto
+  await block('Titular del formulario', async () => {
+    const bad = [];
+    for (const [w, h, m] of [[320, 640, true], [360, 780, true], [390, 844, true], [768, 1024, true], [1024, 768, false], [1440, 900, false]]) {
+      const { ctx, p } = await page(b, { width: w, height: h, mobile: m });
+      await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+      await scrollToSel(p, '#asesoramiento'); await p.waitForTimeout(1600);
+      const r = await p.evaluate(async () => {
+        await document.fonts.ready;
+        const t = document.getElementById('form-title');
+        const tr = t.getBoundingClientRect();
+        const card = document.querySelector('.fcard').getBoundingClientRect();
+        const faq = document.querySelector('#dudas .faq__more').getBoundingClientRect();
+        const eq = document.querySelector('#dudas');
+        return { lines: Math.round(tr.height / parseFloat(getComputedStyle(t).lineHeight)), fits: tr.left >= 0 && tr.right <= document.documentElement.clientWidth && t.scrollWidth <= t.clientWidth + 1, gap: Math.round(card.top - tr.bottom), fromFaq: Math.round(tr.top - faq.bottom), sec: parseFloat(getComputedStyle(eq).paddingTop) };
+      });
+      if (r.lines !== 1 || !r.fits || r.gap > 60 || r.fromFaq > r.sec * 1.8) bad.push(`${w}px ${JSON.stringify(r)}`);
+      await ctx.close();
+    }
+    ok(!bad.length, 'Formulario: "Cuéntanos qué necesitas." en una línea (320 a 1440 px) y el formulario cerca, sin el hueco blanco con Dudas', bad.join(' | ') || '6 anchos');
+  });
+
+  // Solo Más equipos (la cuadrícula) se funde arriba con Lo más pedido; el resto de secciones,
+  // incluidas Javier y la comparativa, mantienen su corte recto
   await block('Transiciones entre secciones', async () => {
     for (const [w, h, m] of [[1440, 900, false], [390, 844, true]]) {
       const { ctx, p } = await page(b, { width: w, height: h, mobile: m });
       await p.goto(BASE + '/', { waitUntil: 'networkidle' });
       const r = await p.evaluate(() => {
-        const body = getComputedStyle(document.body).backgroundColor;
-        const bottomColor = (el) => { const c = getComputedStyle(el); const imgs = c.backgroundImage.match(/rgba?\([^)]*\)/g); if (c.backgroundImage.includes('linear-gradient') && imgs) return imgs[imgs.length - 1]; return c.backgroundColor === 'rgba(0, 0, 0, 0)' ? body : c.backgroundColor; };
-        const out = [];
-        for (const id of ['mas-equipos', 'por-que', 'comparativa', 'dudas', 'asesoramiento']) {
-          const sec = document.getElementById(id);
-          const a = getComputedStyle(sec, '::after');
-          const first = (a.backgroundImage.match(/rgba?\([^)]*\)/) || [''])[0];
-          const last = (a.backgroundImage.match(/rgba?\([^)]*\)/g) || ['']).pop();
-          const prev = bottomColor(sec.previousElementSibling);
-          out.push({ id, grad: a.backgroundImage.startsWith('linear-gradient'), first, prev, fades: /, 0\)$/.test(last), h: parseFloat(a.height), pad: parseFloat(getComputedStyle(sec).paddingTop), top: a.top, z: a.zIndex });
-        }
+        const sec = document.getElementById('mas-equipos');
+        const a = getComputedStyle(sec, '::after');
+        const cols = a.backgroundImage.match(/rgba?\([^)]*\)/g) || [];
+        const straight = ['por-que', 'comparativa', 'dudas', 'asesoramiento', 'equipos'].map((id) => [id, getComputedStyle(document.getElementById(id), '::after').content]);
         const full = ['por-que', 'comparativa'].map((id) => { const el = document.getElementById(id); const b = el.getBoundingClientRect(); return [id, Math.round(b.width), getComputedStyle(el).borderTopLeftRadius]; });
-        const ft = getComputedStyle(document.querySelector('.ft'), '::after').content;
-        return { out, full, vw: document.documentElement.clientWidth, ft, stats: getComputedStyle(document.getElementById('equipos'), '::after').content };
+        return { first: cols[0], last: cols[cols.length - 1], body: getComputedStyle(document.body).backgroundColor, h: parseFloat(a.height), pad: parseFloat(getComputedStyle(sec).paddingTop), straight, full, vw: document.documentElement.clientWidth, ft: getComputedStyle(document.querySelector('.ft'), '::after').content };
       });
-      const bad = r.out.filter((x) => !x.grad || x.first.replace(/rgba?\((\d+), (\d+), (\d+).*/, '$1,$2,$3') !== x.prev.replace(/rgba?\((\d+), (\d+), (\d+).*/, '$1,$2,$3') || !x.fades || x.h > x.pad + 1 || x.h < 60 || x.top !== '0px' || x.z !== '-1');
-      ok(!bad.length, `Secciones ${w}px: de Lo más pedido al formulario, cada unión se funde del color de arriba al de abajo, dentro del margen (sin tapar titulares)`, JSON.stringify(bad.length ? bad : r.out.map((x) => `${x.id}:${x.h}px`)));
+      ok(r.first === r.body && /, 0\)$/.test(r.last) && r.h <= r.pad + 1 && r.h >= 60, `Secciones ${w}px: Más equipos (la cuadrícula) se funde arriba con Lo más pedido, dentro de su margen`, JSON.stringify({ first: r.first, h: r.h, pad: r.pad }));
+      ok(r.straight.every(([, c]) => c === 'none') && r.ft === 'none', `Secciones ${w}px: Javier, la comparativa, Dudas, el formulario y el pie con corte recto`, JSON.stringify(r.straight));
       ok(r.full.every(([, wd, rad]) => wd === r.vw && rad === '0px'), `Secciones ${w}px: Por qué VytalGroup y la comparativa ocupan todo el ancho`, JSON.stringify(r.full));
-      ok(r.ft === 'none' && r.stats === 'none', `Secciones ${w}px: el pie y la unión garantías/Lo más pedido mantienen su corte`, `${r.ft} · ${r.stats}`);
       await ctx.close();
     }
   });
