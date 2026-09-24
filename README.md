@@ -4,8 +4,8 @@ Landing de una sola página para las campañas de Instagram y Facebook de VytalG
 
 - HTML, CSS y JavaScript vanilla. Sin frameworks ni librerías en el navegador.
 - 6 secciones y un footer (apartado 1).
-- Carga inicial en móvil: unos 87 KB (presupuesto 250 KB). JS propio: 13,6 KB. CSS: unos 10 KB (gzip).
-- Lighthouse: móvil 99 a 100 en rendimiento y 100 en accesibilidad, buenas prácticas y SEO; escritorio y páginas legales, 100 en todo.
+- Carga inicial en móvil: unos 61 KB (presupuesto 250 KB). JS propio: 13,6 KB. CSS: unos 9 KB (gzip).
+- Lighthouse: 100 en todo, en móvil y en escritorio, y en las páginas legales.
 
 ---
 
@@ -13,12 +13,12 @@ Landing de una sola página para las campañas de Instagram y Facebook de VytalG
 
 Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", "Cuéntanos qué necesitas", "Escríbenos por WhatsApp"). La única excepción es la historia de Javier en "Por qué VytalGroup", que va firmada por él.
 
-**Sistema de alineación, igual en todos los dispositivos:** titulares de sección y botones de sección siempre centrados. El hero va en dos columnas en escritorio (texto a la izquierda, equipo a la derecha) y centrado en móvil y tableta. La cabecera es fija y siempre visible.
+**Sistema de alineación, igual en todos los dispositivos:** titulares de sección y botones de sección siempre centrados. El hero lleva el texto a la izquierda en escritorio y centrado en móvil y tableta. "Por qué VytalGroup" es la excepción en escritorio: su titular va a la derecha de la foto de Javier, alineado a la izquierda. La cabecera es fija y siempre visible.
 
-1. **Hero** (fondo marino). "Equipos médicos de alta calidad. *Sin letra pequeña.*", la línea "Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas, no comerciales.", el botón "Quiero asesoramiento" y "Ver catálogo" (lleva a Más equipos). A la derecha (debajo en móvil), la **diatermia flotando** con un halo turquesa y **ondas tipo ecografía** que salen de ella en bucle; en escritorio el equipo sigue un poco al cursor. Debajo, la **línea de confianza** en bucle infinito: 2 años de garantía · CE / MDR certificados · UE, USA y LATAM envíos · Fisioterapeutas te asesoran · 0 sorpresas en mantenimiento · 53 páginas de catálogo.
+1. **Hero** a pantalla completa con **foto de clínica de fondo, difuminada y oscurecida** con un velo marino (más opaco a la izquierda en escritorio, donde va el texto, y abajo en móvil). "Equipos médicos de alta calidad. *Sin letra pequeña.*", la línea "Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas, no comerciales.", el botón "Quiero asesoramiento" y "Ver catálogo" (lleva a Más equipos). Abajo del todo, la **línea de confianza** en bucle infinito: 2 años de garantía · CE / MDR certificados · UE, USA y LATAM envíos · Fisioterapeutas te asesoran · 0 sorpresas en mantenimiento · 53 páginas de catálogo.
 2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con "Lo quiero". En móvil y tableta se ve una tarjeta cada vez, centrada, con puntos. CTA de sección.
 3. **Más equipos** ("Todo lo que tu clínica necesita."). 6 categorías del catálogo con descripción al pasar o tocar, "Y más de 50 páginas de equipos en el catálogo." y dos botones: "Quiero asesoramiento" y **"Descargar catálogo"** (oscuro, con icono, para que destaque).
-4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). Historia de Javier en dos líneas, su foto, las cifras (2 años de garantía · 0 sorpresas en mantenimiento · Fisioterapeutas te asesoran, no comerciales), el comparador "Lo habitual" frente a "Con VytalGroup", la firma y el CTA, centrados.
+4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") y las cifras (2 años de garantía · 0 sorpresas en mantenimiento · Fisioterapeutas te asesoran, no comerciales), todo alineado a la izquierda; en móvil y tableta, centrado. Debajo, el comparador "Lo habitual" frente a "Con VytalGroup", la firma y el CTA, centrados. Sin líneas separadoras en las cifras ni en el comparador.
 5. **Dudas** ("Lo que *nos preguntáis.*"). 5 preguntas, el CTA y "¿Otra duda? Escríbenos por WhatsApp".
 6. **Formulario** ("Cuéntanos qué *necesitas.*"). Solo lo imprescindible, en 2 pasos:
    1. ¿Qué equipo buscas? Ecógrafo · Diatermia · Presoterapia · Ondas de choque · Otro equipo (desplegable con magnetoterapia, láser, electrólisis percutánea, camillas u otro).
@@ -30,9 +30,20 @@ Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", 
 
 ---
 
-## 2. Cambios de esta ronda (v5)
+## 2. Cambios de las últimas rondas
 
-- **Hero nuevo, sin fotos ni vídeos de clientes:** escaparate oscuro con la diatermia flotando y ondas tipo ecografía (opción B de las tres maquetas). El texto y los botones van centrados en móvil. Imagen OG rehecha con el mismo estilo.
+**v6 (esta ronda)**
+
+- **Hero con foto de fondo difuminada** (opción 1 de las tres maquetas, "Oscuro, solo foto"): una foto real de clínica del catálogo, difuminada y con velo marino, a toda pantalla. Fuera la diatermia recortada, el halo y las ondas; el hero queda quieto salvo la entrada del texto y la línea de confianza.
+  - La foto viene ya difuminada en el archivo (AVIF de 3,8 KB en móvil y 7 KB en escritorio), sin `filter: blur()`, que es caro de pintar en móviles.
+  - Se precarga la versión de móvil o la de escritorio según el ancho.
+  - La imagen OG se queda como estaba (fondo marino con la diatermia).
+- **Por qué VytalGroup en escritorio vuelve a como estaba:** foto a la izquierda y, a su derecha, titular, "Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen." y las cifras, alineados a la izquierda. En móvil sigue centrado.
+- **Sin líneas separadoras** en las cifras (años, sorpresas, fisioterapeutas) ni en el comparador "Lo habitual" frente a "Con VytalGroup".
+
+**v5**
+
+- **Hero sin fotos ni vídeos de clientes:** escaparate oscuro con la diatermia flotando y ondas (sustituido en la v6). El texto y los botones van centrados en móvil. Imagen OG rehecha en oscuro.
 - **Fuera:**
   - la tarjeta "Clientes" (fotos y vídeo de clientes);
   - la sección de testimonios de ejemplo;
@@ -69,7 +80,7 @@ Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", 
 │   ├── css/                    base.css (compartido), landing.css, legal.css (inline al compilar)
 │   ├── js/                     main.js, form.js, select.js (desplegable propio), data.js,
 │   │                           attribution.js, consent.js, tracking.js, legal.js
-│   ├── img/                    Productos, categorías, diatermia del hero y Javier (AVIF + WebP)
+│   ├── img/                    Productos, categorías, fondo del hero, diatermia de la OG y Javier (AVIF + WebP)
 │   ├── fonts/                  Geist e Instrument Serif cursiva (woff2, subset latino)
 │   ├── brand/                  Favicon, iconos e imagen Open Graph
 │   └── docs/catalogo-vytalgroup-2026.pdf
@@ -215,15 +226,11 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 **Diseño.**
 - Geist + Instrument Serif. Marino `#0B1929` en el hero, en "Por qué VytalGroup" y en el footer. Turquesa `#48A0A8`, el del logo, en botones y detalles.
 - El botón de descarga del catálogo es marino con el icono en turquesa: destaca junto al CTA sin competir con él.
-- El titular del hero se ajusta al ancho de su columna para salir siempre en 3 líneas.
+- El titular del hero se ajusta al ancho de pantalla para salir siempre en 3 líneas.
+- La foto del hero va difuminada en el propio archivo: pesa muy poco y no hay que difuminarla en el navegador.
 
 **Animaciones.** Solo `transform`, `opacity` y variables CSS.
-- Hero:
-  - titular por palabras;
-  - entrada del escaparate;
-  - flotación del equipo y halo que respira;
-  - ondas en bucle;
-  - en escritorio, el equipo sigue un poco al cursor.
+- Hero: titular por palabras y entrada suave del resto; la foto de fondo, quieta.
 - Titulares de sección por líneas.
 - Imágenes con fundido y escala.
 - Parallax leve y halo en tarjetas (escritorio).
@@ -232,7 +239,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 - Conteo de cifras.
 - Barra de progreso de lectura.
 - Botones con brillo y efecto magnético.
-- `prefers-reduced-motion`: sin flotación, ondas, parallax, marquesina ni conteos; quedan los fundidos y las ondas como anillos quietos.
+- `prefers-reduced-motion`: sin entradas, parallax, marquesina ni conteos, y sin desplazamiento suave.
 
 **Formulario.** Solo equipo, nombre y WhatsApp, porque cuantas menos preguntas, más leads. El WhatsApp de la pantalla de gracias lleva el nombre y el equipo o modelo.
 
@@ -240,7 +247,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 
 ## 10. Historial
 
-- **v5 (esta ronda):** ver apartado 2.
+- **v6 (esta ronda)** y **v5:** ver apartado 2.
 - **v4:** hero con fotos y vídeo de clientes y sin testimonios. Sustituido en la v5.
 - **v3:**
   - enfoque "equipos médicos sin letra pequeña";
@@ -271,30 +278,31 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - doble clic sin duplicar;
   - Lead único con `eventID` = `event_id`;
   - endpoint vacío, error del servidor y antispam.
-- **Interfaz (81):**
+- **Interfaz (89):**
   - 6 secciones;
   - palabras;
   - CTA por sección (con "Descargar catálogo" junto al de Más equipos);
   - alineación centrada de titulares y CTA en móvil y escritorio;
+  - Por qué VytalGroup: a la derecha de la foto en escritorio, centrado en móvil, historia en dos líneas y sin líneas separadoras;
   - cabecera fija siempre visible;
   - barra de progreso;
   - línea de confianza infinita;
-  - hero (diatermia precargada, fondo oscuro, logo blanco, ondas, flotación, sigue al cursor, sin fotos ni vídeos de clientes);
+  - hero en móvil y escritorio (foto de fondo precargada según el ancho, a todo el hero, velo marino, sin filtro, titular y logo en blanco, sin equipo recortado, ondas ni vídeos);
   - segmentado;
   - carrusel de una tarjeta centrada;
   - Más equipos, comparador, acordeón y conteo;
   - movimiento reducido;
   - CSP, caché, PDF, URLs limpias, metadatos y OG.
 - **Diseño (17 tamaños):** capturas de página completa de 320 a 1920 px, horizontal y páginas legales, con comprobación por código de desbordes, textos partidos, solapes y áreas táctiles. Revisadas una a una.
-- `node tests/inp.cjs`: interacción más lenta 112 a 144 ms con la CPU ×4 (INP < 200 ms).
+- `node tests/inp.cjs`: interacción más lenta 120 ms con la CPU ×4 (INP < 200 ms).
 
 | | Rendimiento | Accesibilidad | Buenas prácticas | SEO |
 |---|---|---|---|---|
-| Móvil, landing (3 pasadas) | 99 · 100 · 99 | 100 | 100 | 100 |
+| Móvil, landing (3 pasadas) | 100 · 100 · 100 | 100 | 100 | 100 |
 | Escritorio, landing | 100 | 100 | 100 | 100 |
 | Móvil, páginas legales | 100 | 100 | 100 | 100 |
 
-Móvil: LCP 1,7 a 1,8 s (la diatermia del hero), CLS 0. Escritorio: LCP 0,4 s. HTML válido (W3C). Sin rayas ni emojis, comprobado por código.
+Móvil: LCP 1,4 s (el titular del hero), CLS 0. Escritorio: LCP 0,4 s. HTML válido (W3C). Sin rayas ni emojis, comprobado por código.
 
 ---
 
@@ -303,8 +311,8 @@ Móvil: LCP 1,7 a 1,8 s (la diatermia del hero), CLS 0. Escritorio: LCP 0,4 s. H
 ```bash
 bash scripts/assets/subset_fonts.sh                 # fuentes (requiere fonttools y brotli)
 python3 scripts/assets/build_images.py <pdfimages> <fotos> assets/img
-                                                    # imágenes (pdfimages -all -p del catálogo, foto de Javier;
-                                                    # las páginas de la maqueta se renderizan del PDF con pdftoppm)
+                                                    # imágenes (pdfimages -all -p del catálogo y foto de Javier;
+                                                    # también el fondo difuminado del hero)
 node scripts/assets/build_og.mjs                    # imagen Open Graph (Playwright)
 python3 scripts/assets/gen_legal.py                 # páginas legales (toman el pie y las cookies de index.html)
 ```

@@ -280,7 +280,21 @@ dark = Image.new('RGBA', hero.size, (11, 25, 41, 0))
 dark.putalpha(sh)
 hero = Image.alpha_composite(hero, dark)
 hero.alpha_composite(vytamed, (20, 20))
-save(hero, 'hero-vytamed', [400, 560, 760], alpha=True)
+# El recorte de la diatermia solo se usa en la imagen OG
+save(hero, 'hero-vytamed', [760], alpha=True, formats=('webp',))
+
+# ---------------------------------------------------------------- hero: foto de clínica difuminada (fondo)
+# Foto real de la diatermia VytalGroup en una clínica (catálogo). El difuminado va horneado en la imagen:
+# es mucho más barato que un filter: blur() en CSS y la imagen pesa muy poco.
+clinica = Image.open(pdf('i-004-016.png')).convert('RGB')
+for w, rad in ((960, 9), (1600, 14)):
+    x = clinica.resize((w, round(clinica.height * w / clinica.width)), Image.LANCZOS).filter(ImageFilter.GaussianBlur(rad))
+    x.save(os.path.join(OUT, f'hero-fondo-{w}.avif'), quality=50, speed=4)
+    x.save(os.path.join(OUT, f'hero-fondo-{w}.webp'), quality=72, method=6)
+m = clinica.crop((80, 0, 80 + int(952 * 0.62), 952))  # recorte vertical para móvil
+m = m.resize((600, round(m.height * 600 / m.width)), Image.LANCZOS).filter(ImageFilter.GaussianBlur(9))
+m.save(os.path.join(OUT, 'hero-fondo-m-600.avif'), quality=50, speed=4)
+m.save(os.path.join(OUT, 'hero-fondo-m-600.webp'), quality=72, method=6)
 
 # ---------------------------------------------------------------- Javier
 # El recorte termina por encima del logo de terceros que lleva bordado el polo (y = 448)

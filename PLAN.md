@@ -88,3 +88,9 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - [x] Formulario de 2 pasos (equipo; nombre + WhatsApp). Desplegable hacia abajo o hacia arriba, entero y con hover.
 - [x] Instagram: fisioruiz_.
 - [x] Pruebas: formulario 81/81, interfaz 81/81, diseño 17/17. INP ≤ 144 ms. Lighthouse móvil 99-100 y escritorio 100. HTML válido.
+
+## 7. v6: hero con foto de fondo y Por qué VytalGroup como antes
+- [x] Hero: 3 maquetas nuevas con foto de fondo difuminada. Elegida la 1, "Oscuro, solo foto": foto de clínica del catálogo difuminada en el archivo, velo marino, sin animación de fondo.
+- [x] Por qué VytalGroup en escritorio: historia y cifras a la derecha de la foto, alineadas a la izquierda. Móvil sin cambios (centrado).
+- [x] Sin líneas separadoras en las cifras ni en el comparador.
+- [x] Pruebas: formulario 81/81, interfaz 89/89, diseño 17/17. INP 120 ms. Lighthouse 100 en todo (móvil ×3 y escritorio). HTML válido.
