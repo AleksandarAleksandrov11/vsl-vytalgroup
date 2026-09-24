@@ -156,10 +156,9 @@ Cómo funciona:
 4. **Confirmar la marca:** la landing usa **VytalGroup** y el logo "VG". La web actual usa "VytalKineTech", que no aparece como marca visible. El email de contacto sigue siendo vytalkinetech@gmail.com.
 5. **Confirmar las certificaciones ISO 13485 y FDA.** No aparecen en ninguna fuente para los productos de esta landing, así que **no se han usado**. La barra de confianza dice "Certificación MDR / CE". Cada ficha muestra solo la normativa que indica el catálogo: CE, MDR (UE) 2017/745, clase IIa o IIb, CE0068 o Directiva 93/42/CEE.
 6. **Confirmar el usuario de Instagram de la marca.** Se ha enlazado `instagram.com/vytalgroup` a partir de "@VytalGroup". El personal es `@fisioruiz_`.
-7. **Material que no llegó.** La carpeta `referencias/` no venía en el encargo: faltan el catálogo EDAN, las fotos de Javier, el logo en archivo y el cartel del sorteo. Si se envían, se pueden sustituir las imágenes (apartado 8). Mejorarían sobre todo:
-   - la foto de Javier (ahora es un fotograma de su vídeo);
-   - las fotos de los Acclarix (el catálogo trae unos 550 px de ancho).
+7. **Material que no llegó.** La carpeta `referencias/` no venía en el encargo: faltan el catálogo EDAN, el logo en archivo y el cartel del sorteo. Si se envían, se pueden sustituir las imágenes (apartado 8). Mejorarían sobre todo las fotos de los Acclarix (el catálogo trae unos 550 px de ancho) y una foto de Javier a más resolución (la recibida es de 640 × 640).
 8. **Arreglar el certificado HTTPS del dominio** (apartado 5).
+9. **Confirmar el vídeo de demostración de la diatermia.** La persona que aparece no es Javier. Se presenta como "demostración" del producto, sin atribuírselo a nadie. Hay que confirmar que hay permiso para usarlo o enviar uno grabado por Javier (se sustituye en `assets/video/diatermia-demo.*` y `assets/video/diatermia-loop.*`).
 
 ---
 
@@ -184,10 +183,10 @@ Cómo funciona:
 **Imágenes**
 - **Hero:** la Diatermia Multifunción de VytalGroup (foto del catálogo), con una tarjeta flotante del Acclarix AX8, para que se vean los dos productos protagonistas.
 - **Vídeo del hero:** no se ha usado. En la web actual la pieza con el rótulo "DW-P8" es una imagen, no un vídeo, y el rótulo no se puede eliminar.
-- **Vídeo de Javier explicando la diatermia (1:47):** va en la sección de Diatermias:
+- **Vídeo de demostración de la Diatermia Multifunción (1:47):** va en la sección de Diatermias. Quien lo presenta no es Javier, así que el botón dice "Mira la demostración" y no se le atribuye a nadie:
   - un bucle mudo de 8 s de la pantalla, sin subtítulos, que se carga solo al acercarse y nunca con ahorro de datos o conexiones lentas;
   - un botón para verlo completo con sonido en un diálogo, cargado bajo demanda.
-- **Foto de Javier:** a falta de fotos, es un fotograma de ese vídeo, recortado por encima de los subtítulos y con etalonaje de marca.
+- **Foto de Javier:** la que envió el cliente. Se usa en la historia, en el hero ("Te responde Javier Ruiz") y junto al formulario. El recorte termina por encima del logo de otra clínica que lleva bordado el polo, y lleva un etalonaje de marca suave.
 - **Presoterapia:** se usa la imagen de las botas con marca VytalGroup (del vídeo de presoterapia). La foto de I-Press del catálogo lleva otra marca impresa y fondo amarillo.
 - **Firma de Javier:** vectorizada con la tipografía libre Mrs Saint Delafield (licencia OFL) para que se vea igual en todos los dispositivos. Se anima como si se escribiera.
 

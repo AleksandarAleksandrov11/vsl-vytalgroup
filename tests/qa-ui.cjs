@@ -104,7 +104,7 @@ async function open(b, { width, height, mobile, consent = true, intro = false, r
     await wait(700);
     ok(await p.evaluate(() => !document.querySelector('.dd__panel.is-sheet') && !document.documentElement.classList.contains('dd-lock')), 'Móvil: pulsar fuera cierra la hoja');
     ok(errors.length === 0, 'Móvil: sin errores en consola', errors.join(' / '));
-    ok(!reqs.some((u) => /diatermia-loop|javier-diatermia/.test(u)) || true, 'Móvil: control de vídeos (ver prueba de escritorio)');
+    ok(!reqs.some((u) => /diatermia-loop|diatermia-demo/.test(u)) || true, 'Móvil: control de vídeos (ver prueba de escritorio)');
     await ctx.close();
   }
 
@@ -132,7 +132,7 @@ async function open(b, { width, height, mobile, consent = true, intro = false, r
     // Diálogo de vídeo
     await p.click('[data-video-open]');
     await wait(900);
-    ok(await p.evaluate(() => document.getElementById('video-dialog').open), 'Escritorio: se abre el vídeo de Javier');
+    ok(await p.evaluate(() => document.getElementById('video-dialog').open), 'Escritorio: se abre el vídeo de demostración');
     await p.keyboard.press('Escape');
     await wait(400);
     ok(await p.evaluate(() => !document.getElementById('video-dialog').open && document.querySelector('.vdialog__video').paused), 'Escritorio: Escape cierra y pausa el vídeo');

@@ -4,7 +4,7 @@ Trabajo en solitario y secuencial, sin subagentes. Se marca cada tarea al comple
 
 ## 1. Análisis y material
 - [x] Leer el brief completo
-- [x] Revisar material recibido: catálogo ADC | VytalGroup 2026 (53 págs.), vídeo presoterapia VytalGroup, vídeo de Javier con la Diatermia Multifunción
+- [x] Revisar material recibido: catálogo ADC | VytalGroup 2026 (53 págs.), vídeo presoterapia VytalGroup, vídeo de demostración de la Diatermia Multifunción
 - [x] Extraer el texto del catálogo con `pdftotext`
 - [x] Descargar la web actual (vytalgroup.org) y extraer sus recursos base64 (imágenes, vídeo, PDF)
 - [x] Revisar la landing de referencia que ha pasado el cliente (vdnperformance.com): ritmo, animaciones y tono
@@ -14,9 +14,9 @@ Trabajo en solitario y secuencial, sin subagentes. Se marca cada tarea al comple
 - [x] Logo VytalGroup vectorizado (SVG) en versión clara y oscura, más el símbolo "VG"
 - [x] Favicon SVG + PNG, apple-touch-icon y manifest
 - [x] Imágenes de producto recortadas y exportadas en AVIF + WebP en varios tamaños
-- [x] Retrato de Javier (fotograma del vídeo) con etalonaje de marca
+- [x] Retrato y avatar de Javier (foto enviada por el cliente) con etalonaje de marca
 - [x] Portada del catálogo para el mockup
-- [x] Vídeo de Javier (Diatermia) optimizado en MP4 H.264 + WebM, con póster
+- [x] Vídeo de demostración (Diatermia) optimizado en MP4 H.264 + WebM, con póster
 - [x] Catálogo PDF comprimido por debajo de 5 MB (`catalogo-vytalgroup-2026.pdf`)
 - [x] Fuentes Syne (700, 800) e Inter (400, 500, 600) autoalojadas en woff2 con subset latino
 - [x] Imagen Open Graph de 1200 × 630
@@ -28,7 +28,7 @@ Trabajo en solitario y secuencial, sin subagentes. Se marca cada tarea al comple
 - [x] Hero + barra de confianza
 - [x] De fisio a fisio (historia de Javier)
 - [x] Ecógrafos: 4 destacados, "Ver ficha", "Me interesa", gama completa con filtros, Physio Invasiva 2.0
-- [x] Diatermias: 4 modelos, comparativa y vídeo de Javier
+- [x] Diatermias: 4 modelos, comparativa y vídeo de demostración
 - [x] También te equipamos con
 - [x] Cómo trabajamos (línea temporal que se dibuja con el scroll)
 - [x] Garantías
@@ -72,5 +72,6 @@ Trabajo en solitario y secuencial, sin subagentes. Se marca cada tarea al comple
 
 ## Notas finales
 - Añadido a petición del cliente: animación de entrada profesional ("escaneo de ultrasonido") y referencia visual de vdnperformance.com.
+- Corrección del cliente: la persona del vídeo no es Javier. Se usa la foto de Javier que envió (historia, hero y formulario) y el vídeo pasa a ser una demostración del producto, sin atribuírselo.
 - Resultado: Lighthouse móvil 96 a 100 en rendimiento y 100 en accesibilidad, buenas prácticas y SEO; escritorio 100 en todo; LCP 1,7 a 1,8 s; CLS 0; INP medido 96 ms.
 - Pruebas automáticas: `npm test` (formulario y tracking 212/212, componentes 47/47, diseño 14/14 tamaños).

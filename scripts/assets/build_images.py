@@ -2,7 +2,8 @@
 
 Fuentes:
   * Catálogo ADC Global Tech | VytalGroup 2026 (imágenes extraídas con `pdfimages -all -p`)
-  * Fotogramas de los vídeos del cliente (Javier con la Diatermia Multifunción y presoterapia VytalGroup)
+  * Fotogramas de los vídeos del cliente (demostración de la Diatermia Multifunción y presoterapia VytalGroup)
+  * Foto de Javier enviada por el cliente (`javier_foto.png`, 640 × 640)
 
 Uso:
   python3 build_images.py <dir_pdfimages> <dir_fotogramas> <dir_salida>
@@ -136,10 +137,11 @@ cam = cam.point(lambda v: 255 if v > 222 else v)
 save(on_canvas(cam, fill=0.9, cw=400), 'sec-camillas', [240, 400])
 
 # ---------------------------------------------------------------- Javier
-jav = Image.open(os.path.join(FRAMES, 'jav_40.png')).convert('RGB').crop((470, 0, 790, 360))
-jav = grade(jav).filter(ImageFilter.UnsharpMask(radius=1.2, percent=40, threshold=2))
-save(jav, 'javier', [320])
-save(jav.crop((40, 10, 280, 250)), 'javier-avatar', [160, 240])
+# El recorte termina por encima del logo de terceros que lleva bordado el polo (y = 448)
+foto = Image.open(os.path.join(FRAMES, 'javier_foto.png')).convert('RGB')
+jav = grade(foto.crop((128, 0, 512, 432)), 0.12).filter(ImageFilter.UnsharpMask(radius=1.0, percent=30, threshold=2))
+save(jav, 'javier', [320, 384])
+save(grade(foto.crop((180, 15, 460, 295)), 0.12), 'javier-avatar', [160, 240])
 
 for m in manifest:
     print(m)
