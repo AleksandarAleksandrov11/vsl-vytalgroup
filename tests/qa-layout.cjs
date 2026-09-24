@@ -45,7 +45,7 @@ const PAGES = [['/', 'index'], ['/privacidad', 'privacidad'], ['/cookies', 'cook
         });
         // Palabras partidas o que se salen de su caja (texto más ancho que su contenedor)
         const wide = [];
-        document.querySelectorAll('h1, h2, h3, .btn, .card__data dd, .card__data div, .why__list li, .hd__bar, .seg, .cat__name, .cmp__table td, .tst figure').forEach((el) => {
+        document.querySelectorAll('h1, h2, h3, .btn, .card__data dd, .card__data div, .hd__bar, .seg, .cat__name, .cmp__table td, .tst figure').forEach((el) => {
           if (!shown(el)) return;
           const box = el.getBoundingClientRect();
           const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
@@ -58,7 +58,7 @@ const PAGES = [['/', 'index'], ['/privacidad', 'privacidad'], ['/cookies', 'cook
           }
         });
         // Botones, datos y cifras en una sola línea (sin partirse)
-        document.querySelectorAll('.btn, .seg__btn, .card__data dd, .why__list strong, .sel__btn, .lhd__back, .hd__logo').forEach((el) => {
+        document.querySelectorAll('.btn, .seg__btn, .card__data dd, .sel__btn, .lhd__back, .hd__logo').forEach((el) => {
           if (!shown(el)) return;
           const tops = new Set();
           const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);

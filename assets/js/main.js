@@ -1,13 +1,14 @@
 // VytalGroup · landing
 // Cabecera y barra de progreso, entradas al hacer scroll
 // (bloques, titulares por líneas e imágenes), parallax y halo en escritorio, control segmentado,
-// carrusel con flechas, categorías, conteo, comparador, marquesina, acordeón, barra fija
-// en móvil, botones magnéticos, carga diferida del formulario y eventos del píxel.
+// carrusel, categorías, comparador, marquesina, acordeón, barra fija
+// en móvil, botones magnéticos, nombre animado en el pie, carga diferida del formulario y eventos del píxel.
 // Solo se animan transform, opacity y variables CSS. Con prefers-reduced-motion quedan los fundidos.
 
 import { captureAttribution } from './attribution.js';
 import { initConsent } from './consent.js';
 import { initTracking, viewContent, catalogDownload, contact } from './tracking.js';
+import { initFooter } from './footer.js';
 
 const html = document.documentElement;
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -171,40 +172,21 @@ tabs.forEach((t, i) => {
   });
 });
 
-// Carrusel de móvil y tableta: puntos y flechas a los lados de la foto de la tarjeta visible
+// Carrusel de móvil y tableta: los puntos siguen a la tarjeta visible
 $$('[data-carousel]').forEach((track) => {
-  const panel = track.closest('.panel');
   const cards = [...track.children];
-  const dots = $$('.dots span', panel);
-  const prev = $('[data-dir="-1"]', panel);
-  const next = $('[data-dir="1"]', panel);
+  const dots = $$('.dots span', track.closest('.panel'));
   const mid = (el) => { const r = el.getBoundingClientRect(); return r.left + r.width / 2; };
-  const current = () => {
-    const c = mid(track);
-    let best = 0;
-    cards.forEach((card, i) => { if (Math.abs(mid(card) - c) < Math.abs(mid(cards[best]) - c)) best = i; });
-    return best;
-  };
-  const paint = () => {
-    const i = current();
-    dots.forEach((d, j) => d.classList.toggle('is-on', j === i));
-    [[prev, i === 0], [next, i === cards.length - 1]].forEach(([btn, off]) => {
-      if (!btn || btn.disabled === off) return;
-      // Si la flecha con el foco se apaga, el foco pasa a la otra
-      if (off && document.activeElement === btn) (btn === prev ? next : prev).focus();
-      btn.disabled = off;
-    });
-  };
   let raf = 0;
   track.addEventListener('scroll', () => {
     cancelAnimationFrame(raf);
-    raf = requestAnimationFrame(paint);
+    raf = requestAnimationFrame(() => {
+      const c = mid(track);
+      let best = 0;
+      cards.forEach((card, i) => { if (Math.abs(mid(card) - c) < Math.abs(mid(cards[best]) - c)) best = i; });
+      dots.forEach((d, i) => d.classList.toggle('is-on', i === best));
+    });
   }, { passive: true });
-  [prev, next].forEach((btn) => btn && btn.addEventListener('click', () => {
-    const i = Math.max(0, Math.min(cards.length - 1, current() + Number(btn.dataset.dir)));
-    track.scrollTo({ left: track.scrollLeft + mid(cards[i]) - mid(track), behavior: reduced ? 'instant' : 'smooth' });
-  }));
-  paint();
 });
 
 // ------------------------------------------------------------------ más equipos: descripción al tocar
@@ -222,35 +204,6 @@ if (cats) {
     item.classList.toggle('is-open', open);
     btn.setAttribute('aria-expanded', String(open));
   });
-}
-
-// ------------------------------------------------------------------ conteo animado
-const counters = $('[data-count-list]');
-if (counters && hasIO && !reduced) {
-  const nums = $$('[data-count]', counters);
-  const run = () => {
-    const t0 = performance.now();
-    const dur = 1400;
-    const step = (t) => {
-      const p = Math.min(1, (t - t0) / dur);
-      const k = 1 - (1 - p) ** 4; // easeOutQuart: arranca rápido y se posa suave
-      nums.forEach((el) => {
-        const from = Number(el.dataset.from || 0);
-        el.textContent = String(Math.round(from + (Number(el.dataset.count) - from) * k));
-      });
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  };
-  const io = new IntersectionObserver(([e]) => {
-    if (!e.isIntersecting) return;
-    io.disconnect();
-    run();
-  }, { threshold: .6 });
-  if (belowFold(counters)) {
-    nums.forEach((el) => { el.textContent = el.dataset.from || '0'; });
-    io.observe(counters);
-  }
 }
 
 // ------------------------------------------------------------------ comparador: filas una a una y checks que se dibujan
@@ -368,16 +321,17 @@ document.addEventListener('click', (e) => {
 
 // ------------------------------------------------------------------ barra fija en móvil
 // Aparece al pasar el hero y se oculta con el formulario en pantalla.
-// El icono de WhatsApp se oculta cuando se ve el enlace de Dudas.
+// El icono de WhatsApp se oculta cuando se ve el enlace de Dudas o el del pie.
 const bar = $('[data-mbar]');
 const faqWa = $('[data-faq-wa]');
+const ftWa = $('[data-ft-wa]');
 const hero = $('#inicio');
-const vis = { hero: true, form: false, faqWa: false };
+const vis = { hero: true, form: false, faqWa: false, ftWa: false };
 function paintBar() {
   const on = !vis.hero && !vis.form;
   bar.classList.toggle('is-on', on);
   bar.inert = !on;
-  bar.classList.toggle('no-wa', vis.faqWa);
+  bar.classList.toggle('no-wa', vis.faqWa || vis.ftWa);
 }
 if (hasIO) {
   const io = new IntersectionObserver((entries) => {
@@ -385,10 +339,11 @@ if (hasIO) {
       if (e.target === hero) vis.hero = e.isIntersecting;
       else if (e.target === formSec) vis.form = e.isIntersecting;
       else if (e.target === faqWa) vis.faqWa = e.isIntersecting;
+      else if (e.target === ftWa) vis.ftWa = e.isIntersecting;
     });
     paintBar();
   }, { rootMargin: '0px 0px -12% 0px' });
-  [hero, formSec, faqWa].forEach((el) => el && io.observe(el));
+  [hero, formSec, faqWa, ftWa].forEach((el) => el && io.observe(el));
 }
 
 // ------------------------------------------------------------------ botones magnéticos (escritorio)
@@ -428,5 +383,6 @@ document.addEventListener('click', (e) => {
   if (wa) contact(wa.dataset.wa);
 });
 
+initFooter();
 html.classList.add('js');
 if (!desktop.matches) paintBar();

@@ -4,8 +4,8 @@ Landing de una sola página para las campañas de Instagram y Facebook de VytalG
 
 - HTML, CSS y JavaScript vanilla. Sin frameworks ni librerías en el navegador.
 - Hero, franja de garantías, 5 secciones y un footer (apartado 1).
-- Imágenes solo en WebP. Carga inicial en móvil: unos 65 KB (presupuesto 250 KB). JS propio: 13,8 KB. CSS: unos 10 KB (gzip).
-- Lighthouse: 99 a 100 en rendimiento en móvil y 100 en el resto; escritorio y páginas legales, 100 en todo.
+- Imágenes solo en WebP. Carga inicial en móvil: unos 65 KB (presupuesto 250 KB). JS propio: 14,7 KB. CSS: unos 10 KB (gzip).
+- Lighthouse: 100 en todo, en móvil, escritorio y páginas legales.
 
 ---
 
@@ -17,25 +17,39 @@ Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", 
 
 1. **Hero** con **foto de clínica de fondo, difuminada y oscurecida** con un velo marino (más opaco a la izquierda en escritorio, donde va el texto, y abajo en móvil). "Equipos médicos de alta calidad. *Sin letra pequeña.*", la línea "Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas.", el botón "Quiero asesoramiento" y "Ver catálogo" (lleva a Más equipos). Ocupa la primera pantalla menos la franja de garantías, que asoma debajo.
    **Franja de garantías** (sección propia, fondo blanco): en bucle infinito y con un icono para cada una: 2 años de garantía · CE / MDR certificados · UE, USA y LATAM envíos · Fisioterapeutas te asesoran · 0 sorpresas en mantenimiento · 53 páginas de catálogo.
-2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con "Lo quiero". En móvil y tableta se ve una tarjeta cada vez, centrada, con **flechas a los lados de la foto** para pasar a la siguiente o a la anterior, y puntos. CTA de sección.
+2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con "Lo quiero". En móvil y tableta se ve una tarjeta cada vez, centrada; se pasa deslizando, con puntos. CTA de sección.
 3. **Más equipos** ("Todo lo que tu clínica necesita."). 6 categorías del catálogo con descripción al pasar o tocar, "Y más de 50 páginas de equipos en el catálogo." y dos botones: "Quiero asesoramiento" y **"Descargar catálogo"** (oscuro, con icono, para que destaque).
-4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") y las cifras (2 años de garantía · 0 sorpresas en mantenimiento · Fisioterapeutas te asesoran), todo alineado a la izquierda; en móvil y tableta, centrado. Debajo, el comparador "Lo habitual" frente a "Con VytalGroup" como **tabla minimalista centrada**, con fondo y la columna de VytalGroup resaltada en turquesa suave; luego la firma y el CTA. Sin líneas separadoras.
+4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") alineados a la izquierda; en móvil y tableta, centrado y con la foto debajo. De la foto se pasa directo al comparador "Lo habitual" frente a "Con VytalGroup" como **tabla minimalista centrada**, con fondo y la columna de VytalGroup resaltada en turquesa suave; luego la firma y el CTA. Sin líneas separadoras.
 5. **Dudas** ("Lo que *nos preguntáis.*"). 6 preguntas: ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Escríbenos por WhatsApp".
 6. **Formulario** ("Cuéntanos qué *necesitas.*"). 4 preguntas, una por pantalla:
    1. ¿Qué equipo te interesa? Ecógrafo · Diatermia · Presoterapia · Ondas de choque · Otro equipo (desplegable con magnetoterapia, láser, electrólisis percutánea, camillas u otro).
    2. ¿Cuál es tu perfil? Clínica · Fisioterapeuta · Médico · Otro.
    3. ¿Cómo te llamas?
-   4. ¿A qué WhatsApp te escribimos? Con prefijo y el consentimiento.
+   4. ¿A qué WhatsApp te escribimos? Con prefijo y el consentimiento. Debajo, el enlace **"Prefiero por correo"** abre la misma pregunta para el correo ("¿A qué correo te escribimos?"), con teclado de correo, sin espacios, en minúsculas, formato validado y aviso si el dominio parece mal escrito ("¿Querías decir laura@gmail.com?"). "Prefiero por WhatsApp" vuelve atrás.
 
    Las opciones avanzan solas al tocarlas. Desde "Lo quiero" se salta la pregunta 1: se llega a la 2 con "Te interesa: Acclarix AX8 · Cambiar".
 
-**Footer** con teléfono, email, Instagram (`instagram.com/fisioruiz_`), "Catálogo (PDF)" y enlaces legales (centrado en móvil). La barra fija del móvil aparece al pasar el hero y se oculta con el formulario en pantalla.
+**Footer** (también en las páginas legales):
+- el logo en grande, "Equipos médicos de alta calidad. *Sin letra pequeña.*" y "Información dirigida a profesionales sanitarios";
+- columnas con título pequeño: **Contacto** (teléfono, WhatsApp y correo, con icono), **Equipos** (Lo más pedido, Más equipos, Catálogo PDF y Pedir asesoramiento), **Legal** (aviso legal, privacidad, cookies y configurar cookies) y **Síguenos** (Instagram `fisioruiz_`);
+- el copyright;
+- al final del todo, **"VytalGroup" a todo el ancho** ("Vytal" en blanco y "Group" en turquesa, como el logo), con las letras que suben una a una al llegar.
+
+Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 columnas a la derecha. La barra fija del móvil aparece al pasar el hero y se oculta con el formulario en pantalla; su icono de WhatsApp se oculta cuando se ve otro WhatsApp (Dudas o el pie).
 
 ---
 
 ## 2. Cambios de las últimas rondas
 
-**v7 (esta ronda)**
+**v8 (esta ronda)**
+
+- **Lo más pedido:** fuera las flechas; se pasa deslizando, con puntos.
+- **Por qué VytalGroup:** fuera las cifras de debajo de la foto (2 años de garantía, 0 sorpresas, fisioterapeutas te asesoran); de la foto de Javier se pasa directo a la tabla "Lo habitual" frente a "Con VytalGroup".
+- **Formulario:** debajo del WhatsApp, "Prefiero por correo" abre la misma pregunta para el correo. Formato bien controlado (sin espacios, minúsculas, sin puntos seguidos ni en los extremos, dominio y extensión válidos, 254 caracteres como máximo) y aviso de dominio mal escrito antes de enviar, con corrección en un toque. En la hoja llegan "Contactar por" (WhatsApp o Correo) y el correo.
+- **Footer nuevo**, más completo: logo grande, columnas con título pequeño (Contacto, Equipos, Legal, Síguenos) con iconos, copyright y "VytalGroup" a todo el ancho al final con las letras que suben una a una. El mismo pie en las páginas legales.
+- **Apps Script:** acepta WhatsApp o correo (al menos uno y bien escrito), columnas "Contactar por" y "Email", y el aviso por email se puede responder directamente al lead cuando dejó su correo.
+
+**v7**
 
 - **Garantías en su propia sección**, fuera del hero: franja blanca bajo el hero (asoma en la primera pantalla), un poco más alta, textos más grandes y un icono para cada garantía (escudo, sello, globo, personas, llave y libro). Sigue en bucle infinito.
 - **Comparador** "Lo habitual" frente a "Con VytalGroup": tabla minimalista centrada, con fondo y la columna de VytalGroup resaltada.
@@ -151,14 +165,14 @@ El formulario envía cada solicitud a una hoja de Google mediante un pequeño pr
 7. **Prueba.** Envía el formulario con datos de prueba. En segundos aparece una fila en "Leads" con la fecha y hora de Madrid, los datos, el origen de la campaña y la columna **Estado** en "Nuevo" para que la gestiones tú. Si abres la URL `/exec` en el navegador y ves `{"ok":true,...}`, el despliegue responde.
 8. **Si cambias el script**, vuelve a desplegarlo desde **Implementar > Gestionar implementaciones**: lápiz de la implementación activa, **Versión: Nueva versión** e **Implementar**. Así la URL no cambia.
 
-**Aviso por email con cada lead:** activado por defecto, a `NOTIFY_EMAIL` (vytalkinetech@gmail.com), con nombre, teléfono, enlace de WhatsApp, perfil, equipo y campaña. Para desactivarlo, pon `SEND_EMAIL_NOTIFICATION` a `false`, guarda y vuelve a desplegar.
+**Aviso por email con cada lead:** activado por defecto, a `NOTIFY_EMAIL` (vytalkinetech@gmail.com), con nombre, por dónde prefiere que le escribas, teléfono y enlace de WhatsApp (o su correo), perfil, equipo y campaña. Si dejó su correo, "Responder" le contesta directamente. Para desactivarlo, pon `SEND_EMAIL_NOTIFICATION` a `false`, guarda y vuelve a desplegar.
 
-Columnas, en este orden: Fecha · Nombre · Teléfono · WhatsApp (enlace directo `wa.me`) · Perfil · Equipo · Modelo · Consentimiento · utm_source · utm_medium · utm_campaign · utm_content · utm_term · fbclid · fbc · fbp · Referrer · URL de entrada · Dispositivo · Idioma · event_id · Estado.
+Columnas, en este orden: Fecha · Nombre · Contactar por (WhatsApp o Correo) · Teléfono · WhatsApp (enlace directo `wa.me`) · Email · Perfil · Equipo · Modelo · Consentimiento · utm_source · utm_medium · utm_campaign · utm_content · utm_term · fbclid · fbc · fbp · Referrer · URL de entrada · Dispositivo · Idioma · event_id · Estado.
 
 Detalles:
 - Envío con `fetch` y `Content-Type: text/plain;charset=utf-8` (sin petición previa de CORS).
 - UTM y `fbclid` se guardan en `sessionStorage` en la primera visita. `fbc` se construye desde `fbclid` si no existe la cookie `_fbc`.
-- El script valida los campos obligatorios (nombre, teléfono, perfil, equipo, consentimiento y `event_id`) y que el teléfono tenga entre 8 y 15 cifras, usa `LockService`, ignora envíos repetidos con el mismo `event_id`, descarta el campo trampa y escapa los textos que empiezan por `=`, `+`, `-` o `@`.
+- El script valida los campos obligatorios (nombre, perfil, equipo, consentimiento y `event_id`), que haya teléfono o correo, que el teléfono tenga entre 8 y 15 cifras y que el correo tenga un formato válido, usa `LockService`, ignora envíos repetidos con el mismo `event_id`, descarta el campo trampa y escapa los textos que empiezan por `=`, `+`, `-` o `@`.
 - **Equipo:** Ecógrafo, Diatermia, Presoterapia u Ondas de choque. Si se marca "Otro equipo", llega la categoría elegida en el desplegable (Magnetoterapia de alta intensidad, Láser de alta potencia, Electrólisis percutánea ecoguiada o Camillas de fisioterapia) u "Otro equipo" si se elige "Otro".
 - **Modelo:** el elegido en "Lo quiero"; "Sin decidir" si se eligió ecógrafo o diatermia sin modelo; vacío en el resto de equipos.
 - **Perfil:** Clínica, Fisioterapeuta, Médico u Otro.
@@ -256,20 +270,19 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 - Imágenes con fundido y escala.
 - Parallax leve y halo en tarjetas (escritorio).
 - Segmentado con transición cruzada (en vertical en móvil y tableta).
-- Carrusel con flechas y desplazamiento suave.
+- Nombre de la empresa en el pie: las letras suben una a una al llegar (y se levantan un poco al pasar el ratón).
 - Comparador con checks que se dibujan.
-- Conteo de cifras.
 - Barra de progreso de lectura.
 - Botones con brillo y efecto magnético.
-- `prefers-reduced-motion`: sin entradas, parallax, marquesina ni conteos, y sin desplazamiento suave.
+- `prefers-reduced-motion`: sin entradas, parallax ni marquesina, el nombre del pie quieto y sin desplazamiento suave.
 
-**Formulario.** 4 preguntas, una por pantalla y las de opciones con avance automático: así se siente corto aunque pregunte el perfil. El WhatsApp de la pantalla de gracias lleva el nombre y el equipo o modelo.
+**Formulario.** 4 preguntas, una por pantalla y las de opciones con avance automático: así se siente corto aunque pregunte el perfil. El correo es la alternativa, no una pregunta más: quien prefiere WhatsApp no lo ve. El aviso de dominio mal escrito sale al pulsar Enviar (no al salir del campo), para no mover el botón justo cuando se toca. El WhatsApp de la pantalla de gracias lleva el nombre y el equipo o modelo.
 
 ---
 
 ## 10. Historial
 
-- **v7 (esta ronda)**, **v6** y **v5:** ver apartado 2.
+- **v8 (esta ronda)**, **v7**, **v6** y **v5:** ver apartado 2.
 - **v4:** hero con fotos y vídeo de clientes y sin testimonios. Sustituido en la v5.
 - **v3:**
   - enfoque "equipos médicos sin letra pequeña";
@@ -286,14 +299,15 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 
 `npm test` compila y ejecuta sobre `dist/`, con las cabeceras de `vercel.json` y un Apps Script simulado:
 
-- **Apps Script (13):** el `google-sheets.gs` real contra una hoja simulada: `setup()`, columnas, enlace de WhatsApp, email, duplicados, campo trampa, campos obligatorios, teléfono, fórmulas y cuerpos no válidos.
-- **Formulario y tracking (88 comprobaciones):**
+- **Apps Script (17):** el `google-sheets.gs` real contra una hoja simulada: `setup()`, columnas, WhatsApp o correo, enlace de WhatsApp, aviso por email (con respuesta directa al lead), duplicados, campo trampa, campos obligatorios, teléfono, fórmulas y cuerpos no válidos.
+- **Formulario y tracking (102 comprobaciones):**
   - nada de Facebook sin consentimiento;
   - aviso de cookies;
   - eventos: PageView, ViewContent, DescargaCatalogo (desde Más equipos) y Contact;
   - "Lo quiero" salta al perfil con el modelo;
   - 4 preguntas (equipo, perfil, nombre y WhatsApp) y consentimiento, con progreso 1/4 a 4/4;
   - perfil: opciones, aviso si no se elige, avance automático y se conserva al volver;
+  - "Prefiero por correo": enlace bajo el WhatsApp, misma pregunta para el correo, 12 formatos incorrectos rechazados, sin espacios, minúsculas, aviso de dominio mal escrito y corrección en un toque, vuelta a WhatsApp, envío con "Correo" y un dominio propio sin avisos;
   - "Cambiar";
   - validaciones;
   - prefijos: buscador, Enter y Escape, opción resaltada con el ratón, hoja inferior en móvil;
@@ -302,7 +316,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - doble clic sin duplicar;
   - Lead único con `eventID` = `event_id`;
   - endpoint vacío, error del servidor y antispam.
-- **Interfaz (102):**
+- **Interfaz (108):**
   - hero, franja de garantías y 5 secciones;
   - 6 dudas, iguales en la web y en el JSON-LD;
   - sin "no comerciales";
@@ -315,22 +329,24 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - franja de garantías: sección propia bajo el hero, visible en la primera pantalla, más grande, un icono distinto en cada una y en bucle infinito;
   - hero en móvil y escritorio (foto de fondo precargada según el ancho, a todo el hero, velo marino, sin filtro, titular y logo en blanco, sin equipo recortado, ondas ni vídeos);
   - segmentado;
-  - carrusel de una tarjeta centrada, con flechas sobre la foto (se ocultan en los extremos y en escritorio);
+  - carrusel de una tarjeta centrada, sin flechas;
+  - Por qué VytalGroup sin cifras: de la foto directo a la tabla;
+  - pie: logo, columnas con título, enlaces, nombre en grande a todo el ancho con las letras animadas, y el mismo pie en las legales;
   - nada ensancha la página de 320 a 1024 px, con el texto al 100 y al 130 % y simulando un navegador sin `overflow: clip`: la cabecera y la barra fija nunca se cortan;
   - solo WebP;
-  - Más equipos, comparador (tabla centrada con fondo), acordeón y conteo;
+  - Más equipos, comparador (tabla centrada con fondo) y acordeón;
   - movimiento reducido;
   - CSP, caché, PDF, URLs limpias, metadatos y OG.
 - **Diseño (17 tamaños):** capturas de página completa de 320 a 1920 px, horizontal y páginas legales, con comprobación por código de desbordes, textos partidos, solapes y áreas táctiles. Revisadas una a una.
-- `node tests/inp.cjs`: interacción más lenta 112 ms con la CPU ×4 (INP < 200 ms), incluidas las flechas del carrusel y las 4 preguntas.
+- `node tests/inp.cjs`: interacción más lenta 128 ms con la CPU ×4 (INP < 200 ms), incluidas las 4 preguntas y "Prefiero por correo".
 
 | | Rendimiento | Accesibilidad | Buenas prácticas | SEO |
 |---|---|---|---|---|
-| Móvil, landing (3 pasadas) | 99 · 100 · 100 | 100 | 100 | 100 |
+| Móvil, landing (3 pasadas) | 100 · 100 · 100 | 100 | 100 | 100 |
 | Escritorio, landing | 100 | 100 | 100 | 100 |
 | Móvil, páginas legales | 100 | 100 | 100 | 100 |
 
-Móvil: LCP 1,35 a 1,5 s (el titular del hero), CLS 0. Escritorio: LCP 0,4 s. HTML válido (W3C). Sin rayas ni emojis, comprobado por código.
+Móvil: LCP 1,35 s (el titular del hero), CLS 0. Escritorio: LCP 0,4 s. HTML válido (W3C). Sin rayas ni emojis, comprobado por código.
 
 ---
 

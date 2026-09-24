@@ -20,7 +20,6 @@ const { chromium } = require('playwright');
   const steps = [
     ['segmentado', async () => { await go('#equipos .seg'); await p.waitForTimeout(900); await p.tap('#tab-dia'); }],
     ['segmentado (vuelta)', () => p.tap('#tab-eco')],
-    ['flecha del carrusel', async () => { await go('#panel-eco .carousel__btn--next'); await p.waitForTimeout(600); await p.tap('#panel-eco .carousel__btn--next'); }],
     ['lo quiero', () => p.tap('#panel-eco .card:nth-child(2) [data-want]')],
     ['cambiar equipo', async () => { await p.waitForTimeout(1500); await p.tap('[data-change]'); }],
     ['elegir diatermia', () => p.tap('.qf__step.is-active label.opt:has(input[value="Diatermia"])')],
@@ -28,6 +27,8 @@ const { chromium } = require('playwright');
     ['nombre', async () => { await p.tap('#f-name'); await p.keyboard.type('Ana'); await p.keyboard.press('Enter'); }],
     ['prefijo', () => p.tap('.sel--prefix .sel__btn')],
     ['elegir país', () => p.tap('.sel--prefix .sel__opt:has-text("Portugal")')],
+    ['prefiero por correo', async () => { await p.waitForTimeout(400); await p.tap('[data-switch="email"]'); }],
+    ['correo', async () => { await p.keyboard.type('ana@gmail.com'); }],
     ['acordeón', async () => { await go('#q3'); await p.waitForTimeout(900); await p.tap('#q3'); }],
     ['acordeón (cerrar)', () => p.tap('#q3')],
   ];

@@ -140,7 +140,7 @@ async function block(name, fn) {
     ok((await p.getAttribute('.qf__bar', 'aria-valuetext')) === 'Paso 2 de 4' && (await p.textContent('[data-count-step]')) === '2/4' && await p.isVisible('[data-back]'), 'Formulario: 4 pasos con progreso (2/4)');
     const qs = await p.$$eval('.qf__step', (els) => els.map((e) => e.querySelector('.qf__q').textContent.trim()));
     const fields = await p.$$eval('#qf input[name]:not([type=hidden]):not([name=website])', (els) => [...new Set(els.map((e) => e.name))]);
-    ok(qs.join('|') === '¿Qué equipo te interesa?|¿Cuál es tu perfil?|¿Cómo te llamas?|¿A qué WhatsApp te escribimos?' && fields.join(',') === 'equipo,perfil,nombre,telefono,consent', 'Formulario: 4 preguntas (qué te interesa, perfil, nombre y WhatsApp) y el consentimiento', `${qs.join(' / ')} · ${fields.join(', ')}`);
+    ok(qs.join('|') === '¿Qué equipo te interesa?|¿Cuál es tu perfil?|¿Cómo te llamas?|¿A qué WhatsApp te escribimos?' && fields.join(',') === 'equipo,perfil,nombre,telefono,email,consent', 'Formulario: 4 preguntas (qué te interesa, perfil, nombre y WhatsApp o correo) y el consentimiento', `${qs.join(' / ')} · ${fields.join(', ')}`);
     const perfiles = await p.$$eval('input[name="perfil"]', (els) => els.map((e) => e.value));
     ok(perfiles.join('|') === 'Clínica|Fisioterapeuta|Médico|Otro', 'Perfil: Clínica, Fisioterapeuta, Médico u Otro', perfiles.join(', '));
     // "Cambiar" vuelve al paso 1 con el equipo marcado y conserva el modelo si no se cambia
@@ -231,7 +231,7 @@ async function block(name, fn) {
     const gs = fs.readFileSync('integrations/google-sheets.gs', 'utf8');
     const cols = [...gs.match(/const COLUMNS = \[([\s\S]*?)\n\];/)[1].matchAll(/\['(\w+)',/g)].map((m) => m[1]).filter((k) => !['fecha', 'whatsapp', 'estado'].includes(k));
     const keys = Object.keys(d).filter((k) => k !== 'website');
-    ok(cols.join(',') === keys.join(',') && !('email' in d) && !('plazo' in d), 'Envío: las mismas columnas que la hoja de Google, sin email ni plazo', `${keys.join(', ')}`);
+    ok(cols.join(',') === keys.join(',') && d.canal === 'WhatsApp' && d.email === '' && !('plazo' in d), 'Envío: las mismas columnas que la hoja de Google (por WhatsApp: canal WhatsApp y sin correo)', `${keys.join(', ')}`);
     ok(/^fb\.1\.\d{13}\.abc123$/.test(d.fbc) && d.fbp === 'fb.1.1700000000000.987654321', 'Envío: fbc construido desde fbclid y fbp de la cookie', `${d.fbc} / ${d.fbp}`);
     ok(d.consentimiento && d.consentimiento.startsWith('Sí') && /^[0-9a-f-]{36}$/.test(d.event_id) && d.landing_url.includes('utm_source=facebook') && d.idioma && d.dispositivo.startsWith('Escritorio'), 'Envío: consentimiento, event_id, URL de entrada, idioma y dispositivo', `${d.dispositivo} · ${d.idioma}`);
     ok(await p.isVisible('[data-done]') && (await p.textContent('[data-done-title]')) === 'Gracias, Laura. Te escribimos muy pronto.', 'Éxito: "Gracias, Laura. Te escribimos muy pronto."');
@@ -347,6 +347,65 @@ async function block(name, fn) {
     await p.waitForTimeout(1600);
     const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
     ok(d.equipo === 'Presoterapia' && d.modelo === '' && d.perfil === 'Fisioterapeuta', 'Presoterapia: equipo en la hoja y sin modelo', `${d.equipo} · "${d.modelo}" · ${d.perfil}`);
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ 4c. "Prefiero por correo"
+  await block('Prefiero por correo', async () => {
+    fs.writeFileSync(LOG, '');
+    const { ctx, p, logs } = await open(b, { consent: true, width: 390, height: 844, mobile: true });
+    await toForm(p);
+    await p.waitForTimeout(3100);
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Ecógrafo"])'); await p.waitForTimeout(700);
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Médico"])'); await p.waitForTimeout(700);
+    await p.fill('#f-name', 'Pablo Ruiz'); await p.press('#f-name', 'Enter'); await p.waitForTimeout(600);
+    const sw = await p.evaluate(() => { const l = document.querySelector('.qf__step.is-active [data-switch="email"]'); const r = l.getBoundingClientRect(); const t = document.querySelector('.tel').getBoundingClientRect(); return { txt: l.textContent.trim(), below: r.top >= t.bottom, h: Math.round(r.height), ul: getComputedStyle(l).textDecorationLine }; });
+    ok(sw.txt === 'Prefiero por correo' && sw.below && sw.h >= 44 && sw.ul === 'underline', 'Correo: enlace "Prefiero por correo" debajo del WhatsApp', JSON.stringify(sw));
+    await p.tap('[data-switch="email"]'); await p.waitForTimeout(600);
+    const st = await p.evaluate(() => { const e = document.getElementById('f-email'); return { q: document.querySelector('[data-contact="email"] .qf__q').textContent, telHidden: document.querySelector('[data-contact="tel"]').hidden, focus: document.activeElement.id, count: document.querySelector('[data-count-step]').textContent, lab: document.querySelector('.qf__step.is-active').getAttribute('aria-labelledby'), type: e.type, ac: e.autocomplete, im: e.inputMode, back: document.querySelector('.qf__step.is-active [data-switch="tel"]').textContent.trim() }; });
+    ok(st.q === '¿A qué correo te escribimos?' && st.telHidden && st.focus === 'f-email' && st.count === '4/4' && st.lab === 'q-email' && st.type === 'email' && st.ac === 'email' && st.im === 'email' && st.back === 'Prefiero por WhatsApp', 'Correo: abre la misma pregunta para el correo (4/4), con teclado de correo y foco en el campo', JSON.stringify(st));
+    await p.tap('[data-submit]'); await p.waitForTimeout(200);
+    ok((await p.textContent('#e-email')) === 'Escribe tu correo.' && (await p.getAttribute('#f-email', 'aria-invalid')) === 'true', 'Correo: obligatorio');
+    const bad = [];
+    for (const v of ['pablo', 'pablo@', 'pablo@gmail', '@gmail.com', 'pablo..ruiz@gmail.com', '.pablo@gmail.com', 'pablo.@gmail.com', 'pablo@gmail..com', 'pablo@-gmail.com', 'pablo@gmail.c', 'pa(blo@gmail.com', 'pablo@gma_il.com']) {
+      await p.fill('#f-email', v); await p.tap('[data-submit]'); await p.waitForTimeout(80);
+      if ((await p.textContent('#e-email')) !== 'Revisa el correo: debe ser como nombre@correo.com.') bad.push(v);
+    }
+    ok(!bad.length && posts().length === 0, 'Correo: formatos incorrectos rechazados (sin arroba, sin dominio, puntos seguidos o en los extremos, extensión corta, caracteres raros)', bad.join(', ') || '12 casos');
+    await p.fill('#f-email', '  pablo ruiz@gmail.com ');
+    ok((await p.inputValue('#f-email')) === 'pabloruiz@gmail.com' && (await p.textContent('#e-email')) === '', 'Correo: sin espacios, ni al escribir ni al pegar, y el error se borra', await p.inputValue('#f-email'));
+    await p.tap('[data-switch="tel"]'); await p.waitForTimeout(500);
+    ok(await p.evaluate(() => !document.querySelector('[data-contact="tel"]').hidden && document.querySelector('[data-contact="email"]').hidden && document.activeElement.id === 'f-tel'), 'Correo: "Prefiero por WhatsApp" vuelve al teléfono');
+    await p.tap('[data-switch="email"]'); await p.waitForTimeout(500);
+    ok((await p.inputValue('#f-email')) === 'pabloruiz@gmail.com', 'Correo: al volver se conserva lo escrito');
+    // Dominio mal escrito: se avisa una vez antes de enviar
+    await p.fill('#f-email', 'Pablo@GMIAL.com');
+    await p.press('#f-email', 'Enter'); await p.waitForTimeout(300);
+    const hint = await p.evaluate(() => ({ shown: !document.querySelector('[data-email-hint]').hidden, txt: document.querySelector('[data-email-hint]').textContent.replace(/\s+/g, ' ').trim(), val: document.getElementById('f-email').value }));
+    ok(hint.shown && hint.txt === '¿Querías decir pablo@gmail.com?' && hint.val === 'pablo@gmial.com' && posts().length === 0, 'Correo: pasa a minúsculas y avisa de un dominio mal escrito antes de enviar', JSON.stringify(hint));
+    await p.tap('[data-email-fix]'); await p.waitForTimeout(200);
+    ok((await p.inputValue('#f-email')) === 'pablo@gmail.com' && await p.isHidden('[data-email-hint]'), 'Correo: un toque corrige el dominio');
+    await p.tap('input[name="consent"]');
+    await p.tap('[data-submit]'); await p.waitForTimeout(1600);
+    const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
+    ok(posts().length === 1 && d.canal === 'Correo' && d.email === 'pablo@gmail.com' && d.telefono === '' && d.perfil === 'Médico' && d.nombre === 'Pablo Ruiz', 'Correo: se envía con "Contactar por: Correo", el correo y sin teléfono', `${d.canal} · ${d.email} · "${d.telefono}" · ${d.perfil}`);
+    ok(await p.isVisible('[data-done]') && (await p.textContent('[data-done-title]')) === 'Gracias, Pablo. Te escribimos muy pronto.', 'Correo: pantalla de gracias');
+    ok((await fb(p)).filter((c) => c[1] === 'Lead').length === 1, 'Correo: Lead una vez tras el éxito');
+    ok(!logs.length, 'Consola limpia (correo)', logs.join(' / '));
+    await ctx.close();
+  });
+  // Un dominio que no se parece a ninguno habitual no molesta
+  await block('Correo: dominio propio', async () => {
+    fs.writeFileSync(LOG, '');
+    const { ctx, p } = await open(b, { consent: false });
+    await toForm(p);
+    await p.waitForTimeout(3100);
+    await fillToEnd(p, { name: 'Ana' }).catch(() => {});
+    await p.click('[data-switch="email"]'); await p.waitForTimeout(400);
+    await p.fill('#f-email', 'recepcion@clinica-fisio-ana.es');
+    await p.click('[data-submit]'); await p.waitForTimeout(1600);
+    const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
+    ok(await p.isHidden('[data-email-hint]') && d.email === 'recepcion@clinica-fisio-ana.es' && d.canal === 'Correo', 'Correo: con un dominio propio no hay aviso y se envía a la primera', d.email);
     await ctx.close();
   });
 

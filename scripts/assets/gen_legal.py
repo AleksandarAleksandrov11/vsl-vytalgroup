@@ -8,11 +8,12 @@ src = open('index.html', encoding='utf-8').read()
 
 sprite = re.search(r'<svg class="sprite".*?</svg>(?=\s*<a class="skip")', src, re.S).group(0)
 defs = re.search(r'<defs>.*?</defs>', sprite, re.S).group(0)
-keep = ['logo', 'i-arrow', 'i-close', 'i-check']
+keep = ['logo', 'i-arrow', 'i-close', 'i-check', 'i-phone', 'i-mail', 'i-insta', 'i-whatsapp']
 symbols = ''.join(m.group(0) for m in re.finditer(r'<symbol id="([^"]+)".*?</symbol>', sprite, re.S) if m.group(1) in keep)
 mini_sprite = f'<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">{defs}{symbols}</svg>'
 
-footer = re.search(r'<footer class="ft">.*?</footer>', src, re.S).group(0).replace('href="#inicio"', 'href="/"')
+# En las legales, los enlaces a secciones de la landing llevan a la página principal
+footer = re.search(r'<footer class="ft">.*?</footer>', src, re.S).group(0).replace('href="#inicio"', 'href="/"').replace('<a href="#', '<a href="/#')
 cookies = re.search(r'<div class="ck" id="cookie-banner".*?</dialog>', src, re.S).group(0)
 
 HEAD = '''<!doctype html>
@@ -96,7 +97,7 @@ priv = f'''        <h2>1. Responsable del tratamiento</h2>
 {TITULAR}
         <h2>2. Qué datos tratamos</h2>
         <ul>
-          <li><strong>Datos del formulario:</strong> nombre, teléfono de WhatsApp, perfil profesional (clínica, fisioterapeuta, médico u otro) y equipo o modelo de interés.</li>
+          <li><strong>Datos del formulario:</strong> nombre, teléfono de WhatsApp o correo electrónico (según prefieras que te escribamos), perfil profesional (clínica, fisioterapeuta, médico u otro) y equipo o modelo de interés.</li>
           <li><strong>Origen de la visita:</strong> parámetros de campaña (UTM), identificador de clic de Meta (fbclid y fbc), página de referencia y URL de entrada. Si aceptas las cookies de marketing, también el identificador del navegador del píxel de Meta (fbp).</li>
           <li><strong>Datos técnicos:</strong> tipo de dispositivo, sistema operativo, si llegas desde la aplicación de Instagram o Facebook, idioma del navegador y un identificador aleatorio de la solicitud.</li>
           <li><strong>Comunicaciones:</strong> lo que nos cuentes por WhatsApp, teléfono o email.</li>

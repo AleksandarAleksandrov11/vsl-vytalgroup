@@ -21,7 +21,8 @@
  *  · Valida lo mínimo en el servidor (campos obligatorios y campo trampa vacío).
  *  · Escribe una fila por lead en la pestaña "Leads" (la crea si no existe, con
  *    cabeceras en negrita y la primera fila congelada).
- *  · Añade un enlace directo a WhatsApp con el número del lead.
+ *  · Guarda por dónde prefiere que le escribas (WhatsApp o correo) y añade un enlace directo
+ *    a WhatsApp con su número.
  *  · Fecha y hora legibles en zona Europe/Madrid.
  *  · Usa LockService para que dos leads simultáneos no se pisen y descarta envíos repetidos.
  *  · Aviso por email con cada lead (se desactiva poniendo SEND_EMAIL_NOTIFICATION = false).
@@ -38,8 +39,11 @@ const NOTIFY_EMAIL = 'vytalkinetech@gmail.com';
 const COLUMNS = [
   ['fecha', 'Fecha'],
   ['nombre', 'Nombre'],
+  // Contactar por: WhatsApp o Correo (si eligió "Prefiero por correo" en el formulario).
+  ['canal', 'Contactar por'],
   ['telefono', 'Teléfono'],
   ['whatsapp', 'WhatsApp'],
+  ['email', 'Email'],
   // Perfil: Clínica, Fisioterapeuta, Médico u Otro.
   ['perfil', 'Perfil'],
   // Equipo: Ecógrafo, Diatermia, Presoterapia, Ondas de choque o, desde "Otro equipo", la categoría
@@ -64,8 +68,9 @@ const COLUMNS = [
   ['event_id', 'event_id'],
   ['estado', 'Estado'],
 ];
-// El formulario pide 4 cosas: equipo, perfil, nombre y WhatsApp (más el consentimiento).
-const REQUIRED = ['nombre', 'telefono', 'perfil', 'equipo', 'consentimiento', 'event_id'];
+// El formulario pide 4 cosas: equipo, perfil, nombre y WhatsApp o correo (más el consentimiento).
+const REQUIRED = ['nombre', 'perfil', 'equipo', 'consentimiento', 'event_id'];
+const EMAIL_RE = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/;
 
 // ------------------------------------------------------------------ entrada
 function doPost(e) {
@@ -78,8 +83,14 @@ function doPost(e) {
 
     const missing = REQUIRED.filter(function (k) { return !String(data[k] || '').trim(); });
     if (missing.length) return json_({ ok: false, error: 'Faltan campos: ' + missing.join(', ') });
-    const digits = String(data.telefono).replace(/\D/g, '');
-    if (digits.length < 8 || digits.length > 15) return json_({ ok: false, error: 'Teléfono no válido' });
+    // WhatsApp o correo: al menos uno, y bien escrito
+    const digits = String(data.telefono || '').replace(/\D/g, '');
+    const email = String(data.email || '').replace(/\s+/g, '').toLowerCase();
+    if (!digits && !email) return json_({ ok: false, error: 'Falta el teléfono o el correo' });
+    if (digits && (digits.length < 8 || digits.length > 15)) return json_({ ok: false, error: 'Teléfono no válido' });
+    if (email && (email.length > 254 || !EMAIL_RE.test(email))) return json_({ ok: false, error: 'Correo no válido' });
+    data.email = email;
+    data.canal = data.canal === 'Correo' || (email && !digits) ? 'Correo' : 'WhatsApp';
 
     lock.waitLock(20000);
     const sheet = getSheet_();
@@ -89,7 +100,7 @@ function doPost(e) {
 
     data.fecha = Utilities.formatDate(new Date(), TIMEZONE, 'dd/MM/yyyy HH:mm:ss');
     data.estado = 'Nuevo'; // Javier lo cambia a mano: Contactado, Presupuesto, Venta...
-    data.whatsapp = 'https://wa.me/' + digits;
+    data.whatsapp = digits ? 'https://wa.me/' + digits : '';
     const row = COLUMNS.map(function (c) { return clean_(data[c[0]]); });
     sheet.appendRow(row);
     SpreadsheetApp.flush();
@@ -164,19 +175,22 @@ function notify_(d) {
     'Nuevo lead desde la web de VytalGroup',
     '',
     'Nombre: ' + d.nombre,
-    'Teléfono: ' + d.telefono,
-    'WhatsApp: ' + d.whatsapp,
+    'Contactar por: ' + d.canal,
+    d.telefono ? 'Teléfono: ' + d.telefono : 'Correo: ' + d.email,
+    d.whatsapp ? 'WhatsApp: ' + d.whatsapp : '',
     'Perfil: ' + d.perfil,
     'Equipo: ' + d.equipo,
     'Modelo: ' + (d.modelo || 'No aplica'),
     'Campaña: ' + [d.utm_source, d.utm_medium, d.utm_campaign].filter(String).join(' / '),
     'Fecha: ' + d.fecha,
   ];
-  MailApp.sendEmail({
+  const mail = {
     to: NOTIFY_EMAIL,
     subject: 'Nuevo lead: ' + d.nombre + ' (' + (d.modelo || d.equipo) + ')',
-    body: lines.join('\n'),
-  });
+    body: lines.filter(function (l, i) { return l !== '' || i === 1; }).join('\n'),
+  };
+  if (d.email) mail.replyTo = d.email; // "Responder" en el email contesta directamente al lead
+  MailApp.sendEmail(mail);
 }
 
 function json_(obj) {

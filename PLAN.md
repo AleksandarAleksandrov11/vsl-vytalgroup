@@ -107,3 +107,10 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - [x] Revisión por pantallas en 360, 390, 768, 1024, 1440 y horizontal.
 - [x] Pruebas: Apps Script 13/13, formulario 88/88, interfaz 102/102, diseño 17/17. INP 112 ms. Lighthouse móvil 99-100, escritorio y legales 100. HTML válido.
 
+## 9. v8: sin flechas ni cifras, correo como alternativa y pie nuevo
+- [x] Fuera las flechas del carrusel de Lo más pedido.
+- [x] Fuera las cifras bajo la foto de Javier: de la foto directo a la tabla.
+- [x] "Prefiero por correo" bajo el WhatsApp: misma pregunta para el correo, formato validado y aviso de dominio mal escrito. Apps Script con "Contactar por" y "Email".
+- [x] Footer con logo grande, columnas con título pequeño e iconos, y "VytalGroup" a todo el ancho con animación al final. También en las legales.
+- [x] Pruebas: Apps Script 17/17, formulario 102/102, interfaz 108/108, diseño 17/17. INP 128 ms. Lighthouse 100 en todo. HTML válido.
+

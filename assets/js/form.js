@@ -2,7 +2,8 @@
 //   1. ¿Qué equipo te interesa? (desde "Lo quiero" el modelo ya viene elegido y se salta este paso)
 //   2. ¿Cuál es tu perfil? Clínica, fisioterapeuta, médico u otro.
 //   3. ¿Cómo te llamas?
-//   4. ¿A qué WhatsApp te escribimos? + consentimiento.
+//   4. ¿A qué WhatsApp te escribimos? + consentimiento. Con "Prefiero por correo" la misma
+//      pregunta pasa a pedir el correo (formato validado y aviso si el dominio parece mal escrito).
 // · Avance automático al elegir una opción con el dedo o el ratón; con teclado, Enter.
 // · Validación en línea, datos conservados al volver atrás, prefijo con buscador.
 // · Antispam: campo trampa, tiempo mínimo de 3 s y bloqueo de doble envío.
@@ -32,6 +33,11 @@ const WHAT = {
 const OTHER = ['Magnetoterapia de alta intensidad', 'Láser de alta potencia', 'Electrólisis percutánea ecoguiada', 'Camillas de fisioterapia', 'Otro'];
 const WITH_MODELS = ['Ecógrafo', 'Diatermia'];
 const norm = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+// Correo: parte local con los caracteres permitidos (sin puntos al principio, al final ni seguidos),
+// dominio con etiquetas válidas y extensión de al menos 2 letras. Sin "lookbehind": iOS < 16.4 no lo entiende.
+const EMAIL_RE = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/;
+const validEmail = (v) => v.length <= 254 && v.indexOf('@') <= 64 && EMAIL_RE.test(v);
+const DOMAINS = ['gmail.com', 'hotmail.com', 'hotmail.es', 'outlook.com', 'outlook.es', 'yahoo.com', 'yahoo.es', 'icloud.com', 'live.com', 'live.es', 'msn.com', 'me.com', 'gmx.com', 'gmx.es', 'protonmail.com', 'proton.me', 'telefonica.net', 'movistar.es'];
 
 let form;
 let steps;
@@ -125,6 +131,70 @@ function setCountry(c) {
   ui.tel.placeholder = c.ph;
 }
 
+// ------------------------------------------------------------------ correo
+const emailValue = () => ui.email.value.replace(/\s+/g, '').toLowerCase();
+function distance(a, b) {
+  const row = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0];
+    row[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const tmp = row[j];
+      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = tmp;
+    }
+  }
+  return row[b.length];
+}
+// Si el dominio se parece mucho a uno habitual (gmial.com, hotmal.es, gmail.con...) se propone el bueno
+function emailSuggestion(v) {
+  const at = v.lastIndexOf('@');
+  if (at < 1) return '';
+  const domain = v.slice(at + 1);
+  if (!domain || DOMAINS.includes(domain)) return '';
+  let best = '';
+  let bestD = 99;
+  DOMAINS.forEach((d) => { const x = distance(domain, d); if (x < bestD) { bestD = x; best = d; } });
+  return bestD <= (domain.length < 8 ? 1 : 2) ? `${v.slice(0, at)}@${best}` : '';
+}
+function showSuggestion() {
+  const v = emailValue();
+  const sug = validEmail(v) ? emailSuggestion(v) : '';
+  state.sugFor = v;
+  ui.hintFix.textContent = sug;
+  ui.hint.hidden = !sug;
+  if (sug) ui.live.textContent = `¿Querías decir ${sug}?`;
+}
+function onEmailInput() {
+  const el = ui.email;
+  // Sin espacios: ni al escribir ni al pegar
+  if (/\s/.test(el.value)) {
+    const caret = el.selectionStart ?? el.value.length;
+    const before = el.value.slice(0, caret).replace(/\s+/g, '').length;
+    el.value = el.value.replace(/\s+/g, '');
+    try { el.setSelectionRange(before, before); } catch { /* type=email no siempre lo permite */ }
+  }
+  fieldError('email', '');
+  ui.hint.hidden = true;
+}
+function setContact(mode, focus = true) {
+  if (state.contact === mode) return;
+  state.contact = mode;
+  const step = stepEl(4);
+  ui.contacts.forEach((p) => {
+    const on = p.dataset.contact === mode;
+    p.hidden = !on;
+    p.classList.toggle('is-in', on && !reduced());
+  });
+  step.setAttribute('aria-labelledby', mode === 'email' ? 'q-email' : 'q-tel');
+  fieldError('tel', '');
+  fieldError('email', '');
+  ui.hint.hidden = true;
+  const field = mode === 'email' ? ui.email : ui.tel;
+  if (focus) field.focus({ preventScroll: true });
+  ui.live.textContent = step.querySelector(`[data-contact="${mode}"] .qf__q`).textContent;
+}
+
 // ------------------------------------------------------------------ validación
 function nameProblem() {
   const v = ui.name.value.trim();
@@ -135,6 +205,11 @@ function telProblem() {
   if (!ui.tel.value.trim()) return 'Escribe tu número de WhatsApp.';
   return phoneValid() ? '' : 'Revisa el número: faltan o sobran cifras.';
 }
+function emailProblem() {
+  const v = emailValue();
+  if (!v) return 'Escribe tu correo.';
+  return validEmail(v) ? '' : 'Revisa el correo: debe ser como nombre@correo.com.';
+}
 function problem(n) {
   if (n === 1) {
     if (!state.equipo) return 'Elige una opción.';
@@ -142,16 +217,16 @@ function problem(n) {
   }
   if (n === 2) return state.perfil ? '' : 'Elige una opción.';
   if (n === 3) return nameProblem();
-  return telProblem();
+  return state.contact === 'email' ? emailProblem() : telProblem();
 }
 // Errores de los pasos de opciones (1 y 2)
 function setError(n, msg) {
   stepEl(n).querySelector('[data-error]').textContent = msg;
 }
-// Errores de los campos (nombre y WhatsApp), cada uno bajo su campo
+// Errores de los campos (nombre, WhatsApp y correo), cada uno bajo su campo
 function fieldError(which, msg) {
-  const f = which === 'name' ? ui.name : ui.tel;
-  const e = which === 'name' ? ui.nameErr : ui.telErr;
+  const f = { name: ui.name, tel: ui.tel, email: ui.email }[which];
+  const e = { name: ui.nameErr, tel: ui.telErr, email: ui.emailErr }[which];
   if (!msg && !e.textContent) return;
   e.textContent = msg;
   f.setAttribute('aria-invalid', String(!!msg));
@@ -160,8 +235,14 @@ function fieldError(which, msg) {
 function check(n) {
   const msg = problem(n);
   if (n <= 2) setError(n, msg);
-  else fieldError(n === 3 ? 'name' : 'tel', msg);
+  else fieldError(n === 3 ? 'name' : state.contact, msg);
   return !msg;
+}
+// Campo que recibe el foco en cada paso (en el 4, el de WhatsApp o el de correo)
+function fieldOf(n) {
+  const el = stepEl(n);
+  if (n === 4) return state.contact === 'email' ? ui.email : ui.tel;
+  return el.querySelector('.field') || el.querySelector('input[type=radio]:checked') || el.querySelector('input[type=radio]');
 }
 function consentOk(show) {
   const ok = ui.consent.checked;
@@ -211,8 +292,7 @@ function fitStep() {
   if (over > 0) window.scrollBy({ top: Math.min(over, Math.max(room, 0)) });
 }
 function focusStep() {
-  const el = stepEl(state.step);
-  const target = el.querySelector('.field') || el.querySelector('input[type=radio]:checked') || el.querySelector('input[type=radio]');
+  const target = fieldOf(state.step);
   if (target) target.focus({ preventScroll: true });
 }
 function goTo(n, dir = 'fwd') {
@@ -224,14 +304,15 @@ function goTo(n, dir = 'fwd') {
   update();
   focusStep();
   keepInView();
-  ui.live.textContent = `Paso ${n} de ${TOTAL}: ${stepEl(n).querySelector('.qf__q').textContent}`;
+  const q = n === 4 ? stepEl(4).querySelector(`[data-contact="${state.contact}"] .qf__q`) : stepEl(n).querySelector('.qf__q');
+  ui.live.textContent = `Paso ${n} de ${TOTAL}: ${q.textContent}`;
 }
 function next() {
   if (finished) return;
   const n = state.step;
   if (n === TOTAL) { submit(); return; }
   if (!check(n)) {
-    const f = stepEl(n).querySelector('.field, input');
+    const f = fieldOf(n);
     if (f) f.focus({ preventScroll: true });
     return;
   }
@@ -277,9 +358,12 @@ function device() {
 }
 function payload() {
   const a = getAttribution();
+  const byEmail = state.contact === 'email';
   return {
     nombre: ui.name.value.trim(),
-    telefono: phoneFull(),
+    canal: byEmail ? 'Correo' : 'WhatsApp',
+    telefono: byEmail ? '' : phoneFull(),
+    email: byEmail ? emailValue() : '',
     perfil: state.perfil,
     equipo: equipoFinal(),
     modelo: state.modelo || (WITH_MODELS.includes(state.equipo) ? 'Sin decidir' : ''),
@@ -317,8 +401,18 @@ async function submit() {
     if (problem(n)) {
       if (n !== state.step) goTo(n, 'back');
       check(n);
-      const f = stepEl(n).querySelector('.field, input');
+      const f = fieldOf(n);
       if (f) f.focus({ preventScroll: true });
+      return;
+    }
+  }
+  // Dominio que parece mal escrito (gmial.com...): se avisa una vez antes de enviar; si se deja así, se envía
+  if (state.contact === 'email') {
+    const v = emailValue();
+    ui.email.value = v;
+    if (state.sugFor !== v && emailSuggestion(v)) {
+      showSuggestion();
+      ui.hintFix.focus();
       return;
     }
   }
@@ -407,8 +501,13 @@ export function initForm() {
     picked: $('[data-picked]'),
     name: $('#f-name'),
     tel: $('#f-tel'),
+    email: $('#f-email'),
     nameErr: $('[data-error-name]'),
     telErr: $('[data-error-tel]'),
+    emailErr: $('[data-error-email]'),
+    hint: $('[data-email-hint]'),
+    hintFix: $('[data-email-fix]'),
+    contacts: [...form.querySelectorAll('[data-contact]')],
     consent: form.elements.consent,
     consentErr: $('[data-error-consent]'),
     submit: $('[data-submit]'),
@@ -419,7 +518,7 @@ export function initForm() {
     failWa: $('[data-fail-wa]'),
     live: $('[data-live]'),
   };
-  state = { step: 1, equipo: '', modelo: '', otro: '', perfil: '', country: COUNTRIES[0], eventId: uuid(), t0: performance.now() };
+  state = { step: 1, equipo: '', modelo: '', otro: '', perfil: '', contact: 'tel', country: COUNTRIES[0], eventId: uuid(), t0: performance.now() };
 
   prefix = createSelect($('[data-prefix]'), {
     id: 'pf',
@@ -486,6 +585,14 @@ export function initForm() {
     if (t.closest('[data-next]')) { next(); return; }
     if (t.closest('[data-back]')) { back(); return; }
     if (t.closest('[data-change]')) { goTo(1, 'back'); return; }
+    if (t.closest('[data-switch]')) { setContact(t.closest('[data-switch]').dataset.switch); return; }
+    if (t.closest('[data-email-fix]')) {
+      ui.email.value = ui.hintFix.textContent;
+      ui.hint.hidden = true;
+      fieldError('email', '');
+      ui.email.focus();
+      return;
+    }
     if (t.closest('[data-retry]')) retry();
   });
   form.addEventListener('keydown', (e) => {
@@ -503,8 +610,12 @@ export function initForm() {
   });
   ui.name.addEventListener('input', () => fieldError('name', ''));
   ui.tel.addEventListener('input', onTelInput);
+  ui.email.addEventListener('input', onEmailInput);
+  // Al salir del campo solo se limpia (minúsculas y sin espacios). El aviso de dominio mal escrito sale al
+  // pulsar Enviar: si saliera aquí, movería el botón justo cuando se está tocando.
+  ui.email.addEventListener('change', () => { ui.email.value = emailValue(); });
   ui.consent.addEventListener('change', () => consentOk(false));
-  [ui.name, ui.tel].forEach((f) => f.addEventListener('focus', () => setTimeout(fitStep, 350)));
+  [ui.name, ui.tel, ui.email].forEach((f) => f.addEventListener('focus', () => setTimeout(fitStep, 350)));
   if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { if (form.contains(document.activeElement)) fitStep(); });
 
   ready = true;
