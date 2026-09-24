@@ -2,11 +2,10 @@
 
 Fuentes:
   * Catálogo ADC Global Tech | VytalGroup 2026 (imágenes extraídas con `pdfimages -all -p`)
-  * Catálogo PDF comprimido (assets/docs): portada y páginas interiores para la maqueta 3D (pdftoppm)
   * Foto de Javier enviada por el cliente (`javier_foto.png`, 640 × 640)
 
 Uso:
-  pip install pillow numpy opencv-python-headless   (y poppler-utils para pdftoppm)
+  pip install pillow numpy opencv-python-headless
   python3 build_images.py <dir_pdfimages> <dir_fotos> <dir_salida>
 
 Tratamiento homogéneo de producto: cada equipo se recorta, se coloca sobre el mismo lienzo
@@ -15,7 +14,6 @@ solo existen en foto con fondo (Eco Wireless y Diatermia Multifunción) se recor
 Nunca se amplía por encima de la resolución original.
 """
 import os
-import subprocess
 import sys
 import tempfile
 
@@ -273,14 +271,6 @@ CATEGORIES = {
 for name, (obj, opt) in CATEGORIES.items():
     save(stage(obj, **opt), name, [240, 360, 480])
 
-# ---------------------------------------------------------------- catálogo: portada y dos páginas para la maqueta 3D
-CATALOG = os.path.join(os.path.dirname(__file__), '..', '..', 'assets', 'docs', 'catalogo-vytalgroup-2026.pdf')
-tmp = tempfile.mkdtemp()
-for page, name, widths in [(1, 'catalogo-portada', [300, 450, 600]), (6, 'catalogo-p06', [300, 450]), (8, 'catalogo-p08', [300, 450])]:
-    subprocess.run(['pdftoppm', '-r', '80', '-f', str(page), '-l', str(page), '-png', '-singlefile', CATALOG,
-                    os.path.join(tmp, name)], check=True)
-    save(Image.open(os.path.join(tmp, name + '.png')), name, widths)
-
 # ---------------------------------------------------------------- hero: la diatermia VytaMeD con alfa
 hero = Image.new('RGBA', (vytamed.width + 40, vytamed.height + 60), (0, 0, 0, 0))
 sh = Image.new('L', hero.size, 0)
@@ -290,12 +280,10 @@ dark = Image.new('RGBA', hero.size, (11, 25, 41, 0))
 dark.putalpha(sh)
 hero = Image.alpha_composite(hero, dark)
 hero.alpha_composite(vytamed, (20, 20))
-# Desde la v4 el hero muestra material real de clientes (build_clientes.py): el recorte solo se usa en la imagen OG
-save(hero, 'hero-vytamed', [760], alpha=True, formats=('webp',))
+save(hero, 'hero-vytamed', [400, 560, 760], alpha=True)
 
 # ---------------------------------------------------------------- Javier
 # El recorte termina por encima del logo de terceros que lleva bordado el polo (y = 448)
 foto = Image.open(os.path.join(PHOTOS, 'javier_foto.png')).convert('RGB')
 jav = grade(foto.crop((128, 0, 512, 440))).filter(ImageFilter.UnsharpMask(radius=1.0, percent=30, threshold=2))
 save(jav, 'javier', [320, 384])
-save(grade(foto.crop((180, 15, 460, 295))), 'javier-avatar', [96])

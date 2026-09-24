@@ -36,6 +36,7 @@ export function createSelect(slot, o) {
   const btn = root.querySelector('.sel__btn');
   const search = root.querySelector('.sel__search input');
   const list = root.querySelector('.sel__list');
+  const panel = root.querySelector('.sel__panel');
   const focusTarget = () => (search && !matchMedia(SHEET_MQ).matches ? search : list);
 
   function paintButton() {
@@ -72,11 +73,16 @@ export function createSelect(slot, o) {
     renderList();
   }
 
+  // Se abre hacia abajo si cabe; si no, hacia arriba si arriba hay más sitio.
+  // Si aun así no cabe entero, la página se desplaza lo justo para verlo.
   function place() {
     if (matchMedia(SHEET_MQ).matches) { root.classList.remove('is-up'); return; }
     const r = btn.getBoundingClientRect();
+    const need = panel.offsetHeight + 12;
     const below = window.innerHeight - r.bottom;
-    root.classList.toggle('is-up', below < 340 && r.top > below);
+    const up = below < need && r.top > below;
+    root.classList.toggle('is-up', up);
+    if (!up && below < need) window.scrollBy({ top: need - below + 8, behavior: 'smooth' });
   }
 
   function show() {
@@ -147,6 +153,13 @@ export function createSelect(slot, o) {
     search.addEventListener('keydown', keys);
   }
   list.addEventListener('keydown', keys);
+  // Al pasar el ratón, la opción queda activa (Enter elige la misma que se ve resaltada)
+  list.addEventListener('pointermove', (e) => {
+    const el = e.target.closest('.sel__opt');
+    if (!el || e.pointerType === 'touch') return;
+    const i = Number(el.dataset.i);
+    if (i !== active) { active = i; syncActive(false); }
+  });
   list.addEventListener('click', (e) => {
     const el = e.target.closest('.sel__opt');
     if (!el) return;

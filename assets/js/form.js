@@ -1,19 +1,20 @@
-// Formulario "una pregunta cada vez" (6 pasos).
+// Formulario corto, solo lo imprescindible (2 pasos):
+//   1. ¿Qué equipo buscas? (desde "Lo quiero" el modelo ya viene elegido y se salta este paso)
+//   2. Nombre + WhatsApp + consentimiento.
 // · Avance automático al elegir una opción con el dedo o el ratón; con teclado, Enter.
 // · Validación en línea, datos conservados al volver atrás, prefijo con buscador.
 // · Antispam: campo trampa, tiempo mínimo de 3 s y bloqueo de doble envío.
 // · Envío a Google Apps Script (texto plano, sin preflight CORS). Solo tras una respuesta
 //   { ok: true } se muestra el "gracias" y se dispara Lead (una vez, eventID = event_id).
 
-import { COUNTRIES, EMAIL_DOMAINS } from './data.js';
+import { COUNTRIES } from './data.js';
 import { createSelect } from './select.js';
 import { getAttribution } from './attribution.js';
 import { lead } from './tracking.js';
 
-const TOTAL = 6;
+const TOTAL = 2;
 const MIN_MS = 3000;
 const WA = 'https://wa.me/34616372644?text=';
-const EMAIL_RE = /^[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)*\.[a-z]{2,}$/i;
 const WHAT = {
   'Ecógrafo': 'un ecógrafo',
   'Diatermia': 'una diatermia',
@@ -50,9 +51,7 @@ const uuid = () => (crypto.randomUUID ? crypto.randomUUID()
   }));
 const $ = (sel, ctx = form) => ctx.querySelector(sel);
 const stepEl = (n) => steps[n - 1];
-const radio = (name) => { const r = form.querySelector(`input[name="${name}"]:checked`); return r ? r.value : ''; };
 const shortModel = (m) => m.replace(/\s*\([^)]*\)$/, '');
-const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // ------------------------------------------------------------------ teléfono
 function phoneDigits(raw, c) {
@@ -117,84 +116,55 @@ function onTelInput() {
     }
     try { el.setSelectionRange(pos, pos); } catch { /* algunos navegadores no lo permiten en tel */ }
   }
-  clearError(5);
+  fieldError('tel', '');
 }
 function setCountry(c) {
   state.country = c;
   ui.tel.placeholder = c.ph;
 }
 
-// ------------------------------------------------------------------ email
-function lev(a, b) {
-  const d = Array.from({ length: a.length + 1 }, (_, i) => [i, ...Array(b.length).fill(0)]);
-  for (let j = 1; j <= b.length; j++) d[0][j] = j;
-  for (let i = 1; i <= a.length; i++) {
-    for (let j = 1; j <= b.length; j++) {
-      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
-    }
-  }
-  return d[a.length][b.length];
-}
-function emailSuggestion(v) {
-  const at = v.lastIndexOf('@');
-  if (at < 1) return '';
-  const domain = v.slice(at + 1).toLowerCase().trim();
-  if (domain.length < 4 || EMAIL_DOMAINS.includes(domain)) return '';
-  let best = '';
-  let dist = 9;
-  EMAIL_DOMAINS.forEach((d) => {
-    const x = lev(domain, d);
-    if (x < dist) { dist = x; best = d; }
-  });
-  return dist > 0 && dist <= 2 ? `${v.slice(0, at)}@${best}` : '';
-}
-function updateSuggestion() {
-  const s = emailSuggestion(ui.email.value.trim());
-  if (s === ui.suggest.dataset.value) return; // no se repinta: el botón debe seguir ahí al pulsarlo
-  ui.suggest.dataset.value = s;
-  ui.suggest.hidden = !s;
-  ui.suggest.innerHTML = s ? `¿Querías decir <strong>${esc(s)}</strong>?<button type="button" data-fix-email>Sí, corregir</button>` : '';
-}
-
 // ------------------------------------------------------------------ validación
+function nameProblem() {
+  const v = ui.name.value.trim();
+  if (!v) return 'Escribe tu nombre.';
+  return v.length >= 2 && /\p{L}/u.test(v) ? '' : 'Revisa tu nombre.';
+}
+function telProblem() {
+  if (!ui.tel.value.trim()) return 'Escribe tu número de WhatsApp.';
+  return phoneValid() ? '' : 'Revisa el número: faltan o sobran cifras.';
+}
 function problem(n) {
-  switch (n) {
-    case 1:
-      if (!state.equipo) return 'Elige una opción.';
-      return state.equipo === 'Otro equipo' && !state.otro ? 'Elige qué equipo buscas.' : '';
-    case 2: return radio('perfil') ? '' : 'Elige una opción.';
-    case 3: return radio('plazo') ? '' : 'Elige una opción.';
-    case 4: {
-      const v = ui.name.value.trim();
-      if (!v) return 'Escribe tu nombre.';
-      return v.length >= 2 && /\p{L}/u.test(v) ? '' : 'Revisa tu nombre.';
-    }
-    case 5:
-      if (!ui.tel.value.trim()) return 'Escribe tu número de WhatsApp.';
-      return phoneValid() ? '' : 'Revisa el número: faltan o sobran cifras.';
-    case 6: {
-      const v = ui.email.value.trim();
-      if (!v) return 'Escribe tu email.';
-      return EMAIL_RE.test(v) ? '' : 'Revisa el email.';
-    }
-    default: return '';
+  if (n === 1) {
+    if (!state.equipo) return 'Elige una opción.';
+    return state.equipo === 'Otro equipo' && !state.otro ? 'Elige qué equipo buscas.' : '';
   }
+  return nameProblem() || telProblem();
 }
-function field(n) {
-  return { 4: ui.name, 5: ui.tel, 6: ui.email }[n];
+// Errores del paso 1 (opciones)
+function setError(msg) {
+  stepEl(1).querySelector('[data-error]').textContent = msg;
 }
-function setError(n, msg) {
-  stepEl(n).querySelector('[data-error]').textContent = msg;
-  const f = field(n);
-  if (f) f.setAttribute('aria-invalid', String(!!msg));
+// Errores de los campos del paso 2, cada uno bajo su campo
+function fieldError(which, msg) {
+  const f = which === 'name' ? ui.name : ui.tel;
+  const e = which === 'name' ? ui.nameErr : ui.telErr;
+  if (!msg && !e.textContent) return;
+  e.textContent = msg;
+  f.setAttribute('aria-invalid', String(!!msg));
 }
-function clearError(n) {
-  if (stepEl(n).querySelector('[data-error]').textContent) setError(n, '');
+function checkContact() {
+  const n = nameProblem();
+  const t = telProblem();
+  fieldError('name', n);
+  fieldError('tel', t);
+  if (n) { ui.name.focus({ preventScroll: true }); return false; }
+  if (t) { ui.tel.focus({ preventScroll: true }); return false; }
+  return true;
 }
 function consentOk(show) {
   const ok = ui.consent.checked;
   if (show || ok) {
-    ui.consentErr.textContent = ok ? '' : 'Necesito tu permiso para escribirte.';
+    ui.consentErr.textContent = ok ? '' : 'Necesitamos tu permiso para escribirte.';
     ui.consent.setAttribute('aria-invalid', String(!ok));
   }
   return ok;
@@ -208,9 +178,12 @@ function update() {
   ui.bar.setAttribute('aria-valuetext', `Paso ${n} de ${TOTAL}`);
   ui.count.textContent = `${n}/${TOTAL}`;
   ui.back.hidden = n === 1 || finished;
-  // En los pasos de opciones el botón "Siguiente" solo aparece si ya hay respuesta
-  const answered = { 1: !!state.equipo, 2: !!radio('perfil'), 3: !!radio('plazo') };
-  steps.slice(0, 3).forEach((s, i) => s.querySelector('[data-next]').classList.toggle('is-shown', answered[i + 1]));
+  // En el paso de opciones el botón "Siguiente" solo aparece si ya hay respuesta
+  stepEl(1).querySelector('[data-next]').classList.toggle('is-shown', !!state.equipo);
+  // En el paso 2 se recuerda qué equipo se ha elegido, con la opción de cambiarlo
+  const what = state.modelo ? shortModel(state.modelo) : equipoFinal();
+  ui.pickedBox.hidden = !what;
+  ui.picked.textContent = what;
 }
 function keepInView() {
   const card = form.closest('.fcard') || form;
@@ -236,9 +209,7 @@ function fitStep() {
 }
 function focusStep() {
   const el = stepEl(state.step);
-  let target;
-  if (state.step === 1 && !ui.pickedBox.hidden) target = el.querySelector('[data-next]');
-  else target = el.querySelector('.field') || el.querySelector('input[type=radio]:checked') || el.querySelector('input[type=radio]');
+  const target = el.querySelector('.field') || el.querySelector('input[type=radio]:checked') || el.querySelector('input[type=radio]');
   if (target) target.focus({ preventScroll: true });
 }
 function goTo(n, dir = 'fwd') {
@@ -254,16 +225,18 @@ function goTo(n, dir = 'fwd') {
 }
 function next() {
   if (finished) return;
-  const n = state.step;
-  const msg = problem(n);
-  setError(n, msg);
-  if (msg) {
-    const f = field(n) || stepEl(n).querySelector('input');
-    if (f) f.focus({ preventScroll: true });
-    return;
+  if (state.step === 1) {
+    const msg = problem(1);
+    setError(msg);
+    if (msg) {
+      const f = stepEl(1).querySelector('input');
+      if (f) f.focus({ preventScroll: true });
+      return;
+    }
+    goTo(2);
+  } else {
+    submit();
   }
-  if (n < TOTAL) goTo(n + 1);
-  else submit();
 }
 function back() {
   if (state.step > 1 && !finished) goTo(state.step - 1, 'back');
@@ -280,11 +253,7 @@ function showOther(on) {
 }
 
 // ------------------------------------------------------------------ preselección desde las tarjetas
-function showPicked(on) {
-  ui.pickedBox.hidden = !on;
-  ui.opts.hidden = on;
-  if (on) ui.picked.textContent = shortModel(state.modelo);
-}
+// "Lo quiero" ya dice el equipo y el modelo: se va directo a los datos de contacto
 function applyPreselect(model, equipo) {
   if (finished) return;
   state.equipo = equipo;
@@ -292,9 +261,8 @@ function applyPreselect(model, equipo) {
   showOther(false);
   const r = form.querySelector(`input[name="equipo"][value="${equipo}"]`);
   if (r) r.checked = true;
-  setError(1, '');
-  showPicked(true);
-  if (state.step !== 1) goTo(1, 'back');
+  setError('');
+  if (state.step !== 2) goTo(2);
   else update();
 }
 
@@ -313,11 +281,12 @@ function payload() {
   return {
     nombre: ui.name.value.trim(),
     telefono: phoneFull(),
-    email: ui.email.value.trim(),
+    email: '',
     equipo: equipoFinal(),
     modelo: state.modelo || (WITH_MODELS.includes(state.equipo) ? 'Sin decidir' : ''),
-    perfil: radio('perfil'),
-    plazo: radio('plazo'),
+    // Columnas que se mantienen en la hoja aunque ya no se pregunten (formulario corto)
+    perfil: '',
+    plazo: '',
     consentimiento: `Sí · ${new Date().toISOString()}`,
     utm_source: a.utm_source || '',
     utm_medium: a.utm_medium || '',
@@ -338,7 +307,7 @@ function payload() {
 function waText() {
   const name = ui.name.value.trim().split(/\s+/)[0];
   const what = state.modelo ? shortModel(state.modelo) : WHAT[equipoFinal()] || 'vuestros equipos';
-  return encodeURIComponent(`Hola Javier, ${name ? `soy ${name}. ` : ''}Vengo de la web y me interesa ${what}.`);
+  return encodeURIComponent(`Hola, ${name ? `soy ${name}. ` : ''}vengo de la web y me interesa ${what}.`);
 }
 function setLoading(on) {
   ui.submit.classList.toggle('is-loading', on);
@@ -347,14 +316,13 @@ function setLoading(on) {
 }
 async function submit() {
   if (busy || finished) return;
-  for (let n = 1; n <= TOTAL; n++) {
-    const msg = problem(n);
-    if (msg) {
-      if (n !== state.step) goTo(n, 'back');
-      setError(n, msg);
-      return;
-    }
+  const msg1 = problem(1);
+  if (msg1) {
+    goTo(1, 'back');
+    setError(msg1);
+    return;
   }
+  if (!checkContact()) return;
   if (!consentOk(true)) { ui.consent.focus(); return; }
   busy = true;
   setLoading(true);
@@ -404,7 +372,7 @@ function showEnd(el) {
 function done(real) {
   finished = true;
   const first = ui.name.value.trim().split(/\s+/)[0] || '';
-  ui.doneTitle.textContent = first ? `Gracias, ${first}. Te escribo muy pronto.` : 'Gracias. Te escribo muy pronto.';
+  ui.doneTitle.textContent = first ? `Gracias, ${first}. Te escribimos muy pronto.` : 'Gracias. Te escribimos muy pronto.';
   ui.doneWa.href = WA + waText();
   update();
   showEnd(ui.done);
@@ -435,14 +403,13 @@ export function initForm() {
     progress: $('[data-progress]'),
     count: $('[data-count-step]'),
     back: $('[data-back]'),
-    opts: $('[data-opts]'),
     pickedBox: $('[data-picked-box]'),
     other: $('[data-other]'),
     picked: $('[data-picked]'),
     name: $('#f-name'),
     tel: $('#f-tel'),
-    email: $('#f-email'),
-    suggest: $('[data-suggest]'),
+    nameErr: $('[data-error-name]'),
+    telErr: $('[data-error-tel]'),
     consent: form.elements.consent,
     consentErr: $('[data-error-consent]'),
     submit: $('[data-submit]'),
@@ -483,7 +450,7 @@ export function initForm() {
     options: OTHER.map((v) => ({ value: v, label: v })),
     onChange: (x) => {
       state.otro = x.value;
-      setError(1, '');
+      setError('');
       update();
       setTimeout(next, reduced() ? 0 : 280);
     },
@@ -500,7 +467,7 @@ export function initForm() {
         wait = t.value === 'Otro equipo';
         showOther(wait);
       }
-      setError(state.step, '');
+      setError('');
       update();
       if (wait) {
         // Con "Otro equipo" no se avanza: se abre el desplegable para elegir cuál
@@ -516,26 +483,21 @@ export function initForm() {
     }
     if (t.closest('[data-next]')) { next(); return; }
     if (t.closest('[data-back]')) { back(); return; }
-    if (t.closest('[data-change]')) {
-      state.modelo = '';
-      showPicked(false);
-      update();
-      focusStep();
-      return;
-    }
-    if (t.closest('[data-fix-email]')) {
-      ui.email.value = ui.suggest.dataset.value;
-      updateSuggestion();
-      clearError(6);
-      ui.email.focus();
-      return;
-    }
+    if (t.closest('[data-change]')) { goTo(1, 'back'); return; }
     if (t.closest('[data-retry]')) retry();
   });
   form.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter' || e.isComposing) return;
     const t = e.target;
     if (t.closest('.sel')) return; // los desplegables gestionan su propio Enter
+    if (t === ui.name) {
+      // Enter en el nombre pasa al WhatsApp
+      e.preventDefault();
+      const msg = nameProblem();
+      fieldError('name', msg);
+      if (!msg) ui.tel.focus();
+      return;
+    }
     if (t.matches('input:not([type=checkbox]), .opt input')) {
       e.preventDefault();
       next();
@@ -545,11 +507,10 @@ export function initForm() {
     e.preventDefault();
     next();
   });
-  ui.name.addEventListener('input', () => clearError(4));
+  ui.name.addEventListener('input', () => fieldError('name', ''));
   ui.tel.addEventListener('input', onTelInput);
-  ui.email.addEventListener('input', () => { clearError(6); updateSuggestion(); });
   ui.consent.addEventListener('change', () => consentOk(false));
-  [ui.name, ui.tel, ui.email].forEach((f) => f.addEventListener('focus', () => setTimeout(fitStep, 350)));
+  [ui.name, ui.tel].forEach((f) => f.addEventListener('focus', () => setTimeout(fitStep, 350)));
   if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { if (form.contains(document.activeElement)) fitStep(); });
 
   ready = true;

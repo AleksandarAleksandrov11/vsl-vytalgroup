@@ -58,7 +58,7 @@ const PAGES = [['/', 'index'], ['/privacidad', 'privacidad'], ['/cookies', 'cook
           }
         });
         // Botones, datos y cifras en una sola línea (sin partirse)
-        document.querySelectorAll('.btn, .seg__btn, .card__data dd, .why__list strong, .catalog__meta, .reel__cap, .reel__who strong, .reel__who small, .sel__btn, .lhd__back, .hd__logo').forEach((el) => {
+        document.querySelectorAll('.btn, .seg__btn, .card__data dd, .why__list strong, .sel__btn, .lhd__back, .hd__logo').forEach((el) => {
           if (!shown(el)) return;
           const tops = new Set();
           const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);

@@ -1,5 +1,4 @@
-// Datos del formulario: prefijos telefónicos (con validación por país) y dominios de email
-// frecuentes para sugerir correcciones ("gmial.com" → "gmail.com").
+// Datos del formulario: prefijos telefónicos con validación por país.
 
 // ---------------------------------------------------------------- banderas
 // Banderas simplificadas en SVG (sin emojis), lienzo 30 × 20.
@@ -70,7 +69,3 @@ export const COUNTRIES = [
   { iso: 'XX', name: 'Otro país', dial: '', min: 7, max: 15, groups: [3, 3, 3, 3, 3], ph: '+ prefijo y número' },
 ].map((c) => ({ ...c, flag: FLAGS[c.iso] }));
 
-export const EMAIL_DOMAINS = [
-  'gmail.com', 'hotmail.com', 'hotmail.es', 'outlook.com', 'outlook.es', 'yahoo.com', 'yahoo.es',
-  'icloud.com', 'live.com', 'msn.com', 'me.com', 'protonmail.com', 'telefonica.net', 'gmx.com',
-];

@@ -74,12 +74,17 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
   - móvil: 99, 99 y 100 en rendimiento, y 100 en accesibilidad, buenas prácticas y SEO;
   - escritorio y páginas legales: 100 en todo.
 
-## 5. v4: hero con material real de clientes (sin testimonios)
-- [x] Descargar y revisar el material: 7 fotos (una repetida) y un vídeo de 14 s. Se descartan las capturas de WhatsApp e Instagram por los datos personales que muestran.
-- [x] Quitar la sección de testimonios: HTML, CSS, pruebas, aviso de compilación y README.
-- [x] Hero limpio: sin recorte, rejilla de puntos ni barrido. Tarjeta "Clientes" en formato historia con el vídeo y 2 fotos.
-- [x] Vídeo: bucle sin saltos, 4:5, WebM + MP4 sin audio, pedido después de `load`, nunca con ahorro de datos. Foto de la misma sesión como LCP.
-- [x] Pausa (WCAG 2.2.2), pausa fuera de pantalla, anterior y siguiente, y movimiento reducido.
-- [x] Pruebas nuevas (UI 90/90, formulario 89/89, diseño 17/17) y capturas revisadas en todos los anchos, horizontal incluido.
-- [x] Lighthouse 100 en todo (móvil y escritorio), HTML válido, INP 120 ms.
-- [ ] Pendiente del cliente: permiso de imagen de las personas que aparecen.
+## 5. v4: hero con material real de clientes (sustituido en la v5)
+- [x] Tarjeta "Clientes" con fotos y vídeo, y fuera la sección de testimonios. El cliente no quedó convencido y en la v5 se sustituye por el escaparate.
+
+## 6. v5: ajustes del cliente
+- [x] Hero sin material de clientes: 3 maquetas (foto de fondo, escaparate oscuro, carrusel 3D). Elegida la B, escaparate oscuro con ondas.
+- [x] Hero centrado en móvil; cabecera fija siempre visible; línea de confianza infinita.
+- [x] Por qué VytalGroup: historia en dos líneas, etiquetas pegadas a las cifras, "Fisioterapeutas te asesoran", firma entera, sin la línea sobre la firma.
+- [x] Más equipos: botón "Descargar catálogo" destacado junto al CTA; fuera la sección de catálogo.
+- [x] Voz de empresa (nosotros) en toda la web; fuera "Te respondo yo personalmente." y la foto del formulario.
+- [x] Lo más pedido en móvil y tableta: una tarjeta centrada cada vez.
+- [x] Alineación: titulares y CTA de sección centrados en todos los dispositivos; footer centrado en móvil.
+- [x] Formulario de 2 pasos (equipo; nombre + WhatsApp). Desplegable hacia abajo o hacia arriba, entero y con hover.
+- [x] Instagram: fisioruiz_.
+- [x] Pruebas: formulario 81/81, interfaz 81/81, diseño 17/17. INP ≤ 144 ms. Lighthouse móvil 99-100 y escritorio 100. HTML válido.
