@@ -125,3 +125,9 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - [x] Por qué VytalGroup y la comparativa a todo el ancho.
 - [x] Pruebas: Apps Script 17/17, formulario 102/102, interfaz 127/127, diseño 17/17. INP 96 ms. Lighthouse 100. HTML y CSS válidos.
 
+## 12. v11: cortes rectos, "¿Por qué elegir VytalGroup?" y formulario más cerca
+- [x] Cortes rectos entre secciones; solo Más equipos (cuadrícula) se funde arriba.
+- [x] Comparativa: "¿Por qué elegir VytalGroup?", sin subtítulo, tabla más grande, cabeceras centradas "OTRAS MARCAS" / "VYTALGROUP" y 2 filas más (envío y aduana; todo en un solo sitio).
+- [x] "Cuéntanos qué necesitas." en una línea y el formulario más cerca de Dudas.
+- [x] Pruebas: Apps Script 17/17, formulario 102/102, interfaz 131/131, diseño 17/17. INP 96 ms. Lighthouse 100. HTML válido.
+
