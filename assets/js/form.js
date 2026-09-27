@@ -9,6 +9,7 @@
 // · Antispam: campo trampa, tiempo mínimo de 3 s y bloqueo de doble envío.
 // · Envío a Google Apps Script (texto plano, sin preflight CORS). Solo tras una respuesta
 //   { ok: true } se muestra el "gracias" y se dispara Lead (una vez, eventID = event_id).
+// · "Enviar otra solicitud" (o un "Lo quiero" después del gracias) empieza otra con un event_id nuevo.
 
 import { COUNTRIES } from './data.js';
 import { createSelect } from './select.js';
@@ -335,7 +336,7 @@ function showOther(on) {
 // ------------------------------------------------------------------ preselección desde las tarjetas
 // "Lo quiero" ya dice el equipo y el modelo: se va directo a los datos de contacto
 function applyPreselect(model, equipo) {
-  if (finished) return;
+  if (finished) again(false);
   state.equipo = equipo;
   state.modelo = model;
   showOther(false);
@@ -462,6 +463,29 @@ function failed() {
   showEnd(ui.fail);
   ui.live.textContent = 'No se ha podido enviar. Tus datos siguen aquí.';
 }
+// Otra solicitud: vuelve al paso 1 con un event_id nuevo. Se conservan perfil, nombre y contacto;
+// el equipo y el consentimiento se vuelven a pedir.
+function again(focus = true) {
+  finished = false;
+  ui.done.hidden = true;
+  ui.fail.hidden = true;
+  form.classList.remove('is-finished', 'is-back');
+  stepEl(state.step).classList.remove('is-active');
+  form.querySelectorAll('input[name="equipo"]').forEach((r) => { r.checked = false; });
+  showOther(false);
+  other.clear();
+  ui.consent.checked = false;
+  ui.consentErr.textContent = '';
+  ui.consent.removeAttribute('aria-invalid');
+  Object.assign(state, { step: 1, equipo: '', modelo: '', eventId: uuid() });
+  setError(1, '');
+  stepEl(1).classList.add('is-active');
+  update();
+  if (!focus) return;
+  focusStep();
+  keepInView();
+  ui.live.textContent = `Nueva solicitud. Paso 1 de ${TOTAL}: ${stepEl(1).querySelector('.qf__q').textContent}`;
+}
 function retry() {
   ui.fail.hidden = true;
   form.classList.remove('is-finished');
@@ -577,7 +601,8 @@ export function initForm() {
       ui.email.focus();
       return;
     }
-    if (t.closest('[data-retry]')) retry();
+    if (t.closest('[data-retry]')) { retry(); return; }
+    if (t.closest('[data-again]')) again();
   });
   form.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter' || e.isComposing) return;

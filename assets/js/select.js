@@ -172,6 +172,7 @@ export function createSelect(slot, o) {
   paintButton();
   return {
     setValue: (value) => pick(options.find((x) => x.value === value), true),
+    clear: () => { current = null; paintButton(); },
     get value() { return current; },
     focus: () => btn.focus({ preventScroll: true }),
     button: btn,

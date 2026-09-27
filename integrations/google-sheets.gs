@@ -3,7 +3,8 @@ const TIMEZONE = 'Europe/Madrid';
 const SEND_EMAIL_NOTIFICATION = true;
 const NOTIFY_EMAIL = 'aaswebmarketing@gmail.com';
 
-const HEADERS = ['Fecha', 'Nombre', 'Teléfono', 'Email', 'Perfil', 'Equipo de interés', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'event_id'];
+const HEADERS = ['Fecha', 'Nombre', 'Teléfono', 'Email', 'Perfil', 'Equipo de interés', 'Modelo', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'event_id'];
+const MODELO_COL = HEADERS.indexOf('Modelo') + 1;
 const REQUIRED = ['nombre', 'perfil', 'equipo', 'consentimiento', 'event_id'];
 const EMAIL_RE = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/;
 
@@ -34,10 +35,11 @@ function doPost(e) {
       whatsapp: digits ? 'https://wa.me/' + digits : '',
       email: email,
       perfil: d.perfil,
-      interes: interes_(d),
+      equipo: String(d.equipo).trim(),
+      modelo: modelo_(d),
       campana: [d.utm_source, d.utm_medium, d.utm_campaign].filter(String).join(' / '),
     };
-    sheet.appendRow([lead.fecha, lead.nombre, lead.telefono, lead.email, lead.perfil, lead.interes, d.utm_source, d.utm_medium, d.utm_campaign, d.utm_content, d.utm_term, d.event_id].map(clean_));
+    sheet.appendRow([lead.fecha, lead.nombre, lead.telefono, lead.email, lead.perfil, lead.equipo, lead.modelo, d.utm_source, d.utm_medium, d.utm_campaign, d.utm_content, d.utm_term, d.event_id].map(clean_));
     SpreadsheetApp.flush();
 
     if (SEND_EMAIL_NOTIFICATION) notify_(lead);
@@ -60,9 +62,9 @@ function doGet() {
   return json_({ ok: true, service: 'VytalGroup leads', time: Utilities.formatDate(new Date(), TIMEZONE, 'dd/MM/yyyy HH:mm:ss') });
 }
 
-function interes_(d) {
+function modelo_(d) {
   const modelo = String(d.modelo || '').trim();
-  return modelo && modelo !== 'Sin decidir' ? d.equipo + ' · ' + modelo : String(d.equipo);
+  return modelo === 'Sin decidir' ? '' : modelo;
 }
 
 function parseBody_(e) {
@@ -79,7 +81,12 @@ function getSheet_() {
   if (!ss) throw new Error('Este código tiene que estar dentro de la hoja: ábrela y entra en Extensiones > Apps Script');
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (sheet && sheet.getLastRow() > 0) {
-    const first = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0].map(String);
+    let first = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0].map(String);
+    const sinModelo = HEADERS.filter(function (h) { return h !== 'Modelo'; });
+    if (first.slice(0, sinModelo.length).join('|') === sinModelo.join('|')) {
+      addModelo_(sheet);
+      first = HEADERS;
+    }
     if (first.join('|') !== HEADERS.join('|')) {
       sheet.setName(SHEET_NAME + ' anterior ' + Utilities.formatDate(new Date(), TIMEZONE, 'dd-MM-yyyy HH.mm'));
       sheet = null;
@@ -93,6 +100,22 @@ function getSheet_() {
     sheet.hideColumns(HEADERS.length);
   }
   return sheet;
+}
+
+function addModelo_(sheet) {
+  sheet.insertColumnAfter(MODELO_COL - 1);
+  sheet.getRange(1, MODELO_COL).setValue('Modelo').setFontWeight('bold').setBackground('#0B1929').setFontColor('#FFFFFF');
+  sheet.setColumnWidth(MODELO_COL, 170);
+  const n = sheet.getLastRow() - 1;
+  if (n > 0) {
+    const range = sheet.getRange(2, MODELO_COL - 1, n, 2);
+    range.setValues(range.getValues().map(function (r) {
+      const v = String(r[0]);
+      const i = v.indexOf(' · ');
+      return (i < 0 ? [v, ''] : [v.slice(0, i), v.slice(i + 3)]).map(clean_);
+    }));
+  }
+  sheet.hideColumns(HEADERS.length);
 }
 
 function isDuplicate_(sheet, eventId) {
@@ -117,13 +140,14 @@ function notify_(l) {
     l.telefono ? 'Teléfono: ' + l.telefono + '  (WhatsApp: ' + l.whatsapp + ')' : '',
     l.email ? 'Email: ' + l.email : '',
     'Perfil: ' + l.perfil,
-    'Equipo de interés: ' + l.interes,
+    'Equipo de interés: ' + l.equipo,
+    l.modelo ? 'Modelo: ' + l.modelo : '',
     l.campana ? 'Campaña: ' + l.campana : '',
     'Fecha: ' + l.fecha,
   ];
   const mail = {
     to: NOTIFY_EMAIL,
-    subject: 'Nuevo lead: ' + l.nombre + ' · ' + l.interes,
+    subject: 'Nuevo lead: ' + l.nombre + ' · ' + (l.modelo || l.equipo),
     body: lines.filter(function (x, i) { return x !== '' || i === 1; }).join('\n'),
   };
   if (l.email) mail.replyTo = l.email;
