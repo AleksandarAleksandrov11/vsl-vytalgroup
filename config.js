@@ -10,6 +10,6 @@
  * y el píxel no se carga.
  */
 window.VG_CONFIG = {
-  SHEETS_ENDPOINT: "",
+  SHEETS_ENDPOINT: "https://script.google.com/macros/s/AKfycbxZLgstW_bvifa4PX18Jx_UQwx2GqhAqRhq7EH9qUtFlGqI0-qrwkRDNVtIq0i0L7yu/exec",
   META_PIXEL_ID: ""
 };

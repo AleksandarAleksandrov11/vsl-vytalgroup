@@ -224,16 +224,15 @@ async function block(name, fn) {
     ok(sent.length === 1, 'Envío: doble clic no duplica', `${sent.length} POST`);
     const d = sent[0] ? JSON.parse(sent[0].body) : {};
     ok(sent[0] && sent[0].ct.startsWith('text/plain'), 'Envío: Content-Type text/plain;charset=utf-8', sent[0] && sent[0].ct);
-    const expect = { nombre: 'Laura Gómez', telefono: '+34 612 345 678', perfil: 'Fisioterapeuta', equipo: 'Ecógrafo', modelo: 'Acclarix AX8 (EDAN)', utm_source: 'facebook', utm_campaign: 'test', fbclid: 'abc123', website: '' };
+    const expect = { nombre: 'Laura Gómez', telefono: '+34 612 345 678', email: '', perfil: 'Fisioterapeuta', equipo: 'Ecógrafo', modelo: 'Acclarix AX8 (EDAN)', utm_source: 'facebook', utm_campaign: 'test', website: '' };
     const wrong = Object.entries(expect).filter(([k, v]) => d[k] !== v).map(([k]) => `${k}=${d[k]}`);
     ok(!wrong.length, 'Envío: campos del formulario (con el perfil) y UTM correctos', wrong.join(', '));
     // Mismas claves que las columnas del Apps Script (menos las que pone el servidor)
     const gs = fs.readFileSync('integrations/google-sheets.gs', 'utf8');
-    const cols = [...gs.match(/const COLUMNS = \[([\s\S]*?)\n\];/)[1].matchAll(/\['(\w+)',/g)].map((m) => m[1]).filter((k) => !['fecha', 'whatsapp', 'estado'].includes(k));
-    const keys = Object.keys(d).filter((k) => k !== 'website');
-    ok(cols.join(',') === keys.join(',') && d.canal === 'WhatsApp' && d.email === '' && !('plazo' in d), 'Envío: las mismas columnas que la hoja de Google (por WhatsApp: canal WhatsApp y sin correo)', `${keys.join(', ')}`);
-    ok(/^fb\.1\.\d{13}\.abc123$/.test(d.fbc) && d.fbp === 'fb.1.1700000000000.987654321', 'Envío: fbc construido desde fbclid y fbp de la cookie', `${d.fbc} / ${d.fbp}`);
-    ok(d.consentimiento && d.consentimiento.startsWith('Sí') && /^[0-9a-f-]{36}$/.test(d.event_id) && d.landing_url.includes('utm_source=facebook') && d.idioma && d.dispositivo.startsWith('Escritorio'), 'Envío: consentimiento, event_id, URL de entrada, idioma y dispositivo', `${d.dispositivo} · ${d.idioma}`);
+    const keys = Object.keys(d).join(',');
+    ok(keys === 'nombre,telefono,email,perfil,equipo,modelo,consentimiento,utm_source,utm_medium,utm_campaign,utm_content,utm_term,event_id,website' && /HEADERS = \['Fecha', 'Nombre', 'Teléfono', 'Email', 'Perfil', 'Equipo de interés', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'event_id'\]/.test(gs), 'Envío: solo lo que guarda la hoja (nombre, teléfono o email, perfil, equipo, UTM) más consentimiento y event_id', keys);
+    ok(!('fbc' in d) && !('dispositivo' in d) && !('landing_url' in d) && !('canal' in d), 'Envío: sin datos que la hoja no guarda (fbc, dispositivo, URL de entrada...)');
+    ok(d.consentimiento && d.consentimiento.startsWith('Sí') && /^[0-9a-f-]{36}$/.test(d.event_id), 'Envío: consentimiento y event_id', d.event_id);
     ok(await p.isVisible('[data-done]') && (await p.textContent('[data-done-title]')) === 'Gracias, Laura. Te escribimos muy pronto.', 'Éxito: "Gracias, Laura. Te escribimos muy pronto."');
     const wa = decodeURIComponent(await p.getAttribute('[data-done-wa]', 'href'));
     ok(wa.includes('soy Laura') && wa.includes('Acclarix AX8'), 'Éxito: WhatsApp con mensaje y producto', wa);
@@ -278,7 +277,7 @@ async function block(name, fn) {
     await p.tap('[data-submit]');
     await p.waitForTimeout(1600);
     const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
-    ok(d.telefono === '+33 6 12 34 56 78' && d.equipo === 'Diatermia' && d.perfil === 'Clínica' && d.modelo === 'Sin decidir' && d.dispositivo === 'Móvil · iOS · Instagram', 'Móvil: envío correcto (navegador de Instagram)', `${d.telefono} · ${d.perfil} · ${d.modelo} · ${d.dispositivo}`);
+    ok(d.telefono === '+33 6 12 34 56 78' && d.equipo === 'Diatermia' && d.perfil === 'Clínica' && d.modelo === 'Sin decidir', 'Móvil: envío correcto (navegador de Instagram)', `${d.telefono} · ${d.perfil} · ${d.modelo}`);
     ok(await p.isVisible('[data-done]'), 'Móvil: pantalla de gracias');
     ok(!logs.length, 'Consola limpia (móvil)', logs.join(' / '));
     await ctx.close();
@@ -388,7 +387,7 @@ async function block(name, fn) {
     await p.tap('input[name="consent"]');
     await p.tap('[data-submit]'); await p.waitForTimeout(1600);
     const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
-    ok(posts().length === 1 && d.canal === 'Correo' && d.email === 'pablo@gmail.com' && d.telefono === '' && d.perfil === 'Médico' && d.nombre === 'Pablo Ruiz', 'Correo: se envía con "Contactar por: Correo", el correo y sin teléfono', `${d.canal} · ${d.email} · "${d.telefono}" · ${d.perfil}`);
+    ok(posts().length === 1 && d.email === 'pablo@gmail.com' && d.telefono === '' && d.perfil === 'Médico' && d.nombre === 'Pablo Ruiz', 'Correo: se envía con el correo y sin teléfono', `${d.email} · "${d.telefono}" · ${d.perfil}`);
     ok(await p.isVisible('[data-done]') && (await p.textContent('[data-done-title]')) === 'Gracias, Pablo. Te escribimos muy pronto.', 'Correo: pantalla de gracias');
     ok((await fb(p)).filter((c) => c[1] === 'Lead').length === 1, 'Correo: Lead una vez tras el éxito');
     ok(!logs.length, 'Consola limpia (correo)', logs.join(' / '));
@@ -405,7 +404,7 @@ async function block(name, fn) {
     await p.fill('#f-email', 'recepcion@clinica-fisio-ana.es');
     await p.click('[data-submit]'); await p.waitForTimeout(1600);
     const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
-    ok(await p.isHidden('[data-email-hint]') && d.email === 'recepcion@clinica-fisio-ana.es' && d.canal === 'Correo', 'Correo: con un dominio propio no hay aviso y se envía a la primera', d.email);
+    ok(await p.isHidden('[data-email-hint]') && d.email === 'recepcion@clinica-fisio-ana.es', 'Correo: con un dominio propio no hay aviso y se envía a la primera', d.email);
     await ctx.close();
   });
 
