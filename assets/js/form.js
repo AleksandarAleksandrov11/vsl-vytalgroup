@@ -347,21 +347,12 @@ function applyPreselect(model, equipo) {
 }
 
 // ------------------------------------------------------------------ envío
-function device() {
-  const ua = navigator.userAgent;
-  const iPadOS = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
-  const tablet = /iPad|Tablet/i.test(ua) || iPadOS || (/Android/i.test(ua) && !/Mobi/i.test(ua));
-  const type = tablet ? 'Tablet' : /Mobi|iPhone|iPod|Android/i.test(ua) ? 'Móvil' : 'Escritorio';
-  const os = /iPhone|iPad|iPod/.test(ua) || iPadOS ? 'iOS' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'macOS' : /Linux/.test(ua) ? 'Linux' : 'Otro';
-  const app = /Instagram/.test(ua) ? ' · Instagram' : /FBAN|FBAV|FB_IAB/.test(ua) ? ' · Facebook' : '';
-  return `${type} · ${os}${app}`;
-}
+// Solo lo que se guarda en la hoja (más el consentimiento, el event_id y el campo trampa)
 function payload() {
   const a = getAttribution();
   const byEmail = state.contact === 'email';
   return {
     nombre: ui.name.value.trim(),
-    canal: byEmail ? 'Correo' : 'WhatsApp',
     telefono: byEmail ? '' : phoneFull(),
     email: byEmail ? emailValue() : '',
     perfil: state.perfil,
@@ -373,13 +364,6 @@ function payload() {
     utm_campaign: a.utm_campaign || '',
     utm_content: a.utm_content || '',
     utm_term: a.utm_term || '',
-    fbclid: a.fbclid || '',
-    fbc: a.fbc || '',
-    fbp: a.fbp || '',
-    referrer: a.referrer || '',
-    landing_url: a.landing_url || location.href,
-    dispositivo: device(),
-    idioma: navigator.language || '',
     event_id: state.eventId,
     website: form.elements.website.value || '',
   };

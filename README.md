@@ -123,7 +123,7 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 ├── aviso-legal.html            Páginas legales (se generan con scripts/assets/gen_legal.py)
 ├── privacidad.html
 ├── cookies.html
-├── config.js                   ← SHEETS_ENDPOINT y META_PIXEL_ID (vacíos)
+├── config.js                   ← SHEETS_ENDPOINT (hoja conectada) y META_PIXEL_ID (vacío)
 ├── site.config.mjs             ← SITE_URL: la URL pública de la web
 ├── vercel.json                 Cabeceras, CSP, caché y URLs limpias
 ├── assets/
@@ -183,9 +183,9 @@ El formulario envía cada solicitud a una hoja de Google mediante un pequeño pr
 7. **Prueba.** Envía el formulario con datos de prueba. En segundos aparece una fila en "Leads" con la fecha y hora de Madrid, los datos, el origen de la campaña y la columna **Estado** en "Nuevo" para que la gestiones tú. Si abres la URL `/exec` en el navegador y ves `{"ok":true,...}`, el despliegue responde.
 8. **Si cambias el script**, vuelve a desplegarlo desde **Implementar > Gestionar implementaciones**: lápiz de la implementación activa, **Versión: Nueva versión** e **Implementar**. Así la URL no cambia.
 
-**Aviso por email con cada lead:** activado por defecto, a `NOTIFY_EMAIL` (vytalkinetech@gmail.com), con nombre, por dónde prefiere que le escribas, teléfono y enlace de WhatsApp (o su correo), perfil, equipo y campaña. Si dejó su correo, "Responder" le contesta directamente. Para desactivarlo, pon `SEND_EMAIL_NOTIFICATION` a `false`, guarda y vuelve a desplegar.
+**Aviso por email con cada lead:** activado por defecto, a `NOTIFY_EMAIL` (por ahora aaswebmarketing@gmail.com), con nombre, teléfono y enlace de WhatsApp (o su correo), perfil, equipo de interés y campaña. Si dejó su correo, "Responder" le contesta directamente. Para desactivarlo, pon `SEND_EMAIL_NOTIFICATION` a `false`, guarda y vuelve a desplegar.
 
-Columnas, en este orden: Fecha · Nombre · Contactar por (WhatsApp o Correo) · Teléfono · WhatsApp (enlace directo `wa.me`) · Email · Perfil · Equipo · Modelo · Consentimiento · utm_source · utm_medium · utm_campaign · utm_content · utm_term · fbclid · fbc · fbp · Referrer · URL de entrada · Dispositivo · Idioma · event_id · Estado.
+Columnas, en este orden: Fecha · Nombre · Teléfono · Email · Perfil · Equipo de interés (equipo y modelo) · utm_source · utm_medium · utm_campaign · utm_content · utm_term · event_id (oculta, evita duplicados). Se pueden añadir columnas propias a la derecha (por ejemplo "Estado"). Si la pestaña "Leads" tiene otras columnas (versión anterior), el script la renombra a "Leads anterior …" y crea una nueva.
 
 Detalles:
 - Envío con `fetch` y `Content-Type: text/plain;charset=utf-8` (sin petición previa de CORS).
@@ -262,7 +262,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 ## 8. Pendientes del cliente
 
 1. **ID del Meta Pixel** → `config.js` (apartado 5).
-2. **URL del Apps Script** → `config.js` (apartado 4).
+2. ~~URL del Apps Script~~ **Hecho:** la hoja está conectada (`SHEETS_ENDPOINT` en `config.js`) y probada de extremo a extremo con envíos reales por WhatsApp, por correo y con prefijo de Portugal.
 3. **Datos legales del titular** en `aviso-legal.html` y `privacidad.html` (marcados en amarillo como "[Pendiente: …]"): razón social o nombre, NIF o CIF, domicilio y datos registrales, y el plazo de conservación de los leads. Se editan en `scripts/assets/gen_legal.py` y se regeneran con `python3 scripts/assets/gen_legal.py`. Conviene que un asesor legal revise los textos.
 4. **¿Podemos prometer "respuesta en menos de 24 h"?** Si se confirma, se puede añadir bajo "Cuéntanos qué necesitas.".
 5. **Testimonios reales** (opcional): si más adelante hay opiniones de clientes con su permiso, se puede recuperar una sección de testimonios.
