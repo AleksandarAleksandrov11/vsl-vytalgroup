@@ -1,56 +1,17 @@
-/**
- * VytalGroup · Recepción de leads en Google Sheets
- * ---------------------------------------------------------------------------
- * Instalación (5 minutos):
- *  1. Crea una hoja de Google nueva (por ejemplo "Leads VytalGroup").
- *  2. En la hoja: Extensiones > Apps Script. Borra lo que haya y pega este archivo entero.
- *  3. Guarda. Arriba, elige la función "setup" y pulsa Ejecutar. Google pedirá permisos:
- *     Revisar permisos > tu cuenta > Configuración avanzada > Ir a (proyecto) > Permitir.
- *     Se crea la pestaña "Leads" con sus columnas.
- *  4. Implementar > Nueva implementación > tipo "Aplicación web":
- *       · Ejecutar como: Yo
- *       · Quién tiene acceso: Cualquier usuario
- *     Implementar y copia la URL que termina en /exec.
- *  5. Pega esa URL en config.js → SHEETS_ENDPOINT y publica la web.
- *  Para comprobarlo, abre la URL /exec en el navegador: debe responder {"ok":true,...}.
- *  Si cambias este código, vuelve a Implementar > Gestionar implementaciones > editar >
- *  Versión: nueva. La URL no cambia.
- *
- * Qué hace:
- *  · Recibe el formulario de la web (JSON enviado como texto plano, sin preflight CORS).
- *  · Valida lo mínimo en el servidor (campos obligatorios y campo trampa vacío).
- *  · Escribe una fila por lead en la pestaña "Leads" (la crea si no existe, con
- *    cabeceras en negrita y la primera fila congelada).
- *  · Guarda por dónde prefiere que le escribas (WhatsApp o correo) y añade un enlace directo
- *    a WhatsApp con su número.
- *  · Fecha y hora legibles en zona Europe/Madrid.
- *  · Usa LockService para que dos leads simultáneos no se pisen y descarta envíos repetidos.
- *  · Aviso por email con cada lead (se desactiva poniendo SEND_EMAIL_NOTIFICATION = false).
- *  · Responde { ok: true } o { ok: false, error: "..." }.
- */
-
-// ------------------------------------------------------------------ ajustes
 const SHEET_NAME = 'Leads';
 const TIMEZONE = 'Europe/Madrid';
-const SEND_EMAIL_NOTIFICATION = true;             // false para no recibir un email por lead
+const SEND_EMAIL_NOTIFICATION = true;
 const NOTIFY_EMAIL = 'vytalkinetech@gmail.com';
 
-// Columnas en el orden pedido. [clave del JSON, título de la columna]
 const COLUMNS = [
   ['fecha', 'Fecha'],
   ['nombre', 'Nombre'],
-  // Contactar por: WhatsApp o Correo (si eligió "Prefiero por correo" en el formulario).
   ['canal', 'Contactar por'],
   ['telefono', 'Teléfono'],
   ['whatsapp', 'WhatsApp'],
   ['email', 'Email'],
-  // Perfil: Clínica, Fisioterapeuta, Médico u Otro.
   ['perfil', 'Perfil'],
-  // Equipo: Ecógrafo, Diatermia, Presoterapia, Ondas de choque o, desde "Otro equipo", la categoría
-  // elegida (Magnetoterapia de alta intensidad, Láser de alta potencia, Electrólisis percutánea
-  // ecoguiada, Camillas de fisioterapia) u "Otro equipo".
   ['equipo', 'Equipo'],
-  // Modelo: solo en ecógrafos y diatermias (el de la tarjeta o "Sin decidir"); vacío en el resto.
   ['modelo', 'Modelo'],
   ['consentimiento', 'Consentimiento'],
   ['utm_source', 'utm_source'],
@@ -68,22 +29,18 @@ const COLUMNS = [
   ['event_id', 'event_id'],
   ['estado', 'Estado'],
 ];
-// El formulario pide 4 cosas: equipo, perfil, nombre y WhatsApp o correo (más el consentimiento).
 const REQUIRED = ['nombre', 'perfil', 'equipo', 'consentimiento', 'event_id'];
 const EMAIL_RE = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24}$/;
 
-// ------------------------------------------------------------------ entrada
 function doPost(e) {
   const lock = LockService.getScriptLock();
   try {
     const data = parseBody_(e);
 
-    // Campo trampa: si viene relleno es un bot. Se responde ok para no darle pistas.
     if (data.website) return json_({ ok: true });
 
     const missing = REQUIRED.filter(function (k) { return !String(data[k] || '').trim(); });
     if (missing.length) return json_({ ok: false, error: 'Faltan campos: ' + missing.join(', ') });
-    // WhatsApp o correo: al menos uno, y bien escrito
     const digits = String(data.telefono || '').replace(/\D/g, '');
     const email = String(data.email || '').replace(/\s+/g, '').toLowerCase();
     if (!digits && !email) return json_({ ok: false, error: 'Falta el teléfono o el correo' });
@@ -95,11 +52,10 @@ function doPost(e) {
     lock.waitLock(20000);
     const sheet = getSheet_();
 
-    // Evita duplicados si el mismo envío llega dos veces (mismo event_id)
     if (isDuplicate_(sheet, String(data.event_id))) return json_({ ok: true, duplicate: true });
 
     data.fecha = Utilities.formatDate(new Date(), TIMEZONE, 'dd/MM/yyyy HH:mm:ss');
-    data.estado = 'Nuevo'; // Javier lo cambia a mano: Contactado, Presupuesto, Venta...
+    data.estado = 'Nuevo';
     data.whatsapp = digits ? 'https://wa.me/' + digits : '';
     const row = COLUMNS.map(function (c) { return clean_(data[c[0]]); });
     sheet.appendRow(row);
@@ -111,23 +67,20 @@ function doPost(e) {
     console.error(err);
     return json_({ ok: false, error: String(err && err.message ? err.message : err) });
   } finally {
-    try { lock.releaseLock(); } catch (x) { /* el bloqueo puede no haberse obtenido */ }
+    try { lock.releaseLock(); } catch (x) {}
   }
 }
 
-// Ejecútala una vez desde el editor: pide los permisos y crea la pestaña "Leads" con sus columnas
 function setup() {
   getSheet_();
-  if (SEND_EMAIL_NOTIFICATION) MailApp.getRemainingDailyQuota(); // para que Google pida también el permiso de email
+  if (SEND_EMAIL_NOTIFICATION) MailApp.getRemainingDailyQuota();
   console.log('Listo: pestaña "' + SHEET_NAME + '" preparada. Ahora Implementar > Nueva implementación > Aplicación web.');
 }
 
-// Permite comprobar en el navegador que el despliegue responde
 function doGet() {
   return json_({ ok: true, service: 'VytalGroup leads', time: Utilities.formatDate(new Date(), TIMEZONE, 'dd/MM/yyyy HH:mm:ss') });
 }
 
-// ------------------------------------------------------------------ utilidades
 function parseBody_(e) {
   if (!e || !e.postData || !e.postData.contents) throw new Error('Petición vacía');
   try {
@@ -159,12 +112,11 @@ function isDuplicate_(sheet, eventId) {
   const col = COLUMNS.findIndex(function (c) { return c[0] === 'event_id'; }) + 1;
   const last = sheet.getLastRow();
   if (last < 2 || !eventId) return false;
-  const from = Math.max(2, last - 200); // revisa los últimos 200 leads
+  const from = Math.max(2, last - 200);
   const ids = sheet.getRange(from, col, last - from + 1, 1).getValues();
   return ids.some(function (r) { return String(r[0]) === eventId; });
 }
 
-// Evita que un texto que empiece por = + - @ se interprete como fórmula
 function clean_(v) {
   let s = v === undefined || v === null ? '' : String(v);
   s = s.slice(0, 1000);
@@ -190,7 +142,7 @@ function notify_(d) {
     subject: 'Nuevo lead: ' + d.nombre + ' (' + (d.modelo || d.equipo) + ')',
     body: lines.filter(function (l, i) { return l !== '' || i === 1; }).join('\n'),
   };
-  if (d.email) mail.replyTo = d.email; // "Responder" en el email contesta directamente al lead
+  if (d.email) mail.replyTo = d.email;
   MailApp.sendEmail(mail);
 }
 
