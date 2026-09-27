@@ -139,6 +139,7 @@ function parseBody_(e) {
 
 function getSheet_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!ss) throw new Error('Este código tiene que estar dentro de la hoja: ábrela y entra en Extensiones > Apps Script');
   let sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
   const headers = COLUMNS.map(function (c) { return c[1]; });
