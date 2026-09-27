@@ -42,7 +42,12 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 
 ## 2. Cambios de las últimas rondas
 
-**v11 (esta ronda)**
+**v12 (esta ronda)**
+
+- **Enviar otra solicitud:** en la pantalla de gracias, "Enviar otra solicitud" vuelve a la primera pregunta con un `event_id` nuevo. Se conservan perfil, nombre y WhatsApp o correo; el equipo y el consentimiento se vuelven a pedir. Un "Lo quiero" pulsado después del gracias también empieza otra solicitud, ya con ese modelo. Cada solicitud enviada es una fila en la hoja y un Lead con su propio `eventID`.
+- **Hoja de Google:** conectada (`SHEETS_ENDPOINT` en `config.js`) y con menos columnas: Fecha, Nombre, Teléfono, Email, Perfil, Equipo de interés, **Modelo** (solo si eligió un modelo en concreto) y UTM. El aviso por email llega a aaswebmarketing@gmail.com e incluye el modelo. Si la pestaña "Leads" ya estaba en uso sin la columna Modelo, el script la añade en su sitio y separa equipo y modelo en las filas que ya había.
+
+**v11**
 
 - **Transiciones:** vuelven los cortes rectos entre secciones, como antes. Solo Más equipos (la de la cuadrícula) se funde arriba con Lo más pedido; abajo su cuadrícula se desvanece, como siempre. Javier y la comparativa siguen a todo el ancho.
 - **Comparativa:** título "¿Por qué elegir *VytalGroup?*", sin subtítulo, tabla más grande (hasta 960 px, texto mayor e iconos de 30 px), cabeceras centradas "OTRAS MARCAS" y "VYTALGROUP" y dos filas nuevas con datos que ya estaban en la web: envío y aduana (UE, USA y LATAM, aduana gestionada) y todo el equipamiento en un solo sitio.
@@ -180,21 +185,20 @@ El formulario envía cada solicitud a una hoja de Google mediante un pequeño pr
    };
    ```
    Vuelve a desplegar la web (apartado 6).
-7. **Prueba.** Envía el formulario con datos de prueba. En segundos aparece una fila en "Leads" con la fecha y hora de Madrid, los datos, el origen de la campaña y la columna **Estado** en "Nuevo" para que la gestiones tú. Si abres la URL `/exec` en el navegador y ves `{"ok":true,...}`, el despliegue responde.
+7. **Prueba.** Envía el formulario con datos de prueba. En segundos aparece una fila en "Leads" con la fecha y hora de Madrid, los datos y el origen de la campaña. Si abres la URL `/exec` en el navegador y ves `{"ok":true,...}`, el despliegue responde.
 8. **Si cambias el script**, vuelve a desplegarlo desde **Implementar > Gestionar implementaciones**: lápiz de la implementación activa, **Versión: Nueva versión** e **Implementar**. Así la URL no cambia.
 
-**Aviso por email con cada lead:** activado por defecto, a `NOTIFY_EMAIL` (por ahora aaswebmarketing@gmail.com), con nombre, teléfono y enlace de WhatsApp (o su correo), perfil, equipo de interés y campaña. Si dejó su correo, "Responder" le contesta directamente. Para desactivarlo, pon `SEND_EMAIL_NOTIFICATION` a `false`, guarda y vuelve a desplegar.
+**Aviso por email con cada lead:** activado por defecto, a `NOTIFY_EMAIL` (por ahora aaswebmarketing@gmail.com), con nombre, teléfono y enlace de WhatsApp (o su correo), perfil, equipo de interés, modelo (si eligió uno) y campaña. En el asunto van el nombre y el modelo, o el equipo si no hay modelo. Si dejó su correo, "Responder" le contesta directamente. Para desactivarlo, pon `SEND_EMAIL_NOTIFICATION` a `false`, guarda y vuelve a desplegar.
 
-Columnas, en este orden: Fecha · Nombre · Teléfono · Email · Perfil · Equipo de interés (equipo y modelo) · utm_source · utm_medium · utm_campaign · utm_content · utm_term · event_id (oculta, evita duplicados). Se pueden añadir columnas propias a la derecha (por ejemplo "Estado"). Si la pestaña "Leads" tiene otras columnas (versión anterior), el script la renombra a "Leads anterior …" y crea una nueva.
+Columnas, en este orden: Fecha · Nombre · Teléfono · Email · Perfil · Equipo de interés · Modelo · utm_source · utm_medium · utm_campaign · utm_content · utm_term · event_id (oculta, evita duplicados). Se pueden añadir columnas propias a la derecha (por ejemplo "Estado"). Si la pestaña "Leads" es de la versión anterior sin Modelo, el script añade esa columna en su sitio y separa equipo y modelo en las filas que ya había (tus columnas de la derecha se desplazan con sus datos). Si tiene otras columnas (versión más antigua), la renombra a "Leads anterior …" y crea una nueva.
 
 Detalles:
 - Envío con `fetch` y `Content-Type: text/plain;charset=utf-8` (sin petición previa de CORS).
 - UTM y `fbclid` se guardan en `sessionStorage` en la primera visita. `fbc` se construye desde `fbclid` si no existe la cookie `_fbc`.
 - El script valida los campos obligatorios (nombre, perfil, equipo, consentimiento y `event_id`), que haya teléfono o correo, que el teléfono tenga entre 8 y 15 cifras y que el correo tenga un formato válido, usa `LockService`, ignora envíos repetidos con el mismo `event_id`, descarta el campo trampa y escapa los textos que empiezan por `=`, `+`, `-` o `@`.
 - **Equipo:** Ecógrafo, Diatermia, Presoterapia u Ondas de choque. Si se marca "Otro equipo", llega la categoría elegida en el desplegable (Magnetoterapia de alta intensidad, Láser de alta potencia, Electrólisis percutánea ecoguiada o Camillas de fisioterapia) u "Otro equipo" si se elige "Otro".
-- **Modelo:** el elegido en "Lo quiero"; "Sin decidir" si se eligió ecógrafo o diatermia sin modelo; vacío en el resto de equipos.
+- **Modelo:** el elegido en "Lo quiero". Si no hay modelo en concreto (el formulario manda "Sin decidir" en ecógrafo o diatermia, o nada en el resto de equipos), la columna queda vacía.
 - **Perfil:** Clínica, Fisioterapeuta, Médico u Otro.
-- **Dispositivo:** móvil, tablet o escritorio, sistema y si llega desde el navegador interno de Instagram o Facebook.
 - Con `SHEETS_ENDPOINT` vacío el formulario falla con elegancia: mensaje amable, reintento, WhatsApp como alternativa, sin perder los datos, y un aviso claro en la consola.
 
 ---
@@ -318,8 +322,8 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
 
 `npm test` compila y ejecuta sobre `dist/`, con las cabeceras de `vercel.json` y un Apps Script simulado:
 
-- **Apps Script (17):** el `google-sheets.gs` real contra una hoja simulada: `setup()`, columnas, WhatsApp o correo, enlace de WhatsApp, aviso por email (con respuesta directa al lead), duplicados, campo trampa, campos obligatorios, teléfono, fórmulas y cuerpos no válidos.
-- **Formulario y tracking (102 comprobaciones):**
+- **Apps Script (23):** el `google-sheets.gs` real contra una hoja simulada: `setup()`, columnas (con Modelo aparte), WhatsApp o correo, enlace de WhatsApp, aviso por email (con respuesta directa al lead), duplicados, campo trampa, campos obligatorios, teléfono, fórmulas, cuerpos no válidos, columna Modelo añadida a una pestaña en uso y pestaña muy antigua apartada.
+- **Formulario y tracking (111 comprobaciones):**
   - nada de Facebook sin consentimiento;
   - aviso de cookies;
   - eventos: PageView, ViewContent, DescargaCatalogo (desde Más equipos) y Contact;
@@ -334,6 +338,7 @@ Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la v
   - envío con UTM y exactamente las columnas de la hoja;
   - doble clic sin duplicar;
   - Lead único con `eventID` = `event_id`;
+  - "Enviar otra solicitud": vuelve al paso 1 conservando perfil y contacto, pide de nuevo el consentimiento y envía con otro `event_id` (un Lead por solicitud); "Lo quiero" tras el gracias empieza otra con ese modelo;
   - endpoint vacío, error del servidor y antispam.
 - **Interfaz (131):**
   - hero, franja de garantías y 5 secciones;
