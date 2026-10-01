@@ -42,7 +42,16 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 
 ## 2. Cambios de las últimas rondas
 
-**v12 (esta ronda)**
+**v13 (esta ronda): lista para publicar**
+
+- **Dominio:** `SITE_URL` es `https://vsl.vytalgroupem.com` (canonical, vista previa al compartir, JSON-LD, sitemap y robots). La dirección vieja `vsl-vytalgroup.vercel.app` redirige al dominio (308).
+- **Revisión de enlaces y botones** en local y en el dominio real, en móvil y escritorio: las 4 páginas responden, todas las anclas e iconos existen, cada CTA lleva a su sección, WhatsApp, teléfono y correo bien formados, enlaces externos (WhatsApp, Instagram, AEPD, Meta) vivos, PDF descargable y consola y CSP limpias.
+- **Privacidad al día:** describe solo los datos que se guardan ahora (nombre, WhatsApp o correo, perfil, equipo, modelo, UTM e identificador de la solicitud), el aviso por Gmail y a quien ayuda a gestionar la web y las campañas.
+- **Dudas:** "¿Qué pasa cuando envío el formulario?" ya dice que escribimos por WhatsApp o por correo, como prefieras (también en el JSON-LD).
+- **Píxel:** el ID se limpia al leerlo (solo cifras), por si se pega con espacios o comillas.
+- **Desplegables:** al abrirse o moverse con el teclado solo se desplaza su lista, nunca la página. La prueba del prefijo que a veces fallaba se debía al robot de pruebas (desplazaba la página antes de pulsar); ahora pulsa como una persona y pasa siempre.
+
+**v12**
 
 - **Enviar otra solicitud:** en la pantalla de gracias, "Enviar otra solicitud" vuelve a la primera pregunta con un `event_id` nuevo. Se conservan perfil, nombre y WhatsApp o correo; el equipo y el consentimiento se vuelven a pedir. Un "Lo quiero" pulsado después del gracias también empieza otra solicitud, ya con ese modelo. Cada solicitud enviada es una fila en la hoja y un Lead con su propio `eventID`.
 - **Hoja de Google:** conectada (`SHEETS_ENDPOINT` en `config.js`) y con menos columnas: Fecha, Nombre, Teléfono, Email, Perfil, Equipo de interés, **Modelo** (solo si eligió un modelo en concreto) y UTM. El aviso por email llega a aaswebmarketing@gmail.com e incluye el modelo. Si la pestaña "Leads" ya estaba en uso sin la columna Modelo, el script la añade en su sitio y separa equipo y modelo en las filas que ya había.
@@ -205,10 +214,14 @@ Detalles:
 
 ## 5. Meta Pixel
 
-1. En el **Administrador de eventos** de Meta, copia el identificador numérico del píxel.
-2. Pégalo en `config.js` → `META_PIXEL_ID: "123456789012345"` y vuelve a desplegar.
+1. **Crea el píxel** (si no existe): [Administrador de eventos](https://business.facebook.com/events_manager2) > **Conectar orígenes de datos** > **Web** > **Píxel de Meta** > ponle nombre (por ejemplo "VytalGroup web") > escribe `https://vsl.vytalgroupem.com` y sigue sin instalar nada (el código ya está en la web). Si ya existe, entra en él.
+2. **Copia el identificador** del píxel (un número de 15 o 16 cifras, en **Configuración** del píxel).
+3. **Pégalo en `config.js`** → `META_PIXEL_ID: "123456789012345"` y vuelve a desplegar.
+4. **Verifica el dominio** en [Configuración del negocio](https://business.facebook.com/settings) > **Seguridad de la marca** > **Dominios** > **Añadir** > `vytalgroupem.com` (sin `vsl.`: al verificar el dominio principal quedan cubiertos sus subdominios). Elige **Registro TXT de DNS** y copia el valor `facebook-domain-verification=...`. Los DNS de `vytalgroupem.com` están en Hostinger: hPanel > **Dominios** > `vytalgroupem.com` > **DNS / Nameservers** > **Registros DNS** > tipo **TXT**, nombre `@`, valor el copiado. Vuelve a Meta y pulsa **Verificar** (puede tardar de minutos a unas horas).
+5. **Comprueba los eventos**: en el Administrador de eventos > **Probar eventos**, abre la web, acepta las cookies y verás `PageView`; al enviar una solicitud de prueba, `Lead`.
+6. **Campaña**: objetivo **Clientes potenciales**, ubicación de la conversión **Sitio web**, el píxel y el evento **Cliente potencial (Lead)**. En la URL del anuncio, usa parámetros UTM (por ejemplo `?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}`) para ver en la hoja de qué anuncio llega cada lead.
 
-- El script de Meta **no se descarga** hasta que el visitante acepta "Marketing" en el aviso de cookies. Si acepta más tarde, se carga en ese momento. Si lo retira desde "Configurar cookies", deja de enviar eventos y se borran `_fbp` y `_fbc`.
+- El script de Meta **no se descarga** hasta que el visitante acepta "Marketing" en el aviso de cookies. Si acepta más tarde, se carga en ese momento. Si lo retira desde "Configurar cookies", deja de enviar eventos y se borran `_fbp` y `_fbc`. Quien rechaza las cookies sigue llegando a la hoja, pero Meta no lo cuenta: es normal que la hoja tenga más leads que Meta.
 - Con `META_PIXEL_ID` vacío no se carga nada.
 
 | Evento | Cuándo |
@@ -233,7 +246,7 @@ vercel            # la primera vez: enlaza el proyecto
 vercel --prod
 ```
 
-O conecta el repositorio en vercel.com: cada push despliega solo. `vercel.json` ya define:
+O conecta el repositorio en vercel.com: cada push despliega solo. **Ahora mismo** el proyecto está conectado así: lo que entra en `main` se publica en https://vsl.vytalgroupem.com; las ramas generan vistas previas. No hace falta ninguna variable de entorno en Vercel: la URL de la hoja y el píxel van en `config.js` y el dominio en `site.config.mjs`. `vercel.json` ya define:
 - **Compilación:** `npm run build` y carpeta de salida `dist/`.
 - **URLs limpias:** `/privacidad`, `/cookies` y `/aviso-legal`. Las rutas `.html`, con barra final o `/index` redirigen (308).
 - **Seguridad:** `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Strict-Transport-Security`, `Permissions-Policy` y la **CSP** del brief. No hay ningún script inline: todo el JS está en archivos.
@@ -248,29 +261,23 @@ Ajustes respecto al `vercel.json` del brief:
 
 ---
 
-## 7. Dominio definitivo (vytalgroup.org) y `SITE_URL`
+## 7. Dominio: vsl.vytalgroupem.com
 
-1. En Vercel: **Project > Settings > Domains > Add** y escribe `vytalgroup.org`. Añade también `www.vytalgroup.org` y marca que redirija al dominio principal.
-2. En el proveedor del dominio, crea los registros DNS que indica Vercel (normalmente un registro `A` para `vytalgroup.org` y un `CNAME` para `www`). Vercel emite el certificado HTTPS solo.
-3. Cambia la URL en `site.config.mjs`:
-   ```js
-   export const SITE_URL = 'https://vytalgroup.org';
-   ```
-   y vuelve a desplegar. Con eso cambian el canonical, `og:url`, `og:image`, el JSON-LD, `sitemap.xml` y `robots.txt`.
-4. Comprueba la vista previa del enlace en el [depurador de Meta](https://developers.facebook.com/tools/debug/) y pulsa "Volver a extraer".
+Conectado y con HTTPS: `vsl` es un `CNAME` hacia Vercel en los DNS de Hostinger. `SITE_URL` (en `site.config.mjs`) es `https://vsl.vytalgroupem.com`, así que el canonical, `og:url`, `og:image`, el JSON-LD, `sitemap.xml` y `robots.txt` usan el dominio. `vercel.json` redirige `vsl-vytalgroup.vercel.app` al dominio.
 
-Mientras tanto, `SITE_URL` es `https://vsl-vytalgroup.vercel.app`, así que la vista previa al compartir el enlace ya funciona.
+Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domains**, crea el registro DNS que indique Vercel, cambia `SITE_URL` y la redirección de `vercel.json` y vuelve a desplegar. Después, comprueba la vista previa del enlace en el [depurador de Meta](https://developers.facebook.com/tools/debug/) y pulsa "Volver a extraer".
 
 ---
 
-## 8. Pendientes del cliente
+## 8. Pendientes antes de lanzar los anuncios
 
-1. **ID del Meta Pixel** → `config.js` (apartado 5).
-2. ~~URL del Apps Script~~ **Hecho:** la hoja está conectada (`SHEETS_ENDPOINT` en `config.js`) y probada de extremo a extremo con envíos reales por WhatsApp, por correo y con prefijo de Portugal.
-3. **Datos legales del titular** en `aviso-legal.html` y `privacidad.html` (marcados en amarillo como "[Pendiente: …]"): razón social o nombre, NIF o CIF, domicilio y datos registrales, y el plazo de conservación de los leads. Se editan en `scripts/assets/gen_legal.py` y se regeneran con `python3 scripts/assets/gen_legal.py`. Conviene que un asesor legal revise los textos.
-4. **¿Podemos prometer "respuesta en menos de 24 h"?** Si se confirma, se puede añadir bajo "Cuéntanos qué necesitas.".
-5. **Testimonios reales** (opcional): si más adelante hay opiniones de clientes con su permiso, se puede recuperar una sección de testimonios.
-6. **Material que no llegó:** fotos de los Acclarix a más resolución (el catálogo trae unos 550 px) y una foto de Javier más grande (la recibida es de 640 × 640).
+1. **Datos legales del titular** (obligatorios por la LSSI) en `aviso-legal.html` y `privacidad.html`, ahora marcados en amarillo como "[Pendiente: …]": nombre y apellidos o razón social, NIF o CIF, domicilio, datos registrales (o "no procede") y el plazo de conservación de los leads. Se editan en `scripts/assets/gen_legal.py` y se regeneran con `python3 scripts/assets/gen_legal.py`. Conviene que un asesor legal revise los textos.
+2. **ID del Meta Pixel** en `config.js` y **verificación del dominio** en Meta (apartado 5).
+3. **Apps Script:** que esté desplegada la última versión (columna Modelo), como **Nueva versión** de la misma implementación (apartado 4, punto 8). La URL no cambia.
+4. **Correo de avisos:** ahora llegan a aaswebmarketing@gmail.com (`NOTIFY_EMAIL` en el Apps Script). Si también los tiene que recibir VytalGroup, se pueden poner varios separados por comas.
+5. **¿Podemos prometer "respuesta en menos de 24 h"?** Si se confirma, se puede añadir bajo "Cuéntanos qué necesitas.".
+6. **Testimonios reales** (opcional): si más adelante hay opiniones de clientes con su permiso, se puede recuperar una sección de testimonios.
+7. **Material que no llegó** (opcional): fotos de los Acclarix a más resolución (el catálogo trae unos 550 px) y una foto de Javier más grande (la recibida es de 640 × 640).
 
 ---
 

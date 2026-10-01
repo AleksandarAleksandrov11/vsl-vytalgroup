@@ -51,7 +51,7 @@ HEAD = '''<!doctype html>
     <p class="legal__lead">{lead}</p>
     <article class="legal__body">
 {body}
-      <p class="legal__date">Última actualización: 24 de septiembre de 2026.</p>
+      <p class="legal__date">Última actualización: 1 de octubre de 2026.</p>
     </article>
   </div>
 </main>
@@ -97,9 +97,9 @@ priv = f'''        <h2>1. Responsable del tratamiento</h2>
 {TITULAR}
         <h2>2. Qué datos tratamos</h2>
         <ul>
-          <li><strong>Datos del formulario:</strong> nombre, teléfono de WhatsApp o correo electrónico (según prefieras que te escribamos), perfil profesional (clínica, fisioterapeuta, médico u otro) y equipo o modelo de interés.</li>
-          <li><strong>Origen de la visita:</strong> parámetros de campaña (UTM), identificador de clic de Meta (fbclid y fbc), página de referencia y URL de entrada. Si aceptas las cookies de marketing, también el identificador del navegador del píxel de Meta (fbp).</li>
-          <li><strong>Datos técnicos:</strong> tipo de dispositivo, sistema operativo, si llegas desde la aplicación de Instagram o Facebook, idioma del navegador y un identificador aleatorio de la solicitud.</li>
+          <li><strong>Datos del formulario:</strong> nombre, teléfono de WhatsApp o correo electrónico (según prefieras que te escribamos), perfil profesional (clínica, fisioterapeuta, médico u otro), equipo de interés y, si lo eliges, el modelo. También la fecha de la solicitud y la constancia de que aceptaste esta política.</li>
+          <li><strong>Origen de la visita:</strong> los parámetros de campaña (UTM) del enlace por el que llegas, para saber de qué anuncio viene cada solicitud. Si aceptas las cookies de marketing, el píxel de Meta usa además sus propios identificadores en tu navegador (fbp y fbc).</li>
+          <li><strong>Datos técnicos:</strong> un identificador aleatorio de la solicitud, para no registrarla dos veces.</li>
           <li><strong>Comunicaciones:</strong> lo que nos cuentes por WhatsApp, teléfono o email.</li>
         </ul>
         <h2>3. Para qué los usamos</h2>
@@ -119,7 +119,8 @@ priv = f'''        <h2>1. Responsable del tratamiento</h2>
         <p>Mientras mantengamos la relación contigo y, si no llegas a contratar, durante {P("plazo de conservación de los leads, por ejemplo 12 meses desde el último contacto")}. Después, los datos se bloquean durante los plazos legales de prescripción y se eliminan.</p>
         <h2>6. Con quién los compartimos</h2>
         <ul>
-          <li><strong>Google</strong> (Google Workspace, Google Sheets y Apps Script), como encargado del tratamiento, para recibir y guardar las solicitudes del formulario.</li>
+          <li><strong>Google</strong> (Google Sheets, Apps Script y Gmail), como encargado del tratamiento, para recibir y guardar las solicitudes del formulario y avisarnos por correo de cada una.</li>
+          <li>Los profesionales que nos ayudan a gestionar la web y las campañas, como encargados del tratamiento y solo con los datos necesarios para atender tu solicitud.</li>
           <li><strong>Meta Platforms Ireland Ltd.</strong>, solo si aceptas las cookies de marketing, para la medición de anuncios con el píxel de Meta.</li>
           <li><strong>Vercel Inc.</strong>, proveedor de alojamiento de la web, como encargado del tratamiento.</li>
           <li>Autoridades y organismos públicos, cuando exista una obligación legal.</li>
