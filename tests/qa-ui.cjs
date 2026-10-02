@@ -682,8 +682,10 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(await p.isVisible('#cookie-banner'), 'Legales: aviso de cookies también en las páginas legales');
     await p.click('#cookie-banner [data-cookie="reject"]');
     await p.waitForTimeout(700);
-    const pending = await p.$$eval('.pending', (els) => els.length);
-    ok(pending >= 4, 'Legales: datos del titular vacíos y marcados para rellenar', `${pending} huecos`);
+    const legalText = await p.evaluate(() => document.querySelector('.legal__body').innerText);
+    const datos = ['Javier Ruiz Vides', '49115639J', 'Rue des Champs 61a, Bertrange, Luxemburgo', 'vytalkinetech@gmail.com', '+34 616 372 644', '12 meses desde el último contacto'];
+    const faltan = datos.filter((d) => !legalText.includes(d));
+    ok(!(await p.$('mark, .pending')) && !/Pendiente/.test(legalText) && !faltan.length, 'Legales: datos del titular completos (nombre, DNI, domicilio, email, teléfono) y plazo de conservación, sin huecos pendientes', faltan.join(', '));
     await p.evaluate(() => document.querySelector('.ft [data-cookie-settings]').scrollIntoView());
     await p.click('.ft [data-cookie-settings]');
     await p.waitForTimeout(500);
