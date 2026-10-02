@@ -1,21 +1,3 @@
-/**
- * VytalGroup · Leads de la web en Google Sheets
- *
- * Recibe por POST (JSON) cada solicitud del formulario de la web, la valida y la guarda en la pestaña
- * "Leads", con Estado y Notas para el equipo comercial. La pestaña "Resumen" calcula estadísticas con
- * fórmulas que se actualizan solas. Después de guardar, avisa por email. doGet() comprueba el despliegue.
- *
- * Para ejecutar a mano desde el editor:
- *   setup()           prepara la hoja, migra lo que ya hay, crea el Resumen y pide el permiso de email.
- *   rebuildSummary()  rehace la pestaña Resumen desde cero.
- *   testLead()        envía un lead de prueba y comprueba que el duplicado no se guarda.
- *
- * Propiedades del script (Configuración del proyecto > Propiedades del script), opcionales:
- *   NOTIFY_EMAIL   destinatarios del aviso, separados por comas. Por defecto, aaswebmarketing@gmail.com.
- *   LEAD_SECRET    si existe, cada envío tiene que traer "secret" con el mismo valor.
- * El script guarda además LAYOUT_VERSION para saber que la hoja ya está migrada.
- */
-
 const SHEET_NAME = 'Leads';
 const SUMMARY_NAME = 'Resumen';
 const TIMEZONE = 'Europe/Madrid';
@@ -120,7 +102,6 @@ function doPost(e) {
 
     ensureRoom_(sheet, last);
     sheet.getRange(last + 1, 1, 1, HEADERS.length).setValues([row]);
-    // Con LockService hay que escribir antes de soltar el bloqueo: si no, el siguiente envío no ve esta fila al buscar duplicados
     SpreadsheetApp.flush();
     notifyTo = notifyTo_(props);
   } catch (err) {
@@ -414,7 +395,6 @@ function blockTitle_(sh, row, col, text) {
   sh.getRange(row, col, 1, 2).merge().setValue(text).setFontWeight('bold').setFontColor(WHITE).setBackground(NAVY);
 }
 
-// Separador de argumentos de las fórmulas: "," en en_US y ";" en es_ES. Se prueba con una fórmula real.
 function separator_(sheet) {
   const cell = sheet.getRange(1, 1);
   let found = '';
