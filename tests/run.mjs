@@ -1,8 +1,8 @@
 // Ejecuta las pruebas automáticas contra la versión compilada (dist/), servida con las
 // cabeceras de vercel.json (CSP incluida):
-//  · qa-apps-script → el Apps Script real (integrations/google-sheets.gs) contra una hoja simulada:
-//                columnas, WhatsApp o correo, enlace de WhatsApp, aviso por email, duplicados,
-//                campo trampa y validaciones.
+//  · qa-apps-script → el Apps Script real (integrations/apps-script/Code.gs) contra una hoja simulada
+//                en es_ES y en_US: contrato con la web, validaciones, duplicados, Estado y Notas,
+//                migración de la hoja anterior, Resumen sin errores y aviso por email.
 //  · qa-form   → formulario de 4 preguntas (equipo, perfil, nombre y WhatsApp o correo), desplegables,
 //                validaciones, envío (Apps Script simulado), UTM, antispam, consentimiento y
 //                eventos del píxel (Meta simulado, sin salir a internet).

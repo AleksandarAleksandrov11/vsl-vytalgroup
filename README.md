@@ -42,7 +42,30 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 
 ## 2. Cambios de las últimas rondas
 
-**v13 (esta ronda): lista para publicar**
+**v14 (esta ronda): Apps Script con Estado, Notas y Resumen**
+
+- **Leads:**
+  - 15 columnas, con **Estado** (desplegable con color de fila) y **Notas** detrás de Modelo;
+  - fecha real en hora de Madrid y teléfono como texto;
+  - filtro en la cabecera y 1000 filas ya formateadas.
+- **Resumen**, pestaña nueva:
+  - totales, hoy, últimos 7 días y pendientes;
+  - conteos por perfil, equipo, modelo, campaña, anuncio y origen;
+  - las fórmulas se escriben con el separador de la hoja (`;` en es_ES, `,` en en_US), detectado con una fórmula de prueba;
+  - `rebuildSummary()` la rehace.
+- **Guardado rápido:**
+  - dentro del bloqueo solo se comprueba el duplicado y se escribe una fila, sin formatear nada;
+  - el email sale después y, si falla, el lead ya está guardado.
+- **Migración segura de la hoja en uso:**
+  - desde `setup()` o desde el primer lead;
+  - idempotente y sin perder datos;
+  - convierte las fechas de texto y deja los leads antiguos con Estado vacío.
+- **Propiedades opcionales:** `NOTIFY_EMAIL` y `LEAD_SECRET`.
+- **`testLead()`** para probar desde el editor.
+- **Guía paso a paso:** `integrations/apps-script/README-apps-script.md`.
+- **La web no cambia:** mismo contrato, mismas respuestas y misma URL.
+
+**v13: lista para publicar**
 
 - **Dominio:** `SITE_URL` es `https://vsl.vytalgroupem.com` (canonical, vista previa al compartir, JSON-LD, sitemap y robots). La dirección vieja `vsl-vytalgroup.vercel.app` redirige al dominio (308).
 - **Revisión de enlaces y botones** en local y en el dominio real, en móvil y escritorio: las 4 páginas responden, todas las anclas e iconos existen, cada CTA lleva a su sección, WhatsApp, teléfono y correo bien formados, enlaces externos (WhatsApp, Instagram, AEPD, Meta) vivos, PDF descargable y consola y CSP limpias.
@@ -148,7 +171,7 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 │   ├── fonts/                  Geist e Instrument Serif cursiva (woff2, subset latino)
 │   ├── brand/                  Favicon, iconos e imagen Open Graph
 │   └── docs/catalogo-vytalgroup-2026.pdf
-├── integrations/google-sheets.gs   Apps Script que recibe los leads
+├── integrations/apps-script/   Code.gs (Apps Script de los leads) y README-apps-script.md (guía)
 ├── scripts/                    build.mjs, serve.mjs y generadores de recursos (assets/)
 ├── tests/                      Pruebas con Playwright (npm test)
 ├── PLAN.md
@@ -174,11 +197,24 @@ La compilación muestra un informe de pesos y **falla si se supera algún presup
 
 ## 4. Google Sheets: guardar los leads (paso a paso)
 
-El formulario envía cada solicitud a una hoja de Google mediante un pequeño programa (Apps Script). Se configura una sola vez:
+El formulario envía cada solicitud a una hoja de Google mediante un pequeño programa (Apps Script). Desde la v14 el programa también:
+- lleva **Estado** (desplegable con colores) y **Notas** para el equipo comercial;
+- guarda la fecha como fecha real;
+- crea la pestaña **Resumen** con estadísticas.
+
+**La guía completa, para quien no sea técnico, está en [`integrations/apps-script/README-apps-script.md`](integrations/apps-script/README-apps-script.md).** Incluye:
+- la copia de seguridad;
+- el orden para actualizar la hoja real sin cambiar la URL;
+- las propiedades `NOTIFY_EMAIL` y `LEAD_SECRET`;
+- `setup`, `testLead` y `rebuildSummary`;
+- la tabla de columnas;
+- los parámetros UTM para Meta.
+
+Para una hoja nueva desde cero:
 
 1. **Crea la hoja.** Entra en [sheets.google.com](https://sheets.google.com) con la cuenta que quieras usar (por ejemplo vytalkinetech@gmail.com) y crea una hoja en blanco, por ejemplo "Leads web VytalGroup". No hace falta crear columnas: el programa crea la pestaña "Leads" con sus cabeceras.
-2. **Pega el código.** En la hoja, abre **Extensiones > Apps Script**. Borra lo que haya en `Código.gs`, pega todo el contenido de `integrations/google-sheets.gs` y guarda.
-3. **Prepáralo.** Arriba, en el desplegable de funciones, elige **setup** y pulsa **Ejecutar**. Google pedirá permisos (ver el punto 5). Se crea la pestaña "Leads" con sus columnas.
+2. **Pega el código.** En la hoja, abre **Extensiones > Apps Script**. Borra lo que haya en `Código.gs`, pega todo el contenido de `integrations/apps-script/Code.gs` y guarda.
+3. **Prepáralo.** Arriba, en el desplegable de funciones, elige **setup** y pulsa **Ejecutar**. Google pedirá permisos (ver el punto 5). Se crean las pestañas "Leads" y "Resumen".
 4. **Despliégalo como aplicación web.** Pulsa **Implementar > Nueva implementación**. En "Seleccionar tipo" (engranaje) elige **Aplicación web**:
    - Descripción: "Leads web".
    - Ejecutar como: **Yo**.
@@ -195,11 +231,25 @@ El formulario envía cada solicitud a una hoja de Google mediante un pequeño pr
    ```
    Vuelve a desplegar la web (apartado 6).
 7. **Prueba.** Envía el formulario con datos de prueba. En segundos aparece una fila en "Leads" con la fecha y hora de Madrid, los datos y el origen de la campaña. Si abres la URL `/exec` en el navegador y ves `{"ok":true,...}`, el despliegue responde.
-8. **Si cambias el script**, vuelve a desplegarlo desde **Implementar > Gestionar implementaciones**: lápiz de la implementación activa, **Versión: Nueva versión** e **Implementar**. Así la URL no cambia.
+8. **Si cambias el script**, vuelve a desplegarlo desde **Implementar > Gestionar implementaciones**: lápiz de la implementación activa, **Versión: Nueva versión** e **Implementar**. Así la URL no cambia. En una hoja que ya tiene leads, publica la nueva versión **antes** de ejecutar `setup()` (la guía explica por qué).
 
-**Aviso por email con cada lead:** activado por defecto, a `NOTIFY_EMAIL` (por ahora aaswebmarketing@gmail.com), con nombre, teléfono y enlace de WhatsApp (o su correo), perfil, equipo de interés, modelo (si eligió uno) y campaña. En el asunto van el nombre y el modelo, o el equipo si no hay modelo. Si dejó su correo, "Responder" le contesta directamente. Para desactivarlo, pon `SEND_EMAIL_NOTIFICATION` a `false`, guarda y vuelve a desplegar.
+**Aviso por email con cada lead:** activado por defecto, a la propiedad del script `NOTIFY_EMAIL` o, si no existe, a aaswebmarketing@gmail.com. Se envía después de guardar: si el email falla, el lead queda guardado igual. Lleva nombre, teléfono y enlace de WhatsApp (o su correo), perfil, equipo de interés, modelo (si eligió uno) y campaña. En el asunto van el nombre y el modelo, o el equipo si no hay modelo. Si dejó su correo, "Responder" le contesta directamente. Para desactivarlo, pon `SEND_EMAIL_NOTIFICATION` a `false`, guarda y vuelve a desplegar.
 
-Columnas, en este orden: Fecha · Nombre · Teléfono · Email · Perfil · Equipo de interés · Modelo · utm_source · utm_medium · utm_campaign · utm_content · utm_term · event_id (oculta, evita duplicados). Se pueden añadir columnas propias a la derecha (por ejemplo "Estado"). Si la pestaña "Leads" es de la versión anterior sin Modelo, el script añade esa columna en su sitio y separa equipo y modelo en las filas que ya había (tus columnas de la derecha se desplazan con sus datos). Si tiene otras columnas (versión más antigua), la renombra a "Leads anterior …" y crea una nueva.
+Columnas, en este orden (A a O):
+
+Fecha y hora · Nombre · Teléfono · Email · Perfil · Equipo de interés · Modelo · Estado · Notas · utm_source · utm_medium · utm_campaign · utm_content · utm_term · event_id
+
+- **Fecha y hora** es una fecha real.
+- **Teléfono** se guarda como texto.
+- **event_id** está oculta y evita duplicados.
+- Se pueden añadir columnas propias a la derecha de la O.
+
+Si la pestaña "Leads" es de una versión anterior (13 columnas con Modelo, o 12 sin Modelo), el script la migra en su sitio sin perder datos:
+- inserta Estado y Notas;
+- convierte las fechas de texto en fechas;
+- deja los leads antiguos con Estado vacío.
+
+Si tiene otras columnas, la renombra a "Leads anterior …" y crea una nueva.
 
 Detalles:
 - Envío con `fetch` y `Content-Type: text/plain;charset=utf-8` (sin petición previa de CORS).
@@ -273,8 +323,13 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 
 1. **Datos legales del titular** (obligatorios por la LSSI) en `aviso-legal.html` y `privacidad.html`, ahora marcados en amarillo como "[Pendiente: …]": nombre y apellidos o razón social, NIF o CIF, domicilio, datos registrales (o "no procede") y el plazo de conservación de los leads. Se editan en `scripts/assets/gen_legal.py` y se regeneran con `python3 scripts/assets/gen_legal.py`. Conviene que un asesor legal revise los textos.
 2. **ID del Meta Pixel** en `config.js` y **verificación del dominio** en Meta (apartado 5).
-3. **Apps Script:** que esté desplegada la última versión (columna Modelo), como **Nueva versión** de la misma implementación (apartado 4, punto 8). La URL no cambia.
-4. **Correo de avisos:** ahora llegan a aaswebmarketing@gmail.com (`NOTIFY_EMAIL` en el Apps Script). Si también los tiene que recibir VytalGroup, se pueden poner varios separados por comas.
+3. **Apps Script v14 (Estado, Notas y Resumen):**
+   1. Probarlo en una copia de la hoja.
+   2. En la real, publicarlo como **Nueva versión** de la misma implementación.
+   3. **Después**, ejecutar `setup()`.
+
+   Todo está en `integrations/apps-script/README-apps-script.md`. La URL no cambia.
+4. **Correo de avisos:** ahora llegan a aaswebmarketing@gmail.com. Para cambiarlo, crea la propiedad del script `NOTIFY_EMAIL`; admite varios correos separados por comas.
 5. **¿Podemos prometer "respuesta en menos de 24 h"?** Si se confirma, se puede añadir bajo "Cuéntanos qué necesitas.".
 6. **Testimonios reales** (opcional): si más adelante hay opiniones de clientes con su permiso, se puede recuperar una sección de testimonios.
 7. **Material que no llegó** (opcional): fotos de los Acclarix a más resolución (el catálogo trae unos 550 px) y una foto de Javier más grande (la recibida es de 640 × 640).
@@ -329,7 +384,15 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 
 `npm test` compila y ejecuta sobre `dist/`, con las cabeceras de `vercel.json` y un Apps Script simulado:
 
-- **Apps Script (23):** el `google-sheets.gs` real contra una hoja simulada: `setup()`, columnas (con Modelo aparte), WhatsApp o correo, enlace de WhatsApp, aviso por email (con respuesta directa al lead), duplicados, campo trampa, campos obligatorios, teléfono, fórmulas, cuerpos no válidos, columna Modelo añadida a una pestaña en uso y pestaña muy antigua apartada.
+- **Apps Script (52):** el `Code.gs` real contra una hoja de Google simulada, con la configuración regional es_ES (separador `;`) y en_US (`,`). Comprueba:
+  - el contrato con la web (campos y respuestas) y las validaciones;
+  - el campo trampa, los duplicados, la inyección de fórmulas y el límite de 1000 caracteres;
+  - "Sin decidir" vacío y el teléfono guardado como texto;
+  - la fecha real, Estado "Nuevo", los colores, el filtro y las filas reservadas;
+  - las migraciones (13 y 12 columnas, a medias y desconocida), sin perder datos e idempotentes;
+  - el Resumen sin errores y con los conteos correctos, y `rebuildSummary()`;
+  - que el email sale después del bloqueo y que, si falla, el lead se guarda igual;
+  - `LEAD_SECRET`, `NOTIFY_EMAIL` y `testLead()`.
 - **Formulario y tracking (111 comprobaciones):**
   - nada de Facebook sin consentimiento;
   - aviso de cookies;

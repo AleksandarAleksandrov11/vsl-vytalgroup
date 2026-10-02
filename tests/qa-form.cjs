@@ -229,9 +229,9 @@ async function block(name, fn) {
     const wrong = Object.entries(expect).filter(([k, v]) => d[k] !== v).map(([k]) => `${k}=${d[k]}`);
     ok(!wrong.length, 'Envío: campos del formulario (con el perfil) y UTM correctos', wrong.join(', '));
     // Mismas claves que las columnas del Apps Script (menos las que pone el servidor)
-    const gs = fs.readFileSync('integrations/google-sheets.gs', 'utf8');
+    const gs = fs.readFileSync('integrations/apps-script/Code.gs', 'utf8');
     const keys = Object.keys(d).join(',');
-    ok(keys === 'nombre,telefono,email,perfil,equipo,modelo,consentimiento,utm_source,utm_medium,utm_campaign,utm_content,utm_term,event_id,website' && /HEADERS = \['Fecha', 'Nombre', 'Teléfono', 'Email', 'Perfil', 'Equipo de interés', 'Modelo', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'event_id'\]/.test(gs), 'Envío: solo lo que guarda la hoja (nombre, teléfono o email, perfil, equipo, modelo, UTM) más consentimiento y event_id', keys);
+    ok(keys === 'nombre,telefono,email,perfil,equipo,modelo,consentimiento,utm_source,utm_medium,utm_campaign,utm_content,utm_term,event_id,website' && ['Fecha y hora', 'Nombre', 'Teléfono', 'Email', 'Perfil', 'Equipo de interés', 'Modelo', 'Estado', 'Notas', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'event_id'].every((h, i, all) => gs.indexOf(`['${h}', `) > (i ? gs.indexOf(`['${all[i - 1]}', `) : 0)), 'Envío: solo lo que guarda la hoja (nombre, teléfono o email, perfil, equipo, modelo, UTM) más consentimiento y event_id', keys);
     ok(!('fbc' in d) && !('dispositivo' in d) && !('landing_url' in d) && !('canal' in d), 'Envío: sin datos que la hoja no guarda (fbc, dispositivo, URL de entrada...)');
     ok(d.consentimiento && d.consentimiento.startsWith('Sí') && /^[0-9a-f-]{36}$/.test(d.event_id), 'Envío: consentimiento y event_id', d.event_id);
     ok(await p.isVisible('[data-done]') && (await p.textContent('[data-done-title]')) === 'Gracias, Laura. Te escribimos muy pronto.', 'Éxito: "Gracias, Laura. Te escribimos muy pronto."');
