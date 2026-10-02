@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 
 const BASE = process.env.BASE || `http://localhost:${process.env.PORT || 8081}`;
-const SITE_URL = 'https://vsl-vytalgroup.vercel.app';
+const SITE_URL = 'https://vsl.vytalgroupem.com';
 const results = [];
 const ok = (cond, name, extra = '') => results.push(`${cond ? 'PASS' : 'FAIL'}  ${name}${extra ? `  · ${extra}` : ''}`);
 async function block(name, fn) {

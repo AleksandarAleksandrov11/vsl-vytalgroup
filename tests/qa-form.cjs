@@ -182,8 +182,9 @@ async function block(name, fn) {
     ok((await p.textContent('#e-tel')).startsWith('Revisa el número'), 'Validación: número español incorrecto');
     await p.fill('#f-tel', '612345678');
     ok((await p.inputValue('#f-tel')) === '612 345 678' && (await p.textContent('#e-tel')) === '', 'Teléfono: formato por grupos y el error se borra al escribir', await p.inputValue('#f-tel'));
-    // Buscador de prefijos
-    await p.click('.sel--prefix .sel__btn');
+    // Buscador de prefijos. Se pulsa con el ratón en su sitio, como una persona: p.click() desplaza antes
+    // la página para "ver" el botón y, con el scroll suave de la web, a veces se lleva el panel fuera de pantalla.
+    { const bb = await p.locator('.sel--prefix .sel__btn').boundingBox(); await p.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2); }
     await p.waitForTimeout(400);
     const panel = await p.evaluate(() => { const r = document.querySelector('.sel--prefix .sel__panel').getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, focus: document.activeElement.matches('.sel--prefix .sel__search input') }; });
     ok(panel.focus && panel.top >= 0 && panel.bottom <= panel.vh, 'Prefijo: el desplegable se ve entero y el buscador recibe el foco', JSON.stringify(panel));

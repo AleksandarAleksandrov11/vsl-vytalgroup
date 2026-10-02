@@ -10,7 +10,8 @@ import { consentState } from './consent.js';
 
 let allowed = false;
 let loaded = false;
-const pixelId = () => String((window.VG_CONFIG && window.VG_CONFIG.META_PIXEL_ID) || '').trim();
+// Solo cifras: si al pegar el ID se cuelan espacios o comillas, se ignoran
+const pixelId = () => String((window.VG_CONFIG && window.VG_CONFIG.META_PIXEL_ID) || '').replace(/\D/g, '');
 
 function ss(key, val) {
   try {

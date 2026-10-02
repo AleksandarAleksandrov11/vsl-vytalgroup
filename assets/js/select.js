@@ -63,7 +63,16 @@ export function createSelect(slot, o) {
       if (el && el.id) t.setAttribute('aria-activedescendant', el.id);
       else t.removeAttribute('aria-activedescendant');
     });
-    if (el && scroll) el.scrollIntoView({ block: 'nearest' });
+    if (el && scroll) keepInList(el);
+  }
+
+  // Solo se desplaza la lista: scrollIntoView movía a veces la página entera al abrir
+  // (en plena animación de entrada) y el panel quedaba fuera de la pantalla.
+  function keepInList(el) {
+    const lr = list.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+    if (er.top < lr.top) list.scrollTop -= lr.top - er.top;
+    else if (er.bottom > lr.bottom) list.scrollTop += er.bottom - lr.bottom;
   }
 
   function filter() {

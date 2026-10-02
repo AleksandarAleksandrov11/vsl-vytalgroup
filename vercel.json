@@ -46,6 +46,7 @@
     }
   ],
   "redirects": [
-    { "source": "/index", "destination": "/", "permanent": true }
+    { "source": "/index", "destination": "/", "permanent": true },
+    { "source": "/:path*", "has": [{ "type": "host", "value": "vsl-vytalgroup.vercel.app" }], "destination": "https://vsl.vytalgroupem.com/:path*", "permanent": true }
   ]
 }
