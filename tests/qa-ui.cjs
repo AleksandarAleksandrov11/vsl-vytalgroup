@@ -645,7 +645,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const red = await Promise.all(['/privacidad.html', '/cookies/', '/index', '/index.html'].map(get));
     ok(red.map((r) => `${r.status} ${r.headers.location}`).join(' | ') === '308 /privacidad | 308 /cookies | 308 / | 308 /', 'URLs limpias: redirecciones .html, barra final e /index', red.map((r) => `${r.status} ${r.headers.location}`).join(' | '));
     const cfg = await get('/config.js');
-    ok(/must-revalidate/.test(cfg.headers['cache-control']) && /SHEETS_ENDPOINT: "https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec"/.test(cfg.body.toString()) && /META_PIXEL_ID: ""/.test(cfg.body.toString()), 'config.js: sin caché, con la URL del Apps Script (/exec) y el píxel aún vacío');
+    ok(/must-revalidate/.test(cfg.headers['cache-control']) && /SHEETS_ENDPOINT: "https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec"/.test(cfg.body.toString()) && /META_PIXEL_ID: "1593490341777612"/.test(cfg.body.toString()), 'config.js: sin caché, con la URL del Apps Script (/exec) y el ID del píxel');
     const vj = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
     ok(vj.cleanUrls === true && vj.trailingSlash === false && vj.outputDirectory === 'dist', 'vercel.json: JSON válido, URLs limpias y salida dist/');
   });
