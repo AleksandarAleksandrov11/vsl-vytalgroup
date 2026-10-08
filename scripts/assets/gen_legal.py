@@ -51,7 +51,7 @@ HEAD = '''<!doctype html>
     <p class="legal__lead">{lead}</p>
     <article class="legal__body">
 {body}
-      <p class="legal__date">Última actualización: 1 de octubre de 2026.</p>
+      <p class="legal__date">Última actualización: 2 de octubre de 2026.</p>
     </article>
   </div>
 </main>
@@ -61,13 +61,11 @@ HEAD = '''<!doctype html>
 </html>
 '''
 
-P = lambda t: f'<mark class="pending">[Pendiente: {t}]</mark>'
-TITULAR = f'''        <dl class="legal__data">
-          <div><dt>Titular</dt><dd>{P("nombre y apellidos o razón social")}</dd></div>
+TITULAR = '''        <dl class="legal__data">
+          <div><dt>Titular</dt><dd>Javier Ruiz Vides</dd></div>
           <div><dt>Nombre comercial</dt><dd>VytalGroup</dd></div>
-          <div><dt>NIF / CIF</dt><dd>{P("NIF o CIF")}</dd></div>
-          <div><dt>Domicilio</dt><dd>{P("dirección completa")}</dd></div>
-          <div><dt>Datos registrales</dt><dd>{P("Registro Mercantil, tomo, folio y hoja, o indicar que no procede")}</dd></div>
+          <div><dt>DNI / NIF</dt><dd>49115639J</dd></div>
+          <div><dt>Domicilio</dt><dd>Rue des Champs 61a, Bertrange, Luxemburgo</dd></div>
           <div><dt>Email</dt><dd><a href="mailto:vytalkinetech@gmail.com">vytalkinetech@gmail.com</a></dd></div>
           <div><dt>Teléfono</dt><dd><a href="tel:+34616372644">+34 616 372 644</a></dd></div>
         </dl>'''
@@ -116,7 +114,7 @@ priv = f'''        <h2>1. Responsable del tratamiento</h2>
           <li><strong>Interés legítimo</strong> (art. 6.1.f RGPD): seguridad de la web y prevención de envíos automáticos.</li>
         </ul>
         <h2>5. Cuánto tiempo los conservamos</h2>
-        <p>Mientras mantengamos la relación contigo y, si no llegas a contratar, durante {P("plazo de conservación de los leads, por ejemplo 12 meses desde el último contacto")}. Después, los datos se bloquean durante los plazos legales de prescripción y se eliminan.</p>
+        <p>Mientras mantengamos la relación contigo y, si no llegas a contratar, durante 12 meses desde el último contacto. Después, los datos se bloquean durante los plazos legales de prescripción y se eliminan.</p>
         <h2>6. Con quién los compartimos</h2>
         <ul>
           <li><strong>Google</strong> (Google Sheets, Apps Script y Gmail), como encargado del tratamiento, para recibir y guardar las solicitudes del formulario y avisarnos por correo de cada una.</li>

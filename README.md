@@ -42,7 +42,12 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 
 ## 2. Cambios de las últimas rondas
 
-**v14 (esta ronda): Apps Script con Estado, Notas y Resumen**
+**v15 (esta ronda): datos legales**
+
+- **Aviso legal y privacidad con los datos del titular:** Javier Ruiz Vides, DNI, domicilio en Bertrange (Luxemburgo), email, teléfono y conservación de los leads durante 12 meses desde el último contacto. Se quita la fila "Datos registrales" porque no se indicó ninguno. Fuera también el marcado amarillo de "[Pendiente]".
+- **Redirección** de `vsl-vytalgroup.vercel.app` al dominio también en la raíz (`/`), con el patrón `/(.*)` de Vercel.
+
+**v14: Apps Script con Estado, Notas y Resumen**
 
 - **Leads:**
   - 15 columnas, con **Estado** (desplegable con color de fila) y **Notas** detrás de Modelo;
@@ -321,7 +326,7 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 
 ## 8. Pendientes antes de lanzar los anuncios
 
-1. **Datos legales del titular** (obligatorios por la LSSI) en `aviso-legal.html` y `privacidad.html`, ahora marcados en amarillo como "[Pendiente: …]": nombre y apellidos o razón social, NIF o CIF, domicilio, datos registrales (o "no procede") y el plazo de conservación de los leads. Se editan en `scripts/assets/gen_legal.py` y se regeneran con `python3 scripts/assets/gen_legal.py`. Conviene que un asesor legal revise los textos.
+1. ~~Datos legales del titular~~ **Hecho:** Javier Ruiz Vides, DNI 49115639J, Rue des Champs 61a, Bertrange, Luxemburgo, vytalkinetech@gmail.com y conservación de 12 meses desde el último contacto. Se editan en `scripts/assets/gen_legal.py` y se regeneran con `python3 scripts/assets/gen_legal.py`. Quedan por revisar con un asesor legal (apartado 9).
 2. **ID del Meta Pixel** en `config.js` y **verificación del dominio** en Meta (apartado 5).
 3. **Apps Script v14 (Estado, Notas y Resumen):**
    1. Probarlo en una copia de la hoja.
@@ -362,6 +367,8 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 - `prefers-reduced-motion`: sin entradas, parallax ni marquesina, el nombre del pie quieto y sin desplazamiento suave.
 
 **Formulario.** 4 preguntas, una por pantalla y las de opciones con avance automático: así se siente corto aunque pregunte el perfil. El correo es la alternativa, no una pregunta más: quien prefiere WhatsApp no lo ve. El aviso de dominio mal escrito sale al pulsar Enviar (no al salir del campo), para no mover el botón justo cuando se toca. El WhatsApp de la pantalla de gracias lleva el nombre y el equipo o modelo.
+
+**Legal.** Los textos de aviso legal, privacidad y cookies están escritos con la LSSI y el RGPD en clave española: la legislación aplicable es la española y la reclamación se dirige a la AEPD. El titular tiene el domicilio en Luxemburgo (Bertrange), así que conviene que un asesor confirme la legislación aplicable y si hay que citar también a la autoridad luxemburguesa de protección de datos (CNPD). Tampoco figura ningún dato registral: si el titular estuviera inscrito en algún registro, hay que añadirlo en `scripts/assets/gen_legal.py`.
 
 ---
 
