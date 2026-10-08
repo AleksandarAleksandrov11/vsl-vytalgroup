@@ -42,7 +42,11 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 
 ## 2. Cambios de las últimas rondas
 
-**v15 (esta ronda): datos legales**
+**v16 (esta ronda): píxel de Meta**
+
+- `META_PIXEL_ID` es `1593490341777612`. El píxel **no** se pega como código en la página: lo carga `assets/js/tracking.js` con el mismo código de Meta, pero solo después de que el visitante acepte las cookies de marketing, y la CSP no permite scripts dentro de la página. La etiqueta `<noscript>` de Meta tampoco se añade: enviaría una visita a Meta sin consentimiento.
+
+**v15: datos legales**
 
 - **Aviso legal y privacidad con los datos del titular:** Javier Ruiz Vides, DNI, domicilio en Bertrange (Luxemburgo), email, teléfono y conservación de los leads durante 12 meses desde el último contacto. Se quita la fila "Datos registrales" porque no se indicó ninguno. Fuera también el marcado amarillo de "[Pendiente]".
 - **Redirección** de `vsl-vytalgroup.vercel.app` al dominio también en la raíz (`/`), con el patrón `/(.*)` de Vercel.
@@ -165,7 +169,7 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 ├── aviso-legal.html            Páginas legales (se generan con scripts/assets/gen_legal.py)
 ├── privacidad.html
 ├── cookies.html
-├── config.js                   ← SHEETS_ENDPOINT (hoja conectada) y META_PIXEL_ID (vacío)
+├── config.js                   ← SHEETS_ENDPOINT (hoja conectada) y META_PIXEL_ID (1593490341777612)
 ├── site.config.mjs             ← SITE_URL: la URL pública de la web
 ├── vercel.json                 Cabeceras, CSP, caché y URLs limpias
 ├── assets/
@@ -327,7 +331,7 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 ## 8. Pendientes antes de lanzar los anuncios
 
 1. ~~Datos legales del titular~~ **Hecho:** Javier Ruiz Vides, DNI 49115639J, Rue des Champs 61a, Bertrange, Luxemburgo, vytalkinetech@gmail.com y conservación de 12 meses desde el último contacto. Se editan en `scripts/assets/gen_legal.py` y se regeneran con `python3 scripts/assets/gen_legal.py`. Quedan por revisar con un asesor legal (apartado 9).
-2. **ID del Meta Pixel** en `config.js` y **verificación del dominio** en Meta (apartado 5).
+2. ~~ID del Meta Pixel~~ **Hecho** (`1593490341777612` en `config.js`). Falta la **verificación del dominio** en Meta y probar los eventos (apartado 5).
 3. **Apps Script v14 (Estado, Notas y Resumen):**
    1. Probarlo en una copia de la hoja.
    2. En la real, publicarlo como **Nueva versión** de la misma implementación.
