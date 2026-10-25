@@ -10,8 +10,10 @@ import { consentState } from './consent.js';
 
 let allowed = false;
 let loaded = false;
+// Admite uno o varios píxeles separados por comas (p. ej. el de la agencia y el del cliente).
 // Solo cifras: si al pegar el ID se cuelan espacios o comillas, se ignoran
-const pixelId = () => String((window.VG_CONFIG && window.VG_CONFIG.META_PIXEL_ID) || '').replace(/\D/g, '');
+const pixelIds = () => String((window.VG_CONFIG && window.VG_CONFIG.META_PIXEL_ID) || '')
+  .split(/[,;\s]+/).map((v) => v.replace(/\D/g, '')).filter(Boolean);
 
 function ss(key, val) {
   try {
@@ -21,7 +23,7 @@ function ss(key, val) {
   return null;
 }
 
-function loadPixel(id) {
+function loadPixel(ids) {
   /* eslint-disable */
   !function (f, b, e, v, n, t, s) {
     if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
@@ -29,8 +31,10 @@ function loadPixel(id) {
     t = b.createElement(e); t.async = !0; t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
   }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
   /* eslint-enable */
-  window.fbq('set', 'autoConfig', false, id);
-  window.fbq('init', id);
+  ids.forEach((id) => {
+    window.fbq('set', 'autoConfig', false, id);
+    window.fbq('init', id);
+  });
   window.fbq('track', 'PageView');
   loaded = true;
 }
@@ -44,12 +48,12 @@ function clearMetaCookies() {
 }
 
 function apply(c) {
-  const id = pixelId();
+  const ids = pixelIds();
   const want = !!(c && c.marketing);
-  if (!id) { allowed = false; return; }
+  if (!ids.length) { allowed = false; return; }
   if (want) {
     allowed = true;
-    if (!loaded) loadPixel(id);
+    if (!loaded) loadPixel(ids);
     else window.fbq('consent', 'grant');
   } else {
     allowed = false;

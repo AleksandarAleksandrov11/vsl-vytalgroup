@@ -5,11 +5,12 @@
  *  · SHEETS_ENDPOINT: URL de la aplicación web de Google Apps Script que guarda los leads
  *    en la hoja de Google (termina en /exec).
  *  · META_PIXEL_ID: identificador numérico del píxel de Meta (Administrador de eventos).
+ *    Se pueden poner varios separados por comas: el evento se envía a todos.
  *
  * Si se dejan vacíos, la web funciona igual: el formulario muestra un aviso amable de error
  * y el píxel no se carga.
  */
 window.VG_CONFIG = {
   SHEETS_ENDPOINT: "https://script.google.com/macros/s/AKfycbxZLgstW_bvifa4PX18Jx_UQwx2GqhAqRhq7EH9qUtFlGqI0-qrwkRDNVtIq0i0L7yu/exec",
-  META_PIXEL_ID: "1450236327053257"
+  META_PIXEL_ID: "1450236327053257,1593490341777612"
 };
