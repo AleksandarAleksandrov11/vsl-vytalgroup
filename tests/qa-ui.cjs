@@ -66,8 +66,9 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       }
       return out;
     });
-    // v10: + línea de confianza y firma de Javier en el hero, "¿No sabes cuál elegir?" y "¿Otra duda?"
-    ok(words.main <= 290, 'Minimalismo: menos de 290 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
+    // v10: + línea de confianza y firma de Javier en el hero, "¿No sabes cuál elegir?" y "¿Otra duda?";
+    // v18: + financiación en las 6 tarjetas, microtexto y prueba social (datos confirmados)
+    ok(words.main <= 330, 'Minimalismo: menos de 330 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
     // Un CTA por sección con el mismo texto (en Más equipos, solo el de asesoramiento)
     const perSec = await p.$$eval('main > section:not(#asesoramiento):not(#garantias)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog-ask], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
     const want = ['inicio:Pedir asesoramiento gratis', 'equipos:Pedir asesoramiento gratis', 'comparativa:Pedir asesoramiento gratis', 'mas-equipos:Pedir asesoramiento gratis', 'por-que:Pedir asesoramiento gratis', 'dudas:Pedir asesoramiento gratis'];
@@ -84,7 +85,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const gone = ['Ver ficha', 'También te equipamos', 'Cómo trabajamos', 'wa-float', 'Testimonio de ejemplo', 'tsts', 'data-ejemplo', 'Me interesa', 'Habla con Javier', 'No sé cuál elegir', 'ISO 13485', 'FDA', 'veterinari'].filter((x) => html.includes(x));
     ok(!gone.length, 'Contenido: nada de lo eliminado ni prohibido (ISO, FDA, veterinaria)', gone.join(', '));
     const qs = await p.$$eval('.acc__btn', (els) => els.map((e) => e.textContent.trim()));
-    ok(qs.join('|') === '¿Cuánto cuesta?|¿Cuál me conviene?|¿Qué garantía tienen?|¿Y el mantenimiento?|¿Están certificados?|¿Enviáis fuera de España?|¿Qué pasa cuando envío el formulario?', 'Dudas: 7 preguntas, "¿Cuánto cuesta?" la primera y qué pasa al enviar la última', qs.join(' · '));
+    ok(qs.join('|') === '¿Cuánto cuesta?|¿Se puede financiar?|¿Cuál me conviene?|¿Qué garantía tienen?|¿Y el mantenimiento?|¿Están certificados?|¿Enviáis fuera de España?|¿Qué pasa cuando envío el formulario?', 'Dudas: 8 preguntas, "¿Cuánto cuesta?" y "¿Se puede financiar?" las primeras y qué pasa al enviar la última', qs.join(' · '));
     const nc = await p.evaluate(() => [...document.querySelectorAll('body *:not(script):not(style)')].filter((e) => e.children.length === 0 && /no comerciales/i.test(e.textContent)).length + (/no comerciales/i.test(document.head.innerHTML) ? 1 : 0));
     ok(nc === 0, 'Texto: "Fisioterapeutas te asesoran" sin "no comerciales" (web y metadatos)', `${nc}`);
     ok(!logs.length, 'Consola limpia (inicio)', logs.join(' / '));
@@ -254,7 +255,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       return { halfW: Math.round(tr.scrollWidth / 2), vw: innerWidth, lists: lists.length, dup: lists[1] && lists[1].getAttribute('aria-hidden'), same: lists[0].textContent === lists[1].textContent, anim: getComputedStyle(tr).animationName, own: !sec.closest('#inicio') && sec.tagName === 'SECTION' && !!sec.getAttribute('aria-label'), below: Math.abs(tk.top - hero.bottom) <= 1, fold: tk.bottom <= innerHeight + 1, bg: getComputedStyle(sec).backgroundColor, h: Math.round(tk.height), strong: parseFloat(getComputedStyle(li.querySelector('strong')).fontSize), txt: parseFloat(getComputedStyle(li).fontSize), icons: [...lists[0].querySelectorAll('.ticker__ico use')].map((u) => u.getAttribute('href')), items: [...lists[0].children].map((x) => x.textContent.trim().replace(/\s+/g, ' ')) };
     });
     ok(t.own && t.below && t.fold && t.bg === 'rgb(255, 255, 255)', 'Garantías: sección propia bajo el hero, con fondo propio, visible en la primera pantalla', JSON.stringify({ own: t.own, below: t.below, fold: t.fold, bg: t.bg, h: t.h }));
-    ok(t.icons.length === 7 && new Set(t.icons).size === 7 && t.items.includes('Menos de 24 h de respuesta') && t.strong >= 18 && t.txt >= 16 && t.h >= 84, 'Garantías: 7 garantías (con "Menos de 24 h de respuesta"), textos grandes y un icono distinto en cada una', JSON.stringify({ items: t.items, icons: t.icons, strong: t.strong, txt: t.txt, h: t.h }));
+    ok(t.icons.length === 7 && new Set(t.icons).size === 7 && t.items.includes('Menos de 24 h de respuesta') && t.items.includes('8 clínicas y 2 clubes equipados') && !t.items.some((x) => /sorpresas|páginas/.test(x)) && t.strong >= 18 && t.txt >= 16 && t.h >= 84, 'Garantías: 7 garantías (con "Menos de 24 h de respuesta" y "8 clínicas y 2 clubes equipados", sin "0 sorpresas"), textos grandes y un icono distinto en cada una', JSON.stringify({ items: t.items, icons: t.icons, strong: t.strong, txt: t.txt, h: t.h }));
     ok(t.lists === 4 && t.dup === 'true' && t.same && t.anim === 'marquee' && t.halfW >= t.vw, 'Garantías: en bucle infinito sin huecos (media pista ≥ ancho de pantalla) y con las copias ocultas a lectores', `${t.items.join(' · ')} · media pista ${t.halfW}px`);
     const p0 = await p.evaluate(() => getComputedStyle(document.querySelector('.progress span')).transform);
     await scrollToSel(p, '#por-que'); await p.waitForTimeout(400);
@@ -431,6 +432,57 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(/AX8/.test(first) && !/AX8/.test(firstBase) && same, 'Lo más pedido: con campaña, el AX8 va primero (y la variante se mantiene en la sesión); sin campaña, el orden de siempre', `${first} · ${firstBase}`);
   });
 
+  // Datos confirmados por Aleks: financiación (Hotmart y Klarna) y prueba social (8 clínicas y 2 clubes)
+  await block('Financiación y prueba social', async () => {
+    const FIN = 'Financiación disponible con Hotmart y Klarna';
+    const MICRO = 'Asesoramiento gratis · Financiación con Hotmart y Klarna';
+    const SOCIAL = 'Ya hemos equipado 8 clínicas y 2 clubes de alto rendimiento';
+    const txt = (el) => el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+    for (const [w, h, m] of [[390, 844, true], [1440, 900, false]]) {
+      const { ctx, p, logs } = await page(b, { width: w, height: h, mobile: m });
+      await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+      await p.waitForTimeout(1800);
+      const r = await p.evaluate(({ FIN }) => {
+        const t = (el) => el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+        const box = (sel) => { const b = document.querySelector(sel).getBoundingClientRect(); return Math.round(b.bottom); };
+        const cards = [...document.querySelectorAll('.card')];
+        return {
+          micro: t(document.querySelector('.hero__micro')), social: t(document.querySelector('.hero__social')),
+          order: [...document.querySelector('.hero__copy').children].map((e) => e.className.split(' ')[0]).filter((c) => /hero__(actions|micro|social|trust)/.test(c)).join(','),
+          cta: box('.hero__cta'), soc: box('.hero__social'), vh: innerHeight,
+          fin: cards.map((c) => t(c.querySelector('.card__fin'))), finPos: cards.every((c) => { const f = c.querySelector('.card__fin'); return f && f.previousElementSibling.matches('.card__data') && f.nextElementSibling.matches('.btn'); }),
+          lead: t(document.querySelector('#asesoramiento .lead__social')), leadBefore: !!(document.querySelector('#asesoramiento .lead__social').compareDocumentPosition(document.querySelector('.fcard')) & Node.DOCUMENT_POSITION_FOLLOWING),
+          qfMicro: t(document.querySelector('.qf__micro')), qfAfter: !!(document.querySelector('[data-submit]').compareDocumentPosition(document.querySelector('.qf__micro')) & Node.DOCUMENT_POSITION_FOLLOWING),
+          finHero: getComputedStyle(document.querySelector('.hero__fin')).display,
+        };
+      }, { FIN });
+      ok(r.micro === MICRO && r.social === SOCIAL && r.order === 'hero__actions,hero__micro,hero__social,hero__trust', `Hero ${w}px: bajo el CTA "${MICRO}" y la prueba social "${SOCIAL}"`, `${r.order}`);
+      ok(r.cta <= r.vh && r.soc <= r.vh, `Hero ${w}px: el CTA y la prueba social se ven en la primera pantalla (sin empujar el CTA)`, JSON.stringify({ cta: r.cta, social: r.soc, vh: r.vh }));
+      ok(r.fin.length === 6 && r.fin.every((x) => x === FIN) && r.finPos, `Tarjetas ${w}px: "${FIN}" en las 6, bajo los datos y encima del botón`);
+      ok(r.lead === SOCIAL && r.leadBefore && r.qfMicro === MICRO && r.qfAfter, `Asesoramiento ${w}px: prueba social justo encima del formulario y "${MICRO}" bajo el botón de enviar`);
+      ok(r.finHero === 'none' && !logs.length, `Hero ${w}px: sin campaña de cierre, el subtítulo no habla de financiación; consola limpia`, logs.join(' / '));
+      await ctx.close();
+    }
+    // Anuncios de cierre (CERRAR: MOFU 1, MOFU 2, BOFU 1, BOFU 2): el subtítulo añade la financiación
+    const bad = [];
+    for (const [q, want] of [['?utm_campaign=CERRAR&utm_content=MOFU%201', true], ['?utm_campaign=CERRAR&utm_content=MOFU%202', true], ['?utm_campaign=CERRAR&utm_content=BOFU%201', true], ['?utm_campaign=CERRAR&utm_content=BOFU%202', true], ['?utm_campaign=CERRAR', true], ['?utm_campaign=DESCUBRIR&utm_content=TOFU%201', false], ['?utm_campaign=DESCUBRIR', false], ['', false]]) {
+      const { ctx, p } = await page(b, { width: 390, height: 844, mobile: true });
+      await p.goto(BASE + '/' + q, { waitUntil: 'networkidle' });
+      const lead = await p.evaluate(() => [...document.querySelector('.hero__lead').childNodes].filter((n) => n.nodeType === 1 && getComputedStyle(n).display !== 'none').map((n) => n.textContent).join('').trim());
+      if (/Y puedes financiarlo con Hotmart o Klarna\.$/.test(lead) !== want) bad.push(`${q || 'sin UTM'}: ${lead}`);
+      await ctx.close();
+    }
+    ok(!bad.length, 'Hero: en los anuncios de CERRAR el subtítulo termina con "Y puedes financiarlo con Hotmart o Klarna."; en DESCUBRIR y sin UTM, no', bad.join(' | ') || '8 casos');
+    // FAQ y sin datos inventados
+    const { ctx, p } = await page(b, {});
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const f = await p.evaluate(() => ({ q: document.querySelector('#q8').textContent.trim(), a: document.querySelector('#a8 p').textContent.trim(), html: document.documentElement.outerHTML, imgs: [...document.querySelectorAll('img')].map((i) => `${i.src} ${i.alt}`).join(' ') }));
+    ok(f.q === '¿Se puede financiar?' && f.a === 'Sí, puedes financiar tu equipo con Hotmart o Klarna. En el asesoramiento te explicamos las opciones según el equipo que elijas.', 'Dudas: "¿Se puede financiar?" con la respuesta confirmada');
+    const forbidden = ['0 sorpresas', '53 páginas', 'cuota', 'intereses', 'TAE', 'meses sin', 'testimonio', 'opiniones de clientes'].filter((x) => f.html.toLowerCase().includes(x.toLowerCase()));
+    ok(!forbidden.length && !/hotmart|klarna/i.test(f.imgs) && (f.html.match(/8 clínicas y 2 clubes/g) || []).length === 6, 'Sin datos sin confirmar: ni cuotas, intereses o plazos, ni testimonios, ni logos de Hotmart o Klarna; "8 clínicas y 2 clubes" solo con esas cifras', forbidden.join(', '));
+    await ctx.close();
+  });
+
   // Mismo sistema en todos los dispositivos: titulares y CTA de sección centrados
   await block('Alineación', async () => {
     for (const [w, h, m] of [[390, 844, true], [1440, 900, false]]) {
@@ -532,14 +584,15 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
         const t = document.getElementById('form-title');
         const tr = t.getBoundingClientRect();
         const card = document.querySelector('.fcard').getBoundingClientRect();
+        const social = document.querySelector('#asesoramiento .lead__social').getBoundingClientRect();
         const faq = document.querySelector('#dudas .faq__more').getBoundingClientRect();
         const eq = document.querySelector('#dudas');
-        return { lines: Math.round(tr.height / parseFloat(getComputedStyle(t).lineHeight)), fits: tr.left >= 0 && tr.right <= document.documentElement.clientWidth && t.scrollWidth <= t.clientWidth + 1, gap: Math.round(card.top - tr.bottom), fromFaq: Math.round(tr.top - faq.bottom), sec: parseFloat(getComputedStyle(eq).paddingTop) };
+        return { lines: Math.round(tr.height / parseFloat(getComputedStyle(t).lineHeight)), fits: tr.left >= 0 && tr.right <= document.documentElement.clientWidth && t.scrollWidth <= t.clientWidth + 1, gap: Math.round(card.top - social.bottom), toSocial: Math.round(social.top - tr.bottom), fromFaq: Math.round(tr.top - faq.bottom), sec: parseFloat(getComputedStyle(eq).paddingTop) };
       });
-      if (r.lines !== 1 || !r.fits || r.gap > 60 || r.fromFaq > r.sec * 1.8) bad.push(`${w}px ${JSON.stringify(r)}`);
+      if (r.lines !== 1 || !r.fits || r.gap > 40 || r.toSocial > 40 || r.fromFaq > r.sec * 1.8) bad.push(`${w}px ${JSON.stringify(r)}`);
       await ctx.close();
     }
-    ok(!bad.length, 'Formulario: "Cuéntanos qué necesitas." en una línea (320 a 1440 px) y el formulario cerca, sin el hueco blanco con Dudas', bad.join(' | ') || '6 anchos');
+    ok(!bad.length, 'Formulario: "Cuéntanos qué necesitas." en una línea (320 a 1440 px), la prueba social y el formulario justo debajo, sin el hueco blanco con Dudas', bad.join(' | ') || '6 anchos');
   });
 
   // Solo Más equipos (la cuadrícula) se funde arriba con la comparativa; el resto de secciones,
@@ -763,7 +816,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const faq = ld['@graph'].find((x) => x['@type'] === 'FAQPage');
     const org = ld['@graph'].find((x) => x['@type'] === 'Organization');
     const visibleQs = [...html.matchAll(/class="acc__btn"[^>]*>([^<]+)</g)].map((x) => x[1]);
-    ok(org && org.url === `${SITE_URL}/` && faq && faq.mainEntity.length === 7 && faq.mainEntity.map((q) => q.name).join('|') === visibleQs.join('|'), 'Metadatos: JSON-LD Organization y FAQPage con las mismas 7 preguntas que la web');
+    ok(org && org.url === `${SITE_URL}/` && faq && faq.mainEntity.length === 8 && faq.mainEntity.map((q) => q.name).join('|') === visibleQs.join('|'), 'Metadatos: JSON-LD Organization y FAQPage con las mismas 8 preguntas que la web');
     const sitemap = (await get('/sitemap.xml')).body.toString();
     const robots = (await get('/robots.txt')).body.toString();
     ok(sitemap.includes(`<loc>${SITE_URL}/</loc>`) && sitemap.includes(`${SITE_URL}/privacidad`) && robots.includes(`Sitemap: ${SITE_URL}/sitemap.xml`), 'Metadatos: sitemap y robots con SITE_URL');

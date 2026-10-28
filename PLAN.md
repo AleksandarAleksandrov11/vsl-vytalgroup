@@ -143,4 +143,14 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - [x] Hero por campaña (TOFU, MOFU 2, BOFU 1, BOFU 2, sin UTM) sin CLS, AX8 primero con campaña, equipo y firma de Javier en la primera pantalla, comparativa tras Lo más pedido, CTA "Pedir asesoramiento gratis", tarjetas "Pedir asesoramiento", "¿Cuánto cuesta?" y 24 h.
 - [x] Aviso de cookies compacto; privacidad y cookies al día.
 - [x] Pruebas: Apps Script 52/52, API de conversiones 12/12, formulario 150/150, interfaz 138/138, diseño 17/17. INP 64 ms. Lighthouse móvil 98-100 (resto 100), escritorio y legales 100. HTML válido (vnu 26.10).
-- [ ] Producción: un envío PRUEBA (+34 600 000 000) en la revisión final; la fila la borra Aleks.
+- [x] Producción revisada y un envío PRUEBA (+34 600 000 000) el 28/10/2026 a las 14:32; la fila la borra Aleks.
+
+## 14. v18: financiación y prueba social (datos confirmados por Aleks)
+- [x] "Financiación disponible con Hotmart y Klarna" en las 6 tarjetas, bajo los datos (no hay precios).
+- [x] "Asesoramiento gratis · Financiación con Hotmart y Klarna" bajo el CTA del hero y bajo el botón del formulario.
+- [x] Duda "¿Se puede financiar?" (web y JSON-LD).
+- [x] Anuncios de CERRAR: el subtítulo del hero termina con "Y puedes financiarlo con Hotmart o Klarna.".
+- [x] "Ya hemos equipado 8 clínicas y 2 clubes de alto rendimiento" bajo el CTA del hero (primera pantalla en 390 × 844) y encima del formulario; en la franja sustituye a "0 sorpresas en mantenimiento".
+- [x] Sin logos, cuotas, plazos, intereses, nombres de clientes ni testimonios.
+- [x] Pruebas: Apps Script 52/52, API de conversiones 12/12, formulario 150/150, interfaz 151/151, diseño 17/17. INP 64 ms. Lighthouse 100 en móvil y escritorio. HTML válido.
+- [ ] Producción: un envío PRUEBA en la revisión final; la fila la borra Aleks.

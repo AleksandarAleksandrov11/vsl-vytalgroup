@@ -42,8 +42,15 @@
 .hv { display: none; }
 html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
 .v-eco .hv--eco, .v-mofu2 .hv--mofu2, .v-bofu1 .hv--bofu1, .v-bofu2 .hv--bofu2 { display: inline; }
-/* Microconfianza bajo el botón */
-.hero__trust { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 18px; font-size: .875rem; line-height: 1.35; color: rgba(255, 255, 255, .78); }
+/* Anuncios de cierre: el subtítulo añade la financiación */
+.hero__fin { display: none; }
+.v-fin .hero__fin { display: inline; }
+/* Bajo el botón: microtexto, prueba social y microconfianza */
+.hero__micro { margin-top: 16px; font-size: .875rem; line-height: 1.35; color: rgba(255, 255, 255, .86); }
+.hero__social { margin-top: 12px; }
+.hero__social span { display: inline-block; padding: 7px 14px; border-radius: 14px; font-size: .9375rem; line-height: 1.35; color: #FFF; background: rgba(72, 160, 168, .2); box-shadow: inset 0 0 0 1px rgba(127, 211, 214, .38); }
+.hero__social strong { font-weight: 600; color: #8FDCDC; }
+.hero__trust { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 12px; font-size: .875rem; line-height: 1.35; color: rgba(255, 255, 255, .78); }
 .hero__trust li { display: inline-flex; align-items: center; gap: 6px; }
 .hero__trust li::before { content: ""; flex: none; width: 14px; height: 14px; border-radius: 50%; background: #48A0A8 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8'/%3E%3C/svg%3E") center / 10px no-repeat; }
 /* Prueba: el equipo y quién te asesora */
@@ -76,6 +83,9 @@ html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
   .hero__actions { flex-direction: column; gap: 4px; margin-top: 22px; }
   .hero__cta { width: 100%; }
   .hero__more { min-height: 44px; }
+  .hero__micro { margin-top: 10px; font-size: .8125rem; }
+  .hero__social { margin-top: 10px; }
+  .hero__social span { padding: 6px 12px; font-size: .875rem; }
   .hero__trust { margin-top: 10px; font-size: .8125rem; }
 }
 @media (min-width: 900px) {
@@ -88,7 +98,7 @@ html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
   .hero__copy { display: grid; grid-template-columns: minmax(0, 640px) minmax(0, 1fr); column-gap: clamp(32px, 5vw, 96px); max-width: none; }
   .hero__copy > * { grid-column: 1; }
   .hero__proof { display: contents; }
-  .hero__product { grid-column: 2; grid-row: 1 / span 5; align-self: center; justify-self: center; width: min(100%, 320px); padding: 10px; border-radius: 28px; }
+  .hero__product { grid-column: 2; grid-row: 1 / span 7; align-self: center; justify-self: center; width: min(100%, 320px); padding: 10px; border-radius: 28px; }
   .hero__product img { border-radius: 20px; }
   .hero__sig { margin-top: 26px; }
 }
@@ -103,10 +113,11 @@ html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
 
 @media (prefers-reduced-motion: no-preference) {
   .h1 .w > span { transform: translateY(110%); animation: word-up .9s var(--ease) forwards; animation-delay: calc(80ms + var(--i, 0) * 60ms); }
-  .hero__lead, .hero__actions, .hero__trust, .hero__proof, .stats .ticker { opacity: 0; animation: fade-up .9s var(--ease) forwards; }
+  .hero__lead, .hero__actions, .hero__micro, .hero__social, .hero__trust, .hero__proof, .stats .ticker { opacity: 0; animation: fade-up .9s var(--ease) forwards; }
   .hero__lead { animation-delay: .42s; }
   .hero__actions { animation-delay: .52s; }
-  .hero__trust { animation-delay: .58s; }
+  .hero__micro, .hero__social { animation-delay: .56s; }
+  .hero__trust { animation-delay: .6s; }
   .hero__proof { animation-delay: .64s; }
   .stats .ticker { animation-delay: .7s; }
 }
@@ -144,6 +155,8 @@ html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
 .card__data div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; }
 .card__data dd { margin: 0; white-space: nowrap; font-size: clamp(1.25rem, .9rem + .8vw, 1.5rem); font-weight: 520; line-height: 1.05; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
 .card__data dt { font-size: .8125rem; line-height: 1.3; color: var(--ink-3); }
+.card__fin { display: flex; align-items: center; gap: 8px; margin: -4px 10px 16px; font-size: .8125rem; line-height: 1.35; color: var(--ink-2); }
+.card__fin .icon { flex: none; width: 18px; height: 18px; color: var(--teal); }
 .card .btn { margin: auto 10px 0; }
 .dots { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
 .dots span { width: 6px; height: 6px; border-radius: 999px; background: rgba(11, 25, 41, .2); transition: transform .45s var(--ease), background-color .3s ease; }
@@ -222,7 +235,11 @@ html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
 .lead { padding-top: calc(var(--sec) * .55); }
 /* "Cuéntanos qué necesitas." siempre en una línea (mide 10,47 em) */
 #form-title { white-space: nowrap; font-size: min(clamp(2.125rem, 1.6rem + 2.4vw, 3.75rem), calc((100vw - var(--g) * 2) / 10.8)); }
-.fcard { position: relative; margin-top: 36px; padding: 18px 18px 24px; border-radius: 28px; background: #FFF; text-align: left; box-shadow: inset 0 0 0 1px var(--line), 0 30px 70px -40px rgba(11, 25, 41, .3); }
+/* Prueba social justo encima del formulario */
+.lead__social { margin-top: 18px; }
+.lead__social span { display: inline-block; padding: 8px 16px; border-radius: 14px; font-size: .9375rem; line-height: 1.35; color: var(--ink-2); background: rgba(72, 160, 168, .1); box-shadow: inset 0 0 0 1px rgba(72, 160, 168, .28); }
+.lead__social strong { font-weight: 600; color: var(--ink); }
+.fcard { position: relative; margin-top: 22px; padding: 18px 18px 24px; border-radius: 28px; background: #FFF; text-align: left; box-shadow: inset 0 0 0 1px var(--line), 0 30px 70px -40px rgba(11, 25, 41, .3); }
 @media (min-width: 640px) { .fcard { padding: 28px 40px 40px; } }
 
 .qf { position: relative; }
@@ -323,6 +340,8 @@ html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
 }
 
 /* Aviso legal bajo el botón (sin casilla) */
+.qf__micro { margin-top: 12px; font-size: .875rem; font-weight: 500; line-height: 1.4; color: var(--ink-2); text-align: center; }
+.qf__micro + .qf__legal { margin-top: 4px; }
 .qf__legal { margin-top: 12px; font-size: .8125rem; line-height: 1.45; color: var(--ink-3); text-align: center; }
 .qf__legal a { color: var(--ink-2); text-underline-offset: 3px; }
 

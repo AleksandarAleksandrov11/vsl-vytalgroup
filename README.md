@@ -16,18 +16,18 @@ Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", 
 
 **Sistema de alineación, igual en todos los dispositivos:** titulares de sección y botones de sección siempre centrados. El hero lleva el texto a la izquierda en escritorio y centrado en móvil y tableta. "Por qué VytalGroup" es la excepción en escritorio: su titular va a la derecha de la foto de Javier, alineado a la izquierda. La cabecera es fija y siempre visible.
 
-1. **Hero** con **foto de clínica de fondo, difuminada y oscurecida** con un velo marino. El titular cambia según la campaña (apartado 5): sin UTM, "Equipos médicos de alta calidad. *Sin letra pequeña.*" y "Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas.". Debajo, el botón **"Pedir asesoramiento gratis"**, "Ver equipos" (lleva a Lo más pedido), la línea "Gratis y sin compromiso · Respuesta en menos de 24 h · Garantía de 2 años", la foto del Acclarix AX8 y la firma "Te asesora **Javier Ruiz**, fisioterapeuta y fundador" con su foto. En escritorio, el equipo va a la derecha del texto. En móvil el hero es más bajo y la franja de garantías asoma en la primera pantalla. Sin vídeo.
-   **Franja de garantías** (sección propia, fondo blanco): en bucle infinito y con un icono para cada una: 2 años de garantía · CE / MDR certificados · UE, USA y LATAM envíos · Fisioterapeutas te asesoran · 0 sorpresas en mantenimiento · Menos de 24 h de respuesta · Asesoramiento sin compromiso.
-2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con **"Pedir asesoramiento"** (salta la pregunta 1 con el modelo elegido). Con una campaña, el AX8 pasa a la primera tarjeta. En móvil y tableta se ve una tarjeta cada vez, centrada; se pasa deslizando, con puntos, y debajo "¿No sabes cuál elegir? Te ayudamos" (al formulario). CTA de sección.
+1. **Hero** con **foto de clínica de fondo, difuminada y oscurecida** con un velo marino. El titular cambia según la campaña (apartado 5): sin UTM, "Equipos médicos de alta calidad. *Sin letra pequeña.*" y "Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas.". Debajo, el botón **"Pedir asesoramiento gratis"**, "Ver equipos" (lleva a Lo más pedido), el microtexto "Asesoramiento gratis · Financiación con Hotmart y Klarna", la prueba social destacada **"Ya hemos equipado 8 clínicas y 2 clubes de alto rendimiento"** (en la primera pantalla también en móvil, sin empujar el CTA), la línea "Respuesta en menos de 24 h · Garantía de 2 años", la foto del Acclarix AX8 y la firma "Te asesora **Javier Ruiz**, fisioterapeuta y fundador" con su foto. En escritorio, el equipo va a la derecha del texto. En móvil el hero es más bajo y la franja de garantías asoma en la primera pantalla. Sin vídeo.
+   **Franja de garantías** (sección propia, fondo blanco): en bucle infinito y con un icono para cada una: 2 años de garantía · CE / MDR certificados · UE, USA y LATAM envíos · Fisioterapeutas te asesoran · 8 clínicas y 2 clubes equipados · Menos de 24 h de respuesta · Asesoramiento sin compromiso.
+2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con dos datos del equipo, la línea "Financiación disponible con Hotmart y Klarna" y el botón **"Pedir asesoramiento"** (salta la pregunta 1 con el modelo elegido). No hay precios. Con una campaña, el AX8 pasa a la primera tarjeta. En móvil y tableta se ve una tarjeta cada vez, centrada; se pasa deslizando, con puntos, y debajo "¿No sabes cuál elegir? Te ayudamos" (al formulario). CTA de sección.
 3. **¿Por qué elegir *VytalGroup?*** (comparativa, justo después de Lo más pedido). Fondo turquesa claro con una trama de puntos suave, a todo el ancho. Una tabla centrada en tarjeta blanca, con las cabeceras centradas "OTRAS MARCAS" y "VYTALGROUP": aspas grises y texto tachado en otras marcas, checks blancos sobre turquesa en VytalGroup (columna resaltada). 5 filas: comercial frente a fisioterapeutas · mantenimiento · garantía de 2 años · envío y aduana (UE, USA y LATAM, aduana gestionada) · todo el equipamiento en un solo sitio. CTA de sección.
 4. **Más equipos** ("Todo lo que tu clínica necesita."). 6 categorías con descripción al pasar o tocar, "¿Buscas otro equipo? Pregúntanos: trabajamos con más de 50 modelos." y el CTA de asesoramiento. Se funde arriba con el color de la comparativa.
 5. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") alineados a la izquierda; en móvil y tableta, centrado y con la foto debajo. Después, la firma de Javier y el CTA. Fondo marino a todo el ancho.
-6. **Dudas** ("Lo que *nos preguntáis.*"). 7 preguntas: ¿Cuánto cuesta? · ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Déjanos tu WhatsApp y te la resolvemos" (al formulario, sin preselección).
-7. **Formulario** ("Cuéntanos qué *necesitas.*", siempre en una línea). Las mismas 4 preguntas y opciones de siempre, una por pantalla:
+6. **Dudas** ("Lo que *nos preguntáis.*"). 8 preguntas: ¿Cuánto cuesta? · ¿Se puede financiar? (Hotmart o Klarna) · ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Déjanos tu WhatsApp y te la resolvemos" (al formulario, sin preselección).
+7. **Formulario** ("Cuéntanos qué *necesitas.*", siempre en una línea; justo debajo, "Ya hemos equipado 8 clínicas y 2 clubes de alto rendimiento"). Las mismas 4 preguntas y opciones de siempre, una por pantalla:
    1. ¿Qué equipo te interesa? Ecógrafo · Diatermia · Presoterapia · Ondas de choque · Otro equipo (desplegable con magnetoterapia, láser, electrólisis percutánea, camillas u otro).
    2. ¿Cuál es tu perfil? Clínica · Fisioterapeuta · Médico · Otro.
    3. ¿Cómo te llamas?
-   4. ¿A qué WhatsApp te escribimos? El prefijo sale solo según el idioma del navegador (es-MX → +52, es-AR → +54…; si no, +34). Debajo, **"Prefiero por correo"** abre la misma pregunta para el correo, con teclado de correo, formato validado y aviso si el dominio parece mal escrito. El botón dice **"Enviar y abrir WhatsApp"** (o "Enviar" con correo). Sin casilla: bajo el botón, "Al enviar aceptas la política de privacidad y que VytalGroup te contacte sobre tu solicitud."
+   4. ¿A qué WhatsApp te escribimos? El prefijo sale solo según el idioma del navegador (es-MX → +52, es-AR → +54…; si no, +34). Debajo, **"Prefiero por correo"** abre la misma pregunta para el correo, con teclado de correo, formato validado y aviso si el dominio parece mal escrito. El botón dice **"Enviar y abrir WhatsApp"** (o "Enviar" con correo). Debajo, "Asesoramiento gratis · Financiación con Hotmart y Klarna". Sin casilla: bajo el botón, "Al enviar aceptas la política de privacidad y que VytalGroup te contacte sobre tu solicitud."
 
    Las opciones avanzan solas al tocarlas. Desde "Pedir asesoramiento" de una tarjeta se salta la pregunta 1: se llega a la 2 con "Te interesa: Acclarix AX8 · Cambiar".
 
@@ -49,7 +49,13 @@ Sin teléfono, WhatsApp, correo ni Instagram: los datos de contacto del titular 
 
 ## 2. Cambios de las últimas rondas
 
-**v17 (esta ronda): optimización de leads y sin fugas**
+**v18 (esta ronda): financiación y prueba social (datos confirmados por Aleks)**
+
+- **Financiación:** "Financiación disponible con Hotmart y Klarna" en las 6 tarjetas (no hay precios); "Asesoramiento gratis · Financiación con Hotmart y Klarna" bajo el CTA del hero y bajo el botón del formulario; nueva duda "¿Se puede financiar?" (también en el JSON-LD); y en los anuncios de CERRAR (MOFU 1, MOFU 2, BOFU 1 y BOFU 2) el subtítulo del hero termina con "Y puedes financiarlo con Hotmart o Klarna.". Solo texto: sin logos, cuotas, plazos ni intereses.
+- **Prueba social:** "Ya hemos equipado 8 clínicas y 2 clubes de alto rendimiento" bajo el CTA del hero (primera pantalla en 390 × 844) y encima del formulario. En la franja de garantías sustituye a "0 sorpresas en mantenimiento", que no era una cifra confirmada.
+- Sin nombres de clínicas o clubes, logos ni testimonios.
+
+**v17: optimización de leads y sin fugas**
 
 - **Un solo camino, el formulario.** Fuera el WhatsApp de la barra móvil, el de Dudas y las columnas Contacto y Síguenos del pie (también en las legales). WhatsApp solo aparece después de enviar (o en la pantalla de error). Una prueba falla si aparece cualquier otro `wa.me`, `tel:`, `mailto:`, `instagram.com` o enlace externo. Los legales se abren en otra pestaña.
 - **Sin catálogo PDF:** fuera de la web y del repositorio. `/assets/docs/catalogo-vytalgroup-2026.pdf` redirige con 301 a `/#asesoramiento`. "53 páginas de catálogo" pasa a "Asesoramiento sin compromiso".
@@ -336,6 +342,8 @@ utm_source=meta&utm_medium=paid&utm_campaign={{campaign.name}}&utm_term={{adset.
 | MOFU 2 | ¿Ecógrafo portátil *o de carro?* | Cuéntanos cómo trabajas y te decimos cuál encaja contigo. |
 | BOFU 1 | Asesoramiento *sin compromiso.* | 10 minutos para saber qué equipo tiene sentido para ti. |
 | BOFU 2 | Todo por escrito. *Sin sorpresas.* | Qué incluye, qué garantía tiene y cuánto cuesta el mantenimiento, antes de pagar. |
+
+En todos los de la campaña **CERRAR** (y en MOFU 1, MOFU 2, BOFU 1 y BOFU 2 aunque falte la campaña), el subtítulo termina además con "Y puedes financiarlo con Hotmart o Klarna.".
 | Sin UTM | Equipos médicos de alta calidad. *Sin letra pequeña.* | Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas. |
 
 Los nombres se comparan sin espacios ni mayúsculas ("BOFU 1", "bofu1" y "BOFU-1" valen igual). Para un anuncio nuevo, añade su nombre al mapa del script de `index.html`: la compilación avisa con el hash nuevo que hay que poner en la CSP de `vercel.json`.
@@ -385,7 +393,7 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 4. **Revisión legal** de los textos (apartado 9), en especial el envío del Lead a Meta desde el servidor para todos los leads (interés legítimo, con datos cifrados y derecho de oposición).
 5. **Material que no llegó** (opcional): fotos de los Acclarix a más resolución (el catálogo trae unos 550 px) y una foto de Javier más grande (la recibida es de 640 × 640).
 
-Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas y Resumen (desplegado), avisos a aaswebmarketing@gmail.com y "respuesta en menos de 24 h" (confirmado). Precios, financiación y opiniones de clientes no se mencionan.
+Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas y Resumen (desplegado), avisos a aaswebmarketing@gmail.com y "respuesta en menos de 24 h" (confirmado). Financiación (Hotmart y Klarna) y prueba social (8 clínicas y 2 clubes de alto rendimiento) confirmadas por Aleks. Precios, cuotas, nombres de clientes, logos y testimonios no se mencionan.
 
 ---
 
@@ -425,7 +433,7 @@ Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas 
 
 ## 10. Historial
 
-- **v17 (esta ronda)** y de la **v5** a la **v16:** ver apartado 2.
+- **v18 (esta ronda)**, **v17** y de la **v5** a la **v16:** ver apartado 2.
 - **v4:** hero con fotos y vídeo de clientes y sin testimonios. Sustituido en la v5.
 - **v3:**
   - enfoque "equipos médicos sin letra pequeña";
@@ -454,7 +462,8 @@ Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas 
   - pantalla de error con todos los datos en el WhatsApp y Contact `error-envio`;
   - el PDF del catálogo responde 301 a `/#asesoramiento`;
   - lo de antes: cookies, "Pedir asesoramiento" de las tarjetas, validaciones, prefijos, "Otro equipo", "Prefiero por correo", doble clic, otra solicitud, endpoint vacío, error del servidor y antispam.
-- **Interfaz (138):**
+- **Interfaz (151):**
+  - **financiación y prueba social** en 390 y 1440 px: microtexto y prueba social bajo el CTA del hero, en la primera pantalla sin empujar el CTA; financiación en las 6 tarjetas, bajo los datos; prueba social encima del formulario y microtexto bajo el botón; "¿Se puede financiar?"; subtítulo con financiación solo en los anuncios de CERRAR; sin cuotas, intereses, testimonios ni logos de Hotmart o Klarna;
   - **sin fugas:** el código (`index.html`, el JS de la landing y las legales) solo tiene WhatsApp, teléfono, correo o Instagram en el gracias, el error, el JSON-LD y el texto legal; en la página servida todos los enlaces son internos, legales en pestaña nueva o el WhatsApp de después del envío; nada de eso visible al recorrer la página entera; logos a `#inicio`; legales que se abren en otra pestaña;
   - **hero por campaña** (TOFU 1, TOFU 3, DESCUBRIR, MOFU 2, BOFU 1, BOFU 2, `?v=` y sin UTM) en 390 y 1440 px, con CLS 0; el AX8 primero con campaña;
   - barra móvil con un único botón a todo el ancho; pie sin contacto con CTA; 7 dudas iguales en la web y en el JSON-LD; 7 garantías con icono distinto;
@@ -464,7 +473,7 @@ Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas 
 
 | | Rendimiento | Accesibilidad | Buenas prácticas | SEO |
 |---|---|---|---|---|
-| Móvil, landing (4G lenta simulada) | 98-100 | 100 | 100 | 100 |
+| Móvil, landing (4G lenta simulada) | 98-100 (100 en la v18) | 100 | 100 | 100 |
 | Escritorio, landing | 100 | 100 | 100 | 100 |
 | Móvil, páginas legales | 100 | 100 | 100 | 100 |
 
