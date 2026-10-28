@@ -169,6 +169,7 @@ ul[class], ol[class] { list-style: none; padding: 0; }
 .ft a, .ft button { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: rgba(255, 255, 255, .86); text-decoration: none; background: none; border: 0; padding: 0; cursor: pointer; font-size: inherit; text-align: inherit; }
 .ft__list .icon { width: 18px; height: 18px; color: #7FD3D6; }
 .ft a:hover, .ft button:hover { color: #FFF; text-decoration: underline; text-underline-offset: 4px; }
+.ft__bottom a { display: inline; min-height: 0; color: inherit; }
 .ft__bottom { display: grid; justify-items: center; gap: 4px; margin-top: 44px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, .1); font-size: .8125rem; text-align: center; color: rgba(255, 255, 255, .5); }
 /* Nombre de la empresa a todo el ancho: "Vytal" en blanco y "Group" en turquesa, como el logo */
 .ft__word { margin-top: 28px; }
