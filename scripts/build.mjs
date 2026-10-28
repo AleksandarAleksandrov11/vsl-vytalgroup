@@ -1,9 +1,10 @@
 // Compilación de producción → dist/ (lo que publica Vercel)
 // · SITE_URL (site.config.mjs) → canonical, og:url, og:image, JSON-LD, sitemap.xml y robots.txt
 //   (en los HTML fuente se escribe https://site-url.invalid y aquí se sustituye).
-// · Todo /assets lleva hash en el nombre (caché inmutable), salvo el PDF del catálogo.
+// · Todo /assets lleva hash en el nombre (caché inmutable).
 // · CSS: lightningcss (minificado) e insertado inline en cada HTML (no bloquea el render).
-// · JS: esbuild (módulos ES, división de código, minificado, hash). Sin scripts inline (CSP).
+// · JS: esbuild (módulos ES, división de código, minificado, hash). Único script inline: el de la variante
+//   del hero en index.html, autorizado en la CSP de vercel.json por su hash (se comprueba aquí).
 // · HTML: rutas reescritas a los archivos con hash y minificado.
 // · Informe de pesos y presupuestos (gzip).
 import { build } from 'esbuild';
@@ -19,7 +20,6 @@ const ROOT = process.cwd();
 const DIST = join(ROOT, 'dist');
 const PAGES = ['index.html', 'aviso-legal.html', 'privacidad.html', 'cookies.html'];
 const HASHED = ['assets/brand', 'assets/fonts', 'assets/img'];
-const PDF = 'assets/docs/catalogo-vytalgroup-2026.pdf';
 const TARGETS = { chrome: 100 << 16, safari: 15 << 16, ios_saf: 15 << 16, firefox: 100 << 16, edge: 100 << 16, samsung: 16 << 16 };
 const BUDGET = { initial: 250, js: 30, css: 25 };
 const PLACEHOLDER = 'https://site-url.invalid'; // en los HTML fuente; se sustituye por SITE_URL
@@ -48,8 +48,6 @@ for (const dir of HASHED) {
     map.set(`/${dir}/${file}`, `/${dir}/${out}`);
   }
 }
-mkdirSync(join(DIST, 'assets/docs'), { recursive: true });
-cpSync(join(ROOT, PDF), join(DIST, PDF));
 cpSync(join(ROOT, 'config.js'), join(DIST, 'config.js'));
 
 const rewrite = (text) => {
@@ -96,6 +94,7 @@ for (const [out, meta] of Object.entries(result.metafile.outputs)) {
 
 // ---------------------------------------------------------------- HTML
 const inlineCss = {};
+const csp = JSON.parse(readFileSync(join(ROOT, 'vercel.json'), 'utf8')).headers.flatMap((h) => h.headers).find((h) => h.key === 'Content-Security-Policy').value;
 for (const file of PAGES) {
   let html = readFileSync(join(ROOT, file), 'utf8');
   // Los <link data-inline> consecutivos se sustituyen por un único <style>
@@ -121,6 +120,11 @@ for (const file of PAGES) {
     removeRedundantAttributes: false,
     sortAttributes: false,
   });
+  // Scripts inline: cada uno tiene que estar autorizado en la CSP por su hash SHA-256
+  for (const m of min.matchAll(/<script>([\s\S]*?)<\/script>/g)) {
+    const h = `'sha256-${createHash('sha256').update(m[1]).digest('base64')}'`;
+    if (!csp.includes(h)) throw new Error(`${file}: el script inline no está en la CSP de vercel.json. Añade ${h} a script-src.`);
+  }
   mkdirSync(dirname(join(DIST, file)), { recursive: true });
   writeFileSync(join(DIST, file), min);
 }
@@ -160,7 +164,6 @@ const js = readdirSync(join(DIST, 'assets/js')).reduce((a, f) => a + gz(readFile
 const cssIndex = gz(Buffer.from(inlineCss['index.html']));
 console.log(`JS propio total (gzip): ${kb(js)} (presupuesto ${BUDGET.js} KB)`);
 console.log(`CSS de la landing (gzip): ${kb(cssIndex)} (presupuesto ${BUDGET.css} KB)`);
-console.log(`Catálogo PDF: ${kb(statSync(join(DIST, PDF)).size)}`);
 const over = [total > BUDGET.initial * 1024 && 'carga inicial', js > BUDGET.js * 1024 && 'JS', cssIndex > BUDGET.css * 1024 && 'CSS'].filter(Boolean);
 if (over.length) throw new Error(`Presupuesto superado: ${over.join(', ')}`);
 console.log('\nListo: dist/');

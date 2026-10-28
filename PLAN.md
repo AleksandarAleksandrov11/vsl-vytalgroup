@@ -131,3 +131,16 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - [x] "Cuéntanos qué necesitas." en una línea y el formulario más cerca de Dudas.
 - [x] Pruebas: Apps Script 17/17, formulario 102/102, interfaz 131/131, diseño 17/17. INP 96 ms. Lighthouse 100. HTML válido.
 
+
+## 13. v17: optimización de leads y sin fugas (con las correcciones finales)
+- [x] Catálogo PDF fuera (web, repositorio y dist) y 301 a `/#asesoramiento`; sin botón de catálogo; ticker "Asesoramiento sin compromiso"; nota "¿Buscas otro equipo?"; "Ver equipos" en el hero.
+- [x] Sin fugas antes del formulario: barra móvil con un solo botón, FAQ "¿Otra duda? Déjanos tu WhatsApp y te la resolvemos" al formulario sin preselección, pie sin Contacto ni Síguenos y con CTA, legales en pestaña nueva, logos a `#inicio`. Prueba automática de enlaces.
+- [x] WhatsApp tras enviar: se abre solo en móvil (1,5 s, tras el Lead), botón de respaldo, escritorio y correo sin redirección, vuelta atrás al gracias sin reenviar; error con todos los datos y Contact `error-envio`.
+- [x] Formulario: preguntas y opciones de siempre; prefijo por idioma; "Enviar y abrir WhatsApp"; aviso de privacidad bajo el botón.
+- [x] Apps Script y hoja sin tocar: mismos 14 campos (prueba de contrato) y `Code.gs` igual al desplegado. Sin lead parcial.
+- [x] Lead por servidor en `api/lead-capi.js` (Vercel): SHA-256, IP y navegador de la petición, fbc y fbp, mismo `event_id`, sin token no hace nada, PRUEBA no se envía. Variables `META_CAPI_TOKEN` (lo pone Aleks) y `META_PIXEL_ID`.
+- [x] Píxel: embudo FormStart / FormStep / FormError y coincidencia avanzada antes del Lead.
+- [x] Hero por campaña (TOFU, MOFU 2, BOFU 1, BOFU 2, sin UTM) sin CLS, AX8 primero con campaña, equipo y firma de Javier en la primera pantalla, comparativa tras Lo más pedido, CTA "Pedir asesoramiento gratis", tarjetas "Pedir asesoramiento", "¿Cuánto cuesta?" y 24 h.
+- [x] Aviso de cookies compacto; privacidad y cookies al día.
+- [x] Pruebas: Apps Script 52/52, API de conversiones 12/12, formulario 150/150, interfaz 138/138, diseño 17/17. INP 64 ms. Lighthouse móvil 98-100 (resto 100), escritorio y legales 100. HTML válido (vnu 26.10).
+- [ ] Producción: un envío PRUEBA (+34 600 000 000) en la revisión final; la fila la borra Aleks.

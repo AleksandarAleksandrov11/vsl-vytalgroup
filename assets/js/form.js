@@ -1,35 +1,34 @@
 // Formulario corto de 4 preguntas, una por pantalla:
-//   1. ¿Qué equipo te interesa? (desde "Lo quiero" el modelo ya viene elegido y se salta este paso)
-//   2. ¿Cuál es tu perfil? Clínica, fisioterapeuta, médico u otro.
+//   1. ¿Qué equipo te interesa? (desde "Pedir asesoramiento" de una tarjeta el modelo ya viene elegido y
+//      se salta este paso)
+//   2. ¿Cuál es tu perfil?
 //   3. ¿Cómo te llamas?
-//   4. ¿A qué WhatsApp te escribimos? + consentimiento. Con "Prefiero por correo" la misma
-//      pregunta pasa a pedir el correo (formato validado y aviso si el dominio parece mal escrito).
+//   4. ¿A qué WhatsApp te escribimos? Con "Prefiero por correo" la misma pregunta pasa a pedir el
+//      correo (formato validado y aviso si el dominio parece mal escrito). Sin casilla: bajo el
+//      botón, un aviso de que al enviar se acepta la política de privacidad.
 // · Avance automático al elegir una opción con el dedo o el ratón; con teclado, Enter.
 // · Validación en línea, datos conservados al volver atrás, prefijo con buscador.
 // · Antispam: campo trampa, tiempo mínimo de 3 s y bloqueo de doble envío.
-// · Envío a Google Apps Script (texto plano, sin preflight CORS). Solo tras una respuesta
-//   { ok: true } se muestra el "gracias" y se dispara Lead (una vez, eventID = event_id).
-// · "Enviar otra solicitud" (o un "Lo quiero" después del gracias) empieza otra con un event_id nuevo.
+// · Envío a Google Apps Script (texto plano, sin preflight CORS) con los mismos campos de siempre
+//   (contrato con la hoja: tests/qa-form.cjs). Solo tras una respuesta { ok: true } se muestra el
+//   "gracias" y se dispara Lead una vez, por el píxel y por servidor (función de Vercel
+//   /api/lead-capi, API de conversiones), con el mismo event_id.
+// · Con WhatsApp, en móvil se abre WhatsApp solo con el mensaje escrito (navegación, a los 1,5 s);
+//   en escritorio se intenta en otra pestaña si el navegador lo permite y queda el botón.
+// · "Enviar otra solicitud" (o un "Pedir asesoramiento" después del gracias) empieza otra con un event_id nuevo.
+// · Embudo: FormStart, FormStep y FormError (eventos personalizados del píxel).
 
 import { COUNTRIES } from './data.js';
 import { createSelect } from './select.js';
 import { getAttribution } from './attribution.js';
-import { lead } from './tracking.js';
+import { lead, contact, matchUser, formStart, formStep, formError } from './tracking.js';
 
 const TOTAL = 4;
 const MIN_MS = 3000;
 const WA = 'https://wa.me/34616372644?text=';
-const WHAT = {
-  'Ecógrafo': 'un ecógrafo',
-  'Diatermia': 'una diatermia',
-  'Presoterapia': 'un equipo de presoterapia',
-  'Ondas de choque': 'un equipo de ondas de choque',
-  'Magnetoterapia de alta intensidad': 'un equipo de magnetoterapia de alta intensidad',
-  'Láser de alta potencia': 'un láser de alta potencia',
-  'Electrólisis percutánea ecoguiada': 'un equipo de electrólisis percutánea ecoguiada',
-  'Camillas de fisioterapia': 'una camilla de fisioterapia',
-  'Otro equipo': 'otro equipo del catálogo',
-};
+// Apertura de WhatsApp en móvil: indicador de 1,5 s; Contact sale antes, con margen para el píxel
+const WA_DELAY = 1500;
+const CONTACT_AT = 700;
 // "Otro equipo" en el paso 1 abre un desplegable con el resto de categorías del catálogo
 const OTHER = ['Magnetoterapia de alta intensidad', 'Láser de alta potencia', 'Electrólisis percutánea ecoguiada', 'Camillas de fisioterapia', 'Otro'];
 const WITH_MODELS = ['Ecógrafo', 'Diatermia'];
@@ -192,6 +191,7 @@ function setContact(mode, focus = true) {
   fieldError('email', '');
   ui.hint.hidden = true;
   const field = mode === 'email' ? ui.email : ui.tel;
+  sendLabel();
   if (focus) field.focus({ preventScroll: true });
   ui.live.textContent = step.querySelector(`[data-contact="${mode}"] .qf__q`).textContent;
 }
@@ -237,6 +237,7 @@ function check(n) {
   const msg = problem(n);
   if (n <= 2) setError(n, msg);
   else fieldError(n === 3 ? 'name' : state.contact, msg);
+  if (msg) formError(n, [state.equipo === 'Otro equipo' ? 'otro' : 'equipo', 'perfil', 'nombre', state.contact === 'email' ? 'email' : 'telefono'][n - 1]);
   return !msg;
 }
 // Campo que recibe el foco en cada paso (en el 4, el de WhatsApp o el de correo)
@@ -244,14 +245,6 @@ function fieldOf(n) {
   const el = stepEl(n);
   if (n === 4) return state.contact === 'email' ? ui.email : ui.tel;
   return el.querySelector('.field') || el.querySelector('input[type=radio]:checked') || el.querySelector('input[type=radio]');
-}
-function consentOk(show) {
-  const ok = ui.consent.checked;
-  if (show || ok) {
-    ui.consentErr.textContent = ok ? '' : 'Necesitamos tu permiso para escribirte.';
-    ui.consent.setAttribute('aria-invalid', String(!ok));
-  }
-  return ok;
 }
 
 // ------------------------------------------------------------------ navegación
@@ -303,6 +296,7 @@ function goTo(n, dir = 'fwd') {
   state.step = n;
   stepEl(n).classList.add('is-active');
   update();
+  if (dir === 'fwd') formStep(n);
   focusStep();
   keepInView();
   const q = n === 4 ? stepEl(4).querySelector(`[data-contact="${state.contact}"] .qf__q`) : stepEl(n).querySelector('.qf__q');
@@ -334,9 +328,10 @@ function showOther(on) {
 }
 
 // ------------------------------------------------------------------ preselección desde las tarjetas
-// "Lo quiero" ya dice el equipo y el modelo: se va directo a los datos de contacto
+// "Pedir asesoramiento" ya dice el equipo y el modelo: se va directo a los datos de contacto
 function applyPreselect(model, equipo) {
   if (finished) again(false);
+  formStart();
   state.equipo = equipo;
   state.modelo = model;
   showOther(false);
@@ -348,7 +343,8 @@ function applyPreselect(model, equipo) {
 }
 
 // ------------------------------------------------------------------ envío
-// Solo lo que se guarda en la hoja (más el consentimiento, el event_id y el campo trampa)
+// Solo lo que se guarda en la hoja (más el consentimiento, el event_id y el campo trampa).
+// Mismos campos que siempre: el Apps Script y la hoja no cambian.
 function payload() {
   const a = getAttribution();
   const byEmail = state.contact === 'email';
@@ -369,11 +365,56 @@ function payload() {
     website: form.elements.website.value || '',
   };
 }
-function waText() {
-  const name = ui.name.value.trim().split(/\s+/)[0];
-  const what = state.modelo ? shortModel(state.modelo) : WHAT[equipoFinal()] || 'vuestros equipos';
-  return encodeURIComponent(`Hola, ${name ? `soy ${name}. ` : ''}vengo de la web y me interesa ${what}.`);
+// Lead por servidor (API de conversiones, función de Vercel /api/lead-capi) con el mismo event_id
+// que el píxel. Es el mismo dominio y no espera respuesta: si falla, el usuario no lo nota.
+function serverLead() {
+  const a = getAttribution();
+  const byEmail = state.contact === 'email';
+  const body = {
+    event_id: state.eventId,
+    nombre: ui.name.value.trim(),
+    telefono: byEmail ? '' : phoneFull(),
+    email: byEmail ? emailValue() : '',
+    country: byEmail || state.country.iso === 'XX' ? '' : state.country.iso,
+    content_name: state.modelo || equipoFinal(),
+    content_category: equipoFinal(),
+    fbc: a.fbc || '',
+    fbp: a.fbp || '',
+    event_source_url: location.href.slice(0, 1000),
+  };
+  try {
+    fetch('/api/lead-capi', { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => {});
+  } catch { /* sin conexión */ }
 }
+// Mensaje de WhatsApp ya escrito, sin emojis: tres líneas tras enviar; si el envío falla, además
+// el teléfono o el correo, para que no se pierda ningún dato
+function interest() {
+  const eq = equipoFinal();
+  return eq ? `Me interesa: ${state.modelo || eq}.` : '';
+}
+function waText() {
+  const lines = [
+    `Hola, soy ${ui.name.value.trim()}. Acabo de pedir asesoramiento en la web.`,
+    interest(),
+    `Perfil: ${state.perfil}.`,
+  ];
+  return encodeURIComponent(lines.join('\n'));
+}
+function failText() {
+  const name = ui.name.value.trim();
+  const lines = [
+    `Hola${name ? `, soy ${name}` : ''}. He intentado pedir asesoramiento en la web y no se ha enviado.`,
+    interest(),
+    state.perfil ? `Perfil: ${state.perfil}.` : '',
+    state.contact === 'email' ? `Mi correo: ${emailValue()}.` : `Mi WhatsApp: ${phoneFull()}.`,
+  ];
+  return encodeURIComponent(lines.filter(Boolean).join('\n'));
+}
+function sendLabel() {
+  ui.submit.querySelector('span').textContent = state.contact === 'email' ? 'Enviar' : 'Enviar y abrir WhatsApp';
+}
+// Escritorio: puntero fino y sin pantalla táctil
+const isDesktop = () => matchMedia('(pointer: fine)').matches && !matchMedia('(any-pointer: coarse)').matches && !(navigator.maxTouchPoints > 0);
 function setLoading(on) {
   ui.submit.classList.toggle('is-loading', on);
   ui.submit.setAttribute('aria-busy', String(on));
@@ -401,7 +442,6 @@ async function submit() {
       return;
     }
   }
-  if (!consentOk(true)) { ui.consent.focus(); return; }
   busy = true;
   setLoading(true);
   const data = payload();
@@ -447,25 +487,97 @@ function showEnd(el) {
   el.focus({ preventScroll: true });
   keepInView();
 }
+// Gracias: con WhatsApp, en móvil se abre WhatsApp solo (navegación, no window.open: tras un await
+// lo bloquean iOS, Instagram y Facebook); en escritorio se intenta en otra pestaña solo si el navegador
+// aún considera el clic como gesto, y si no queda el botón. Con correo no se abre nada.
+let goTimer = 0;
+let contactTimer = 0;
 function done(real) {
   finished = true;
   const first = ui.name.value.trim().split(/\s+/)[0] || '';
-  ui.doneTitle.textContent = first ? `Gracias, ${first}. Te escribimos muy pronto.` : 'Gracias. Te escribimos muy pronto.';
-  ui.doneWa.href = WA + waText();
+  const hi = first ? `Gracias, ${first}.` : 'Gracias.';
+  const url = WA + waText();
+  const byEmail = state.contact === 'email';
+  const desk = isDesktop();
+  ui.doneWa.href = url;
+  ui.doneWaLabel.textContent = byEmail ? 'Escríbenos por WhatsApp' : desk ? 'Abrir WhatsApp Web' : 'Abrir WhatsApp';
+  ui.doneText.textContent = byEmail ? '¿Prefieres hablar ya?' : desk ? 'Escríbenos ya con el mensaje preparado.' : 'Si no se abre solo, toca aquí.';
+  ui.doneTitle.textContent = byEmail ? `${hi} Te escribimos en menos de 24 horas.` : `${hi} Te abrimos WhatsApp para que nos escribas ya.`;
   update();
   showEnd(ui.done);
   ui.live.textContent = ui.doneTitle.textContent;
-  if (real) lead(state.eventId, state.modelo ? shortModel(state.modelo) : equipoFinal(), equipoFinal());
+  if (real) {
+    matchUser(matchData());
+    lead(state.eventId, state.modelo || equipoFinal(), equipoFinal());
+    serverLead();
+    saveDone();
+  }
   window.dispatchEvent(new CustomEvent('vg:lead-done'));
+  if (!real || byEmail) return;
+  if (desk) {
+    const active = navigator.userActivation ? navigator.userActivation.isActive : false;
+    const w = active ? window.open(url, '_blank') : null;
+    if (w) { try { w.opener = null; } catch { /* otra ventana */ } contact('gracias-auto'); }
+    return;
+  }
+  ui.go.hidden = false;
+  contactTimer = setTimeout(() => contact('gracias-auto'), CONTACT_AT);
+  goTimer = setTimeout(() => { ui.go.hidden = true; window.location.href = url; }, WA_DELAY);
 }
+// Al volver desde WhatsApp con el botón Atrás, el navegador puede recargar la página: se vuelve a
+// mostrar el gracias (sin enviar nada, sin Lead y sin abrir WhatsApp otra vez)
+const DONE_KEY = 'vg_done';
+function saveDone() {
+  try {
+    sessionStorage.setItem(DONE_KEY, JSON.stringify({ t: Date.now(), title: ui.doneTitle.textContent, text: ui.doneText.textContent, label: ui.doneWaLabel.textContent, href: ui.doneWa.href }));
+  } catch { /* sin almacenamiento */ }
+}
+function restoreDone() {
+  let saved = null;
+  try { saved = JSON.parse(sessionStorage.getItem(DONE_KEY) || 'null'); } catch { saved = null; }
+  if (!saved || !(Date.now() - saved.t < 30 * 60e3)) return;
+  finished = true;
+  ui.doneTitle.textContent = saved.title;
+  ui.doneText.textContent = saved.text;
+  ui.doneWaLabel.textContent = saved.label;
+  ui.doneWa.href = saved.href;
+  stepEl(state.step).classList.remove('is-active');
+  form.classList.add('is-finished');
+  ui.done.hidden = false;
+  update();
+}
+export const cameBack = () => {
+  try { return performance.getEntriesByType('navigation')[0].type === 'back_forward'; } catch { return false; }
+};
+function stopGo() {
+  clearTimeout(goTimer);
+  clearTimeout(contactTimer);
+  if (ui.go) ui.go.hidden = true;
+}
+// Datos de coincidencia avanzada para el píxel, normalizados como pide Meta
+function matchData() {
+  const m = {};
+  const fn = (ui.name.value.trim().split(/\s+/)[0] || '').toLowerCase().replace(/[^\p{L}\p{M}]/gu, '');
+  if (fn) m.fn = fn;
+  if (state.contact === 'email') {
+    m.em = emailValue();
+  } else {
+    m.ph = phoneFull().replace(/\D/g, '');
+    if (state.country.iso !== 'XX') m.country = state.country.iso.toLowerCase();
+  }
+  return m;
+}
+
 function failed() {
-  ui.failWa.href = WA + waText();
+  ui.failWa.href = WA + failText();
   showEnd(ui.fail);
   ui.live.textContent = 'No se ha podido enviar. Tus datos siguen aquí.';
 }
 // Otra solicitud: vuelve al paso 1 con un event_id nuevo. Se conservan perfil, nombre y contacto;
-// el equipo y el consentimiento se vuelven a pedir.
+// el equipo se vuelve a pedir.
 function again(focus = true) {
+  stopGo();
+  try { sessionStorage.removeItem(DONE_KEY); } catch { /* sin almacenamiento */ }
   finished = false;
   ui.done.hidden = true;
   ui.fail.hidden = true;
@@ -474,9 +586,6 @@ function again(focus = true) {
   form.querySelectorAll('input[name="equipo"]').forEach((r) => { r.checked = false; });
   showOther(false);
   other.clear();
-  ui.consent.checked = false;
-  ui.consentErr.textContent = '';
-  ui.consent.removeAttribute('aria-invalid');
   Object.assign(state, { step: 1, equipo: '', modelo: '', eventId: uuid() });
   setError(1, '');
   stepEl(1).classList.add('is-active');
@@ -516,24 +625,28 @@ export function initForm() {
     hint: $('[data-email-hint]'),
     hintFix: $('[data-email-fix]'),
     contacts: [...form.querySelectorAll('[data-contact]')],
-    consent: form.elements.consent,
-    consentErr: $('[data-error-consent]'),
     submit: $('[data-submit]'),
     done: $('[data-done]'),
     doneTitle: $('[data-done-title]'),
     doneWa: $('[data-done-wa]'),
+    doneWaLabel: $('[data-done-wa] span'),
+    doneText: $('[data-done-text]'),
+    go: $('[data-go]'),
     fail: $('[data-fail]'),
     failWa: $('[data-fail-wa]'),
     live: $('[data-live]'),
   };
-  state = { step: 1, equipo: '', modelo: '', otro: '', perfil: '', contact: 'tel', country: COUNTRIES[0], eventId: uuid(), t0: performance.now() };
+  // Prefijo según el idioma del navegador (es-MX, es-AR, es-CO…); si no, España
+  const region = (/^es-([a-z]{2})$/i.exec(navigator.language || '') || [])[1];
+  const home = COUNTRIES.find((c) => region && c.iso === region.toUpperCase() && c.dial) || COUNTRIES[0];
+  state = { step: 1, equipo: '', modelo: '', otro: '', perfil: '', contact: 'tel', country: home, eventId: uuid(), t0: performance.now() };
 
   prefix = createSelect($('[data-prefix]'), {
     id: 'pf',
     className: 'sel--prefix',
     title: 'Prefijo',
     options: COUNTRIES.map((c) => ({ value: c.iso, label: c.name, html: `${c.flag}<span>${c.name}</span>`, hint: c.dial ? `+${c.dial}` : '', c })),
-    value: 'ES',
+    value: home.iso,
     searchable: true,
     searchLabel: 'Buscar país o prefijo',
     button: (x) => `${x.c.flag}<span>${x.c.dial ? `+${x.c.dial}` : '+'}</span>`,
@@ -546,7 +659,7 @@ export function initForm() {
       ui.tel.focus({ preventScroll: true });
     },
   });
-  setCountry(COUNTRIES[0]);
+  setCountry(home);
 
   other = createSelect($('[data-other-select]'), {
     id: 'otro',
@@ -623,12 +736,16 @@ export function initForm() {
   // Al salir del campo solo se limpia (minúsculas y sin espacios). El aviso de dominio mal escrito sale al
   // pulsar Enviar: si saliera aquí, movería el botón justo cuando se está tocando.
   ui.email.addEventListener('change', () => { ui.email.value = emailValue(); });
-  ui.consent.addEventListener('change', () => consentOk(false));
+  ui.doneWa.addEventListener('click', stopGo);
+  // Embudo: primera interacción con el formulario
+  ['pointerdown', 'focusin', 'input'].forEach((ev) => form.addEventListener(ev, formStart, { once: true }));
   [ui.name, ui.tel, ui.email].forEach((f) => f.addEventListener('focus', () => setTimeout(fitStep, 350)));
   if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { if (form.contains(document.activeElement)) fitStep(); });
 
   ready = true;
+  sendLabel();
   update();
+  if (cameBack()) restoreDone();
   if (pending) {
     applyPreselect(pending.model, pending.equipo);
     pending = null;

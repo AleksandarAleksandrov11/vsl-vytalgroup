@@ -7,7 +7,7 @@
 
 import { captureAttribution } from './attribution.js';
 import { initConsent } from './consent.js';
-import { initTracking, viewContent, catalogDownload, contact } from './tracking.js';
+import { initTracking, viewContent, contact } from './tracking.js';
 import { initFooter } from './footer.js';
 
 const html = document.documentElement;
@@ -172,6 +172,13 @@ tabs.forEach((t, i) => {
   });
 });
 
+// Visita desde un anuncio (todos hablan de ecógrafos): el AX8 pasa al primer puesto de Ecógrafos
+if (/\bv-/.test(html.className)) {
+  const ax8 = $('[data-want^="Acclarix AX8"]');
+  const li = ax8 && ax8.closest('li');
+  if (li && li.parentElement.firstElementChild !== li) li.parentElement.prepend(li);
+}
+
 // Carrusel de móvil y tableta: los puntos siguen a la tarjeta visible
 $$('[data-carousel]').forEach((track) => {
   const cards = [...track.children];
@@ -289,6 +296,8 @@ if (hasIO) {
   loadForm();
 }
 ['pointerdown', 'focusin'].forEach((ev) => formSec.addEventListener(ev, loadForm, { once: true }));
+// Vuelta atrás desde WhatsApp tras enviar: el formulario se carga ya para enseñar el gracias
+try { if (sessionStorage.getItem('vg_done') && performance.getEntriesByType('navigation')[0].type === 'back_forward') loadForm(); } catch { /* sin almacenamiento */ }
 
 // Al llegar al formulario desde un CTA, el foco pasa a la pregunta actual
 // Enlaces internos: desplazamiento suave solo en saltos cortos; en los largos (p. ej. de una
@@ -320,30 +329,25 @@ document.addEventListener('click', (e) => {
 });
 
 // ------------------------------------------------------------------ barra fija en móvil
-// Aparece al pasar el hero y se oculta con el formulario en pantalla.
-// El icono de WhatsApp se oculta cuando se ve el enlace de Dudas o el del pie.
+// Aparece al pasar el hero y se oculta con el formulario en pantalla. Un solo botón: el formulario
+// (antes de enviar no hay WhatsApp, teléfono ni correo a la vista).
 const bar = $('[data-mbar]');
-const faqWa = $('[data-faq-wa]');
-const ftWa = $('[data-ft-wa]');
 const hero = $('#inicio');
-const vis = { hero: true, form: false, faqWa: false, ftWa: false };
+const vis = { hero: true, form: false };
 function paintBar() {
   const on = !vis.hero && !vis.form;
   bar.classList.toggle('is-on', on);
   bar.inert = !on;
-  bar.classList.toggle('no-wa', vis.faqWa || vis.ftWa);
 }
 if (hasIO) {
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
       if (e.target === hero) vis.hero = e.isIntersecting;
       else if (e.target === formSec) vis.form = e.isIntersecting;
-      else if (e.target === faqWa) vis.faqWa = e.isIntersecting;
-      else if (e.target === ftWa) vis.ftWa = e.isIntersecting;
     });
     paintBar();
   }, { rootMargin: '0px 0px -12% 0px' });
-  [hero, formSec, faqWa, ftWa].forEach((el) => el && io.observe(el));
+  [hero, formSec].forEach((el) => el && io.observe(el));
 }
 
 // ------------------------------------------------------------------ botones magnéticos (escritorio)
@@ -378,7 +382,6 @@ if (hasIO) {
   window.addEventListener('vg:consent', () => { if (!sent) { io.unobserve(equipos); io.observe(equipos); } });
 }
 document.addEventListener('click', (e) => {
-  if (e.target.closest('[data-catalog]')) catalogDownload();
   const wa = e.target.closest('[data-wa]');
   if (wa) contact(wa.dataset.wa);
 });

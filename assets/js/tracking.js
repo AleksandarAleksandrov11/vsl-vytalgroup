@@ -4,7 +4,9 @@
 //   se inicializa en ese momento; si se retira, deja de enviar eventos.
 // · Eventos: PageView, ViewContent (una vez por sesión, al ver los equipos, con la categoría
 //   activa), Lead (una sola vez y solo tras un envío correcto, con eventID = event_id de la
-//   hoja), DescargaCatalogo (personalizado, no es un lead) y Contact (WhatsApp).
+//   hoja; antes se actualizan los datos de coincidencia avanzada) y Contact (WhatsApp).
+// · Embudo del formulario (eventos personalizados, no se optimiza con ellos): FormStart y FormStep
+//   (una vez por sesión y paso) y FormError (cada error de validación).
 
 import { consentState } from './consent.js';
 
@@ -94,5 +96,17 @@ export function lead(eventId, contentName, category) {
   track('Lead', { content_name: contentName, content_category: category }, eventId);
 }
 
-export const catalogDownload = () => trackCustom('DescargaCatalogo', { content_name: 'Catálogo VytalGroup 2026' });
+// Coincidencia avanzada: con los datos ya normalizados (minúsculas, solo cifras con prefijo, país ISO);
+// el píxel los cifra antes de enviarlos
+export function matchUser(data) {
+  if (!allowed || !loaded || typeof window.fbq !== 'function') return false;
+  pixelIds().forEach((id) => window.fbq('init', id, data));
+  return true;
+}
+
+const once = (key, fn) => { if (!ss(key) && fn()) ss(key, '1'); };
+export const formStart = () => once('vg_fs', () => trackCustom('FormStart', {}));
+export const formStep = (step) => once(`vg_fstep_${step}`, () => trackCustom('FormStep', { step }));
+export const formError = (step, field) => trackCustom('FormError', { step, field });
+
 export const contact = (source) => track('Contact', { content_name: 'WhatsApp', content_category: source || 'web' });

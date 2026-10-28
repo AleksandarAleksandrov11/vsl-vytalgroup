@@ -1,11 +1,12 @@
 # VytalGroup · Landing de venta (Meta Ads)
 
-Landing de una sola página para las campañas de Instagram y Facebook de VytalGroup: equipos médicos de alta calidad para profesionales sanitarios, sin letra pequeña. Ecógrafos y diatermias como protagonistas y el resto del catálogo a un clic. Una acción principal: pedir asesoramiento.
+Landing de una sola página para las campañas de Instagram y Facebook de VytalGroup: equipos médicos de alta calidad para profesionales sanitarios, sin letra pequeña. Ecógrafos y diatermias como protagonistas. **Un solo camino: el formulario de asesoramiento.** Antes de enviarlo no hay WhatsApp, teléfono, correo ni Instagram a la vista; WhatsApp aparece solo después.
 
 - HTML, CSS y JavaScript vanilla. Sin frameworks ni librerías en el navegador.
 - Hero, franja de garantías, 6 secciones y un footer (apartado 1).
-- Imágenes solo en WebP. Carga inicial en móvil: unos 65 KB (presupuesto 250 KB). JS propio: 14,7 KB. CSS: unos 10 KB (gzip).
-- Lighthouse: 100 en todo, en móvil, escritorio y páginas legales.
+- Imágenes solo en WebP. Carga inicial en móvil: unos 68 KB (presupuesto 250 KB). JS propio: 15,9 KB. CSS: 10,7 KB (gzip).
+- Lighthouse: móvil 98-100 en rendimiento y 100 en el resto; escritorio y páginas legales, 100 en todo.
+- Lead por píxel (con consentimiento) y por servidor (función de Vercel `api/lead-capi.js`, API de conversiones), con el mismo `event_id`.
 
 ---
 
@@ -15,34 +16,52 @@ Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", 
 
 **Sistema de alineación, igual en todos los dispositivos:** titulares de sección y botones de sección siempre centrados. El hero lleva el texto a la izquierda en escritorio y centrado en móvil y tableta. "Por qué VytalGroup" es la excepción en escritorio: su titular va a la derecha de la foto de Javier, alineado a la izquierda. La cabecera es fija y siempre visible.
 
-1. **Hero** con **foto de clínica de fondo, difuminada y oscurecida** con un velo marino (más opaco a la izquierda en escritorio, donde va el texto, y abajo en móvil). "Equipos médicos de alta calidad. *Sin letra pequeña.*", la línea "Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas.", el botón "Quiero asesoramiento" y "Ver catálogo" (lleva a Más equipos). Ocupa la primera pantalla menos la franja de garantías, que asoma debajo.
-   **Franja de garantías** (sección propia, fondo blanco): en bucle infinito y con un icono para cada una: 2 años de garantía · CE / MDR certificados · UE, USA y LATAM envíos · Fisioterapeutas te asesoran · 0 sorpresas en mantenimiento · 53 páginas de catálogo.
-2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con "Lo quiero". En móvil y tableta se ve una tarjeta cada vez, centrada; se pasa deslizando, con puntos. CTA de sección.
-3. **Más equipos** ("Todo lo que tu clínica necesita."). 6 categorías del catálogo con descripción al pasar o tocar, "Y más de 50 páginas de equipos en el catálogo." y dos botones: "Quiero asesoramiento" y **"Descargar catálogo"** (oscuro, con icono, para que destaque).
-4. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") alineados a la izquierda; en móvil y tableta, centrado y con la foto debajo. Después, la firma de Javier y el CTA. Fondo marino a todo el ancho.
-5. **¿Por qué elegir *VytalGroup?*** (sección propia). Fondo turquesa claro con una trama de puntos suave, distinto del marino de arriba y del claro de Dudas; a todo el ancho. Una tabla centrada en tarjeta blanca, con las cabeceras centradas "OTRAS MARCAS" y "VYTALGROUP": aspas grises y texto tachado en otras marcas, checks blancos sobre turquesa en VytalGroup (columna resaltada). 5 filas: comercial frente a fisioterapeutas · mantenimiento · garantía de 2 años · envío y aduana (UE, USA y LATAM, aduana gestionada) · todo el equipamiento en un solo sitio. En escritorio cada fila cabe en una línea. Sin líneas separadoras. CTA de sección.
-6. **Dudas** ("Lo que *nos preguntáis.*"). 6 preguntas: ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Escríbenos por WhatsApp".
-7. **Formulario** ("Cuéntanos qué *necesitas.*", siempre en una línea; la sección empieza más cerca de Dudas porque las dos son claras). 4 preguntas, una por pantalla:
+1. **Hero** con **foto de clínica de fondo, difuminada y oscurecida** con un velo marino. El titular cambia según la campaña (apartado 5): sin UTM, "Equipos médicos de alta calidad. *Sin letra pequeña.*" y "Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas.". Debajo, el botón **"Pedir asesoramiento gratis"**, "Ver equipos" (lleva a Lo más pedido), la línea "Gratis y sin compromiso · Respuesta en menos de 24 h · Garantía de 2 años", la foto del Acclarix AX8 y la firma "Te asesora **Javier Ruiz**, fisioterapeuta y fundador" con su foto. En escritorio, el equipo va a la derecha del texto. En móvil el hero es más bajo y la franja de garantías asoma en la primera pantalla. Sin vídeo.
+   **Franja de garantías** (sección propia, fondo blanco): en bucle infinito y con un icono para cada una: 2 años de garantía · CE / MDR certificados · UE, USA y LATAM envíos · Fisioterapeutas te asesoran · 0 sorpresas en mantenimiento · Menos de 24 h de respuesta · Asesoramiento sin compromiso.
+2. **Lo más pedido.** Segmentado Ecógrafos / Diatermias y 3 tarjetas con **"Pedir asesoramiento"** (salta la pregunta 1 con el modelo elegido). Con una campaña, el AX8 pasa a la primera tarjeta. En móvil y tableta se ve una tarjeta cada vez, centrada; se pasa deslizando, con puntos, y debajo "¿No sabes cuál elegir? Te ayudamos" (al formulario). CTA de sección.
+3. **¿Por qué elegir *VytalGroup?*** (comparativa, justo después de Lo más pedido). Fondo turquesa claro con una trama de puntos suave, a todo el ancho. Una tabla centrada en tarjeta blanca, con las cabeceras centradas "OTRAS MARCAS" y "VYTALGROUP": aspas grises y texto tachado en otras marcas, checks blancos sobre turquesa en VytalGroup (columna resaltada). 5 filas: comercial frente a fisioterapeutas · mantenimiento · garantía de 2 años · envío y aduana (UE, USA y LATAM, aduana gestionada) · todo el equipamiento en un solo sitio. CTA de sección.
+4. **Más equipos** ("Todo lo que tu clínica necesita."). 6 categorías con descripción al pasar o tocar, "¿Buscas otro equipo? Pregúntanos: trabajamos con más de 50 modelos." y el CTA de asesoramiento. Se funde arriba con el color de la comparativa.
+5. **Por qué VytalGroup** ("Sin timos. *Sin letra pequeña.*"). En escritorio, la foto de Javier a la izquierda y a su derecha el titular, la historia en dos líneas ("Me quemé en jornadas de 12 horas." / "Monté VytalGroup para que no te engañen.") alineados a la izquierda; en móvil y tableta, centrado y con la foto debajo. Después, la firma de Javier y el CTA. Fondo marino a todo el ancho.
+6. **Dudas** ("Lo que *nos preguntáis.*"). 7 preguntas: ¿Cuánto cuesta? · ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Déjanos tu WhatsApp y te la resolvemos" (al formulario, sin preselección).
+7. **Formulario** ("Cuéntanos qué *necesitas.*", siempre en una línea). Las mismas 4 preguntas y opciones de siempre, una por pantalla:
    1. ¿Qué equipo te interesa? Ecógrafo · Diatermia · Presoterapia · Ondas de choque · Otro equipo (desplegable con magnetoterapia, láser, electrólisis percutánea, camillas u otro).
    2. ¿Cuál es tu perfil? Clínica · Fisioterapeuta · Médico · Otro.
    3. ¿Cómo te llamas?
-   4. ¿A qué WhatsApp te escribimos? Con prefijo y el consentimiento. Debajo, el enlace **"Prefiero por correo"** abre la misma pregunta para el correo ("¿A qué correo te escribimos?"), con teclado de correo, sin espacios, en minúsculas, formato validado y aviso si el dominio parece mal escrito ("¿Querías decir laura@gmail.com?"). "Prefiero por WhatsApp" vuelve atrás.
+   4. ¿A qué WhatsApp te escribimos? El prefijo sale solo según el idioma del navegador (es-MX → +52, es-AR → +54…; si no, +34). Debajo, **"Prefiero por correo"** abre la misma pregunta para el correo, con teclado de correo, formato validado y aviso si el dominio parece mal escrito. El botón dice **"Enviar y abrir WhatsApp"** (o "Enviar" con correo). Sin casilla: bajo el botón, "Al enviar aceptas la política de privacidad y que VytalGroup te contacte sobre tu solicitud."
 
-   Las opciones avanzan solas al tocarlas. Desde "Lo quiero" se salta la pregunta 1: se llega a la 2 con "Te interesa: Acclarix AX8 · Cambiar".
+   Las opciones avanzan solas al tocarlas. Desde "Pedir asesoramiento" de una tarjeta se salta la pregunta 1: se llega a la 2 con "Te interesa: Acclarix AX8 · Cambiar".
+
+   **Después de enviar** (solo con `{ ok: true }` de la hoja): Lead una vez y la pantalla de gracias.
+   - Con WhatsApp, en móvil: "Gracias, Laura. Te abrimos WhatsApp para que nos escribas ya.", un indicador de 1,5 s y se abre WhatsApp (+34 616 372 644) con el mensaje escrito en tres líneas ("Hola, soy … Acabo de pedir asesoramiento en la web." / "Me interesa: …" / "Perfil: …"). Si no se abre solo, botón "Abrir WhatsApp". Al volver atrás se ve el gracias y no se reenvía nada.
+   - En escritorio no se navega fuera: se intenta abrir WhatsApp Web en otra pestaña solo si el navegador lo permite y queda el botón grande "Abrir WhatsApp Web".
+   - Con correo no se abre nada: "Te escribimos en menos de 24 horas." y "¿Prefieres hablar ya? Escríbenos por WhatsApp".
+   - Si el envío falla: "Reintentar" y "Escribir por WhatsApp", con todos los datos del formulario en el mensaje.
 
 **Footer** (también en las páginas legales):
-- el logo en grande, "Equipos médicos de alta calidad. *Sin letra pequeña.*" y "Información dirigida a profesionales sanitarios";
-- columnas con título pequeño: **Contacto** (teléfono, WhatsApp y correo, con icono), **Equipos** (Lo más pedido, Más equipos, Catálogo PDF y Pedir asesoramiento), **Legal** (aviso legal, privacidad, cookies y configurar cookies) y **Síguenos** (Instagram `fisioruiz_`);
+- el logo (sube al inicio), "Equipos médicos de alta calidad. *Sin letra pequeña.*", "Información dirigida a profesionales sanitarios" y el CTA "Pedir asesoramiento gratis";
+- columnas con título pequeño: **Equipos** (Lo más pedido, Más equipos y Pedir asesoramiento) y **Legal** (aviso legal, privacidad y cookies, en pestaña nueva, y configurar cookies);
 - el copyright;
 - al final del todo, **"VytalGroup" a todo el ancho** ("Vytal" en blanco y "Group" en turquesa, como el logo), con las letras que suben una a una al llegar.
 
-Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 columnas a la derecha. La barra fija del móvil aparece al pasar el hero y se oculta con el formulario en pantalla; su icono de WhatsApp se oculta cuando se ve otro WhatsApp (Dudas o el pie).
+Sin teléfono, WhatsApp, correo ni Instagram: los datos de contacto del titular están en las páginas legales, que los exigen. La barra fija del móvil aparece al pasar el hero, con un único botón a todo el ancho ("Pedir asesoramiento gratis"), y se oculta con el formulario en pantalla y mientras se ve el aviso de cookies.
 
 ---
 
 ## 2. Cambios de las últimas rondas
 
-**v16 (esta ronda): píxel de Meta**
+**v17 (esta ronda): optimización de leads y sin fugas**
+
+- **Un solo camino, el formulario.** Fuera el WhatsApp de la barra móvil, el de Dudas y las columnas Contacto y Síguenos del pie (también en las legales). WhatsApp solo aparece después de enviar (o en la pantalla de error). Una prueba falla si aparece cualquier otro `wa.me`, `tel:`, `mailto:`, `instagram.com` o enlace externo. Los legales se abren en otra pestaña.
+- **Sin catálogo PDF:** fuera de la web y del repositorio. `/assets/docs/catalogo-vytalgroup-2026.pdf` redirige con 301 a `/#asesoramiento`. "53 páginas de catálogo" pasa a "Asesoramiento sin compromiso".
+- **WhatsApp tras enviar**, que se abre solo en móvil (apartado 1).
+- **Lead por servidor (API de conversiones)** en una función de Vercel, `api/lead-capi.js`, para todos los leads y con el mismo `event_id` que el píxel (apartado 5). **El Apps Script y la hoja no cambian:** el formulario les envía exactamente los mismos campos que antes y una prueba lo vigila.
+- **Hero por campaña** sin parpadeo (CLS 0), con equipo, garantías y la firma de Javier en la primera pantalla; la comparativa sube tras Lo más pedido; "¿Cuánto cuesta?" en Dudas; "Respuesta en menos de 24 h"; botón "Pedir asesoramiento gratis" en todas partes.
+- **Formulario:** las mismas preguntas y opciones; prefijo según el idioma del navegador, botón "Enviar y abrir WhatsApp" y aviso de privacidad bajo el botón en lugar de la casilla.
+- **Píxel:** embudo del formulario (`FormStart`, `FormStep`, `FormError`), coincidencia avanzada antes del Lead y `Contact` según el origen (`gracias-auto`, `gracias-boton`, `error-envio`). Fuera `DescargaCatalogo`.
+- **Aviso de cookies** compacto: Rechazar y Aceptar con el mismo peso y Configurar como enlace; no tapa la barra móvil.
+- **Privacidad y cookies** al día: base legal y envío del Lead a Meta desde el servidor con los datos cifrados.
+
+**v16: píxel de Meta**
 
 - `META_PIXEL_ID` es `1593490341777612`. El píxel **no** se pega como código en la página: lo carga `assets/js/tracking.js` con el mismo código de Meta, pero solo después de que el visitante acepte las cookies de marketing, y la CSP no permite scripts dentro de la página. La etiqueta `<noscript>` de Meta tampoco se añade: enviaría una visita a Meta sin consentimiento.
 
@@ -178,9 +197,9 @@ Centrado en móvil y tableta; en escritorio, la marca a la izquierda y las 4 col
 │   │                           attribution.js, consent.js, tracking.js, legal.js
 │   ├── img/                    Productos, categorías, fondo del hero, diatermia de la OG y Javier (WebP)
 │   ├── fonts/                  Geist e Instrument Serif cursiva (woff2, subset latino)
-│   ├── brand/                  Favicon, iconos e imagen Open Graph
-│   └── docs/catalogo-vytalgroup-2026.pdf
-├── integrations/apps-script/   Code.gs (Apps Script de los leads) y README-apps-script.md (guía)
+│   └── brand/                  Favicon, iconos e imagen Open Graph
+├── api/lead-capi.js            Función de Vercel: Lead por servidor (API de conversiones de Meta)
+├── integrations/apps-script/   Code.gs (Apps Script de los leads, el desplegado) y README-apps-script.md (guía)
 ├── scripts/                    build.mjs, serve.mjs y generadores de recursos (assets/)
 ├── tests/                      Pruebas con Playwright (npm test)
 ├── PLAN.md
@@ -265,33 +284,63 @@ Detalles:
 - UTM y `fbclid` se guardan en `sessionStorage` en la primera visita. `fbc` se construye desde `fbclid` si no existe la cookie `_fbc`.
 - El script valida los campos obligatorios (nombre, perfil, equipo, consentimiento y `event_id`), que haya teléfono o correo, que el teléfono tenga entre 8 y 15 cifras y que el correo tenga un formato válido, usa `LockService`, ignora envíos repetidos con el mismo `event_id`, descarta el campo trampa y escapa los textos que empiezan por `=`, `+`, `-` o `@`.
 - **Equipo:** Ecógrafo, Diatermia, Presoterapia u Ondas de choque. Si se marca "Otro equipo", llega la categoría elegida en el desplegable (Magnetoterapia de alta intensidad, Láser de alta potencia, Electrólisis percutánea ecoguiada o Camillas de fisioterapia) u "Otro equipo" si se elige "Otro".
-- **Modelo:** el elegido en "Lo quiero". Si no hay modelo en concreto (el formulario manda "Sin decidir" en ecógrafo o diatermia, o nada en el resto de equipos), la columna queda vacía.
+- **Modelo:** el elegido en "Pedir asesoramiento" de una tarjeta. Si no hay modelo en concreto (el formulario manda "Sin decidir" en ecógrafo o diatermia, o nada en el resto de equipos), la columna queda vacía.
 - **Perfil:** Clínica, Fisioterapeuta, Médico u Otro.
 - Con `SHEETS_ENDPOINT` vacío el formulario falla con elegancia: mensaje amable, reintento, WhatsApp como alternativa, sin perder los datos, y un aviso claro en la consola.
 
 ---
 
-## 5. Meta Pixel
+## 5. Meta: píxel, API de conversiones y campañas
 
-1. **Crea el píxel** (si no existe): [Administrador de eventos](https://business.facebook.com/events_manager2) > **Conectar orígenes de datos** > **Web** > **Píxel de Meta** > ponle nombre (por ejemplo "VytalGroup web") > escribe `https://vsl.vytalgroupem.com` y sigue sin instalar nada (el código ya está en la web). Si ya existe, entra en él.
-2. **Copia el identificador** del píxel (un número de 15 o 16 cifras, en **Configuración** del píxel).
-3. **Pégalo en `config.js`** → `META_PIXEL_ID: "123456789012345"` y vuelve a desplegar.
-4. **Verifica el dominio** en [Configuración del negocio](https://business.facebook.com/settings) > **Seguridad de la marca** > **Dominios** > **Añadir** > `vytalgroupem.com` (sin `vsl.`: al verificar el dominio principal quedan cubiertos sus subdominios). Elige **Registro TXT de DNS** y copia el valor `facebook-domain-verification=...`. Los DNS de `vytalgroupem.com` están en Hostinger: hPanel > **Dominios** > `vytalgroupem.com` > **DNS / Nameservers** > **Registros DNS** > tipo **TXT**, nombre `@`, valor el copiado. Vuelve a Meta y pulsa **Verificar** (puede tardar de minutos a unas horas).
-5. **Comprueba los eventos**: en el Administrador de eventos > **Probar eventos**, abre la web, acepta las cookies y verás `PageView`; al enviar una solicitud de prueba, `Lead`.
-6. **Campaña**: objetivo **Clientes potenciales**, ubicación de la conversión **Sitio web**, el píxel y el evento **Cliente potencial (Lead)**. En la URL del anuncio, usa parámetros UTM (por ejemplo `?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}`) para ver en la hoja de qué anuncio llega cada lead.
-
-- El script de Meta **no se descarga** hasta que el visitante acepta "Marketing" en el aviso de cookies. Si acepta más tarde, se carga en ese momento. Si lo retira desde "Configurar cookies", deja de enviar eventos y se borran `_fbp` y `_fbc`. Quien rechaza las cookies sigue llegando a la hoja, pero Meta no lo cuenta: es normal que la hoja tenga más leads que Meta.
-- Con `META_PIXEL_ID` vacío no se carga nada.
+**Píxel.** `META_PIXEL_ID` en `config.js` admite varios ID separados por comas: ahora `1450236327053257,1593490341777612` (el de la agencia y el dataset "LANDING VSL" de Javier). El script de Meta **no se descarga** hasta que el visitante acepta "Marketing" en el aviso de cookies. Si lo retira desde "Configurar cookies", deja de enviar eventos y se borran `_fbp` y `_fbc`.
 
 | Evento | Cuándo |
 |---|---|
 | `PageView` | Al inicializar el píxel. |
-| `ViewContent` | Una vez por sesión, al ver la sección de equipos, con la categoría activa (`Ecógrafos` o `Diatermias`). |
-| `Lead` | Solo tras un envío correcto a la hoja, una única vez, con `eventID` igual al `event_id` guardado en la hoja (listo para la API de Conversiones sin duplicar). |
-| `DescargaCatalogo` | Evento personalizado (`trackCustom`) al descargar el catálogo (botón de Más equipos, footer o pantalla de gracias). **No es un lead.** |
-| `Contact` | Al pulsar cualquier enlace de WhatsApp. |
+| `ViewContent` | Una vez por sesión, al ver Lo más pedido, con la categoría activa. |
+| `Lead` | Solo tras un envío correcto a la hoja, una única vez, con `eventID` = `event_id`. Justo antes se actualiza la coincidencia avanzada (`fbq('init', id, { ph, em, fn, country })` en cada píxel; el píxel los cifra). |
+| `Contact` | Al abrir WhatsApp después de enviar: `gracias-auto` (se abre solo), `gracias-boton` (botón) o `error-envio` (pantalla de error). |
+| `FormStart` | Personalizado. Primera interacción con el formulario, una vez por sesión. |
+| `FormStep` | Personalizado. Al llegar a los pasos 2, 3 y 4 (`step`), una vez por sesión y paso. |
+| `FormError` | Personalizado. Cada error de validación, con `step` y `field`. |
 
-Todo el tracking está en `assets/js/tracking.js`.
+Los eventos personalizados sirven para ver en el Administrador de eventos en qué paso se cae la gente. No se usan para optimizar: las campañas optimizan `Lead`.
+
+**API de conversiones (Lead por servidor).** `api/lead-capi.js` es una función de Vercel. El navegador la llama con `fetch` (`keepalive`) justo después de que la hoja responda `{ ok: true }`, con el mismo `event_id` que el Lead del píxel, para **todos** los leads (también quien rechaza las cookies). Meta deduplica los dos.
+- La función calcula el SHA-256 del teléfono (cifras con prefijo), del correo, del nombre de pila y del país, toma la IP y el navegador de la propia petición y añade `fbc` (cookie `_fbc` o, si no existe, construida desde el `fbclid`) y `fbp`.
+- **Variables de entorno de Vercel** (Settings > Environment Variables, entorno Production):
+  - `META_PIXEL_ID` = `1593490341777612`;
+  - `META_CAPI_TOKEN` = el token (lo pone Aleks; nunca en el repositorio);
+  - opcional `META_TEST_EVENT_CODE`, para "Probar eventos" (bórrala al terminar), y `META_GRAPH_VERSION` (por defecto `v26.0`).
+
+  Después de crearlas o cambiarlas hay que volver a desplegar (Deployments > los tres puntos del último > **Redeploy**).
+- **Sin token no hace nada** (responde sin error). Si Meta falla, el usuario no lo nota y el error queda en los logs de la función en Vercel.
+- Los envíos de prueba cuyo nombre empieza por **PRUEBA** no se mandan a Meta.
+- Solo acepta peticiones desde la propia web (mismo dominio).
+- **Crear el token:** Administrador de eventos > dataset **LANDING VSL** (`1593490341777612`) > **Configuración** > **API de conversiones** > **Generar token de acceso**. Se copia una sola vez.
+- **Comprobar la deduplicación:** crea `META_TEST_EVENT_CODE` con el código de "Probar eventos", redespliega, abre la web, acepta las cookies y envía una solicitud con un nombre que no empiece por PRUEBA. Deben aparecer dos `Lead` (Navegador y Servidor) con el mismo identificador de evento, marcados como deduplicados. Después borra la variable, redespliega y borra tú esa fila de la hoja.
+
+**Verificar el dominio** en [Configuración del negocio](https://business.facebook.com/settings) > **Seguridad de la marca** > **Dominios** > **Añadir** > `vytalgroupem.com` (sin `vsl.`). Registro TXT en los DNS de Hostinger: hPanel > **Dominios** > `vytalgroupem.com` > **DNS / Nameservers** > **Registros DNS** > tipo **TXT**, nombre `@`, valor `facebook-domain-verification=...`.
+
+**Campañas.** Objetivo **Clientes potenciales**, conversión en **Sitio web**, dataset LANDING VSL y evento **Lead**. En cada anuncio, **Seguimiento > Parámetros de URL**:
+
+```
+utm_source=meta&utm_medium=paid&utm_campaign={{campaign.name}}&utm_term={{adset.name}}&utm_content={{ad.name}}
+```
+
+**Titular del hero según el anuncio** (`utm_content`, o `utm_campaign` si no hay anuncio; también `?v=` para probar). Se decide en un script mínimo en la cabecera, antes de pintar, así que no hay parpadeo ni saltos. Se recuerda en la sesión.
+
+| Anuncio o campaña | Titular | Línea de apoyo |
+|---|---|---|
+| TOFU 1, TOFU 2, TOFU 3, MOFU 1, DESCUBRIR, CERRAR | ¿Vas a comprar un ecógrafo? *Antes, hablemos.* | Fisioterapeutas te ayudan a elegir el que necesitas. Y te decimos cuál no. |
+| MOFU 2 | ¿Ecógrafo portátil *o de carro?* | Cuéntanos cómo trabajas y te decimos cuál encaja contigo. |
+| BOFU 1 | Asesoramiento *sin compromiso.* | 10 minutos para saber qué equipo tiene sentido para ti. |
+| BOFU 2 | Todo por escrito. *Sin sorpresas.* | Qué incluye, qué garantía tiene y cuánto cuesta el mantenimiento, antes de pagar. |
+| Sin UTM | Equipos médicos de alta calidad. *Sin letra pequeña.* | Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas. |
+
+Los nombres se comparan sin espacios ni mayúsculas ("BOFU 1", "bofu1" y "BOFU-1" valen igual). Para un anuncio nuevo, añade su nombre al mapa del script de `index.html`: la compilación avisa con el hash nuevo que hay que poner en la CSP de `vercel.json`.
+
+Todo el tracking del navegador está en `assets/js/tracking.js`.
 
 ---
 
@@ -305,18 +354,18 @@ vercel            # la primera vez: enlaza el proyecto
 vercel --prod
 ```
 
-O conecta el repositorio en vercel.com: cada push despliega solo. **Ahora mismo** el proyecto está conectado así: lo que entra en `main` se publica en https://vsl.vytalgroupem.com; las ramas generan vistas previas. No hace falta ninguna variable de entorno en Vercel: la URL de la hoja y el píxel van en `config.js` y el dominio en `site.config.mjs`. `vercel.json` ya define:
+O conecta el repositorio en vercel.com: cada push despliega solo. **Ahora mismo** el proyecto está conectado así: lo que entra en `main` se publica en https://vsl.vytalgroupem.com. La URL de la hoja y el píxel van en `config.js` y el dominio en `site.config.mjs`. Las únicas variables de entorno son las de la API de conversiones (`META_CAPI_TOKEN` y `META_PIXEL_ID`, apartado 5); sin ellas la web funciona igual. La carpeta `api/` la publica Vercel como funciones (Node). `vercel.json` ya define:
 - **Compilación:** `npm run build` y carpeta de salida `dist/`.
 - **URLs limpias:** `/privacidad`, `/cookies` y `/aviso-legal`. Las rutas `.html`, con barra final o `/index` redirigen (308).
-- **Seguridad:** `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Strict-Transport-Security`, `Permissions-Policy` y la **CSP** del brief. No hay ningún script inline: todo el JS está en archivos.
-- **Caché:** todo `/assets` lleva hash en el nombre y se cachea un año (`immutable`), salvo el PDF (`/assets/docs`, sin hash, 7 días y descarga como adjunto). HTML, `config.js`, `robots.txt`, `sitemap.xml` y el manifest se revalidan siempre (`max-age=0, must-revalidate`), así los cambios en `config.js` se ven al momento.
+- **Seguridad:** `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Strict-Transport-Security`, `Permissions-Policy` y la **CSP** del brief. El único script dentro de la página es el que elige el titular del hero, autorizado en la CSP por su hash SHA-256 (la compilación falla si no coincide). La llamada a `/api/lead-capi` es del mismo dominio, así que la CSP no cambia.
+- **Caché:** todo `/assets` lleva hash en el nombre y se cachea un año (`immutable`). HTML, `config.js`, `robots.txt`, `sitemap.xml`, el manifest y `/api` se revalidan siempre (`max-age=0, must-revalidate`), así los cambios en `config.js` se ven al momento.
+- **Redirecciones:** el antiguo catálogo PDF (301 a `/#asesoramiento`) y `vsl-vytalgroup.vercel.app` al dominio.
 
 Ajustes respecto al `vercel.json` del brief:
-- La regla de caché de un año usa `/assets/((?!docs/).*)` para no pisar la del PDF.
 - Se añade `/((?!assets/).*)` con `must-revalidate`: con URLs limpias, `/privacidad` no termina en `.html` y no la cubriría la regla de los HTML.
 - Si se añade cualquier recurso de otro dominio (un vídeo, una fuente…), hay que añadirlo a la CSP.
 
-**Comprobarlo en local:** `npm run build && npm run preview` sirve `dist/` con las mismas cabeceras y redirecciones de `vercel.json`. La única diferencia es que en local se quita `upgrade-insecure-requests`, porque no hay https en `localhost`.
+**Comprobarlo en local:** `npm run build && npm run preview` sirve `dist/` con las mismas cabeceras y redirecciones de `vercel.json` y ejecuta `api/*.js` como Vercel (sin variables de Meta: `/api/lead-capi` no envía nada). La única diferencia es que en local se quita `upgrade-insecure-requests`, porque no hay https en `localhost`.
 
 ---
 
@@ -330,18 +379,13 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 
 ## 8. Pendientes antes de lanzar los anuncios
 
-1. ~~Datos legales del titular~~ **Hecho:** Javier Ruiz Vides, DNI 49115639J, Rue des Champs 61a, Bertrange, Luxemburgo, vytalkinetech@gmail.com y conservación de 12 meses desde el último contacto. Se editan en `scripts/assets/gen_legal.py` y se regeneran con `python3 scripts/assets/gen_legal.py`. Quedan por revisar con un asesor legal (apartado 9).
-2. ~~ID del Meta Pixel~~ **Hecho** (`1593490341777612` en `config.js`). Falta la **verificación del dominio** en Meta y probar los eventos (apartado 5).
-3. **Apps Script v14 (Estado, Notas y Resumen):**
-   1. Probarlo en una copia de la hoja.
-   2. En la real, publicarlo como **Nueva versión** de la misma implementación.
-   3. **Después**, ejecutar `setup()`.
+1. **Token de la API de conversiones** (lo pone Aleks): `META_CAPI_TOKEN` y `META_PIXEL_ID` = `1593490341777612` en Vercel, redesplegar y comprobar la deduplicación (apartado 5).
+2. **Verificación del dominio** en Meta, si aún no está (apartado 5).
+3. **Parámetros de URL** de cada anuncio con el formato del apartado 5, para que el titular del hero y la hoja reciban la campaña y el anuncio.
+4. **Revisión legal** de los textos (apartado 9), en especial el envío del Lead a Meta desde el servidor para todos los leads (interés legítimo, con datos cifrados y derecho de oposición).
+5. **Material que no llegó** (opcional): fotos de los Acclarix a más resolución (el catálogo trae unos 550 px) y una foto de Javier más grande (la recibida es de 640 × 640).
 
-   Todo está en `integrations/apps-script/README-apps-script.md`. La URL no cambia.
-4. **Correo de avisos:** ahora llegan a aaswebmarketing@gmail.com. Para cambiarlo, crea la propiedad del script `NOTIFY_EMAIL`; admite varios correos separados por comas.
-5. **¿Podemos prometer "respuesta en menos de 24 h"?** Si se confirma, se puede añadir bajo "Cuéntanos qué necesitas.".
-6. **Testimonios reales** (opcional): si más adelante hay opiniones de clientes con su permiso, se puede recuperar una sección de testimonios.
-7. **Material que no llegó** (opcional): fotos de los Acclarix a más resolución (el catálogo trae unos 550 px) y una foto de Javier más grande (la recibida es de 640 × 640).
+Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas y Resumen (desplegado), avisos a aaswebmarketing@gmail.com y "respuesta en menos de 24 h" (confirmado). Precios, financiación y opiniones de clientes no se mencionan.
 
 ---
 
@@ -351,10 +395,9 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 
 **Diseño.**
 - Geist + Instrument Serif. Marino `#0B1929` en el hero, en "Por qué VytalGroup" y en el footer. Turquesa `#48A0A8`, el del logo, en botones y detalles.
-- El botón de descarga del catálogo es marino con el icono en turquesa: destaca junto al CTA sin competir con él.
 - El titular del hero se ajusta al ancho de pantalla para salir siempre en 3 líneas.
 - La foto del hero va difuminada en el propio archivo: pesa muy poco y no hay que difuminarla en el navegador.
-- Entre secciones, corte recto; solo Más equipos se funde arriba con Lo más pedido (curva suave de opacidad dentro de su margen).
+- Entre secciones, corte recto; solo Más equipos se funde arriba con la comparativa (curva suave de opacidad dentro de su margen).
 - Imágenes solo en WebP (decodificación rápida en cualquier móvil). La imagen OG sigue en JPG y los iconos de la web en PNG, porque Facebook, WhatsApp e iOS los piden así.
 - Nada puede salirse por la derecha: en móvil y tableta el cambio de pestaña se anima en vertical y el carrusel se recorta dentro de su sección.
 
@@ -370,15 +413,19 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 - Botones con brillo y efecto magnético.
 - `prefers-reduced-motion`: sin entradas, parallax ni marquesina, el nombre del pie quieto y sin desplazamiento suave.
 
-**Formulario.** 4 preguntas, una por pantalla y las de opciones con avance automático: así se siente corto aunque pregunte el perfil. El correo es la alternativa, no una pregunta más: quien prefiere WhatsApp no lo ve. El aviso de dominio mal escrito sale al pulsar Enviar (no al salir del campo), para no mover el botón justo cuando se toca. El WhatsApp de la pantalla de gracias lleva el nombre y el equipo o modelo.
+**Formulario.** 4 preguntas, una por pantalla y las de opciones con avance automático: así se siente corto aunque pregunte el perfil. Las preguntas y sus opciones no se tocan (ya son las mínimas). El correo es la alternativa, no una pregunta más: quien prefiere WhatsApp no lo ve. El aviso de dominio mal escrito sale al pulsar Enviar (no al salir del campo), para no mover el botón justo cuando se toca.
 
-**Legal.** Los textos de aviso legal, privacidad y cookies están escritos con la LSSI y el RGPD en clave española: la legislación aplicable es la española y la reclamación se dirige a la AEPD. El titular tiene el domicilio en Luxemburgo (Bertrange), así que conviene que un asesor confirme la legislación aplicable y si hay que citar también a la autoridad luxemburguesa de protección de datos (CNPD). Tampoco figura ningún dato registral: si el titular estuviera inscrito en algún registro, hay que añadirlo en `scripts/assets/gen_legal.py`.
+**WhatsApp después de enviar.** En móvil se abre navegando (`location.href`), no con `window.open`: después de esperar a la hoja, iOS y los navegadores de Instagram y Facebook bloquean las ventanas nuevas. Se espera 1,5 s para que el Lead (píxel y servidor) salga antes. En escritorio no se saca a nadie de la página. Sin lead parcial: nada se guarda hasta pulsar Enviar.
+
+**Hoja y Apps Script.** No se tocan: ni el código desplegado, ni las columnas, ni los leads. La web les manda exactamente los mismos campos que antes (`tests/qa-form.cjs` falla si cambian) y comprueba que `Code.gs` es el desplegado. La API de conversiones va aparte, en Vercel.
+
+**Legal.** La casilla de consentimiento pasa a ser un aviso bajo el botón: la base para atender la solicitud es la petición de la propia persona (art. 6.1.b RGPD); el envío del Lead a Meta desde el servidor, con los datos cifrados, se basa en el interés legítimo, con derecho de oposición; las cookies de Meta siguen pidiendo consentimiento. Los textos de aviso legal, privacidad y cookies están escritos con la LSSI y el RGPD en clave española: la legislación aplicable es la española y la reclamación se dirige a la AEPD. El titular tiene el domicilio en Luxemburgo (Bertrange), así que conviene que un asesor confirme la legislación aplicable y si hay que citar también a la autoridad luxemburguesa de protección de datos (CNPD). Tampoco figura ningún dato registral: si el titular estuviera inscrito en algún registro, hay que añadirlo en `scripts/assets/gen_legal.py`.
 
 ---
 
 ## 10. Historial
 
-- **v11 (esta ronda)**, **v10**, **v9**, **v8**, **v7**, **v6** y **v5:** ver apartado 2.
+- **v17 (esta ronda)** y de la **v5** a la **v16:** ver apartado 2.
 - **v4:** hero con fotos y vídeo de clientes y sin testimonios. Sustituido en la v5.
 - **v3:**
   - enfoque "equipos médicos sin letra pequeña";
@@ -393,69 +440,35 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 
 ## 11. Pruebas y resultados
 
-`npm test` compila y ejecuta sobre `dist/`, con las cabeceras de `vercel.json` y un Apps Script simulado:
+`npm test` compila y ejecuta sobre `dist/`, con las cabeceras de `vercel.json`, un Apps Script simulado y Meta simulado (nada sale a internet ni llega a la hoja real):
 
-- **Apps Script (52):** el `Code.gs` real contra una hoja de Google simulada, con la configuración regional es_ES (separador `;`) y en_US (`,`). Comprueba:
-  - el contrato con la web (campos y respuestas) y las validaciones;
-  - el campo trampa, los duplicados, la inyección de fórmulas y el límite de 1000 caracteres;
-  - "Sin decidir" vacío y el teléfono guardado como texto;
-  - la fecha real, Estado "Nuevo", los colores, el filtro y las filas reservadas;
-  - las migraciones (13 y 12 columnas, a medias y desconocida), sin perder datos e idempotentes;
-  - el Resumen sin errores y con los conteos correctos, y `rebuildSummary()`;
-  - que el email sale después del bloqueo y que, si falla, el lead se guarda igual;
-  - `LEAD_SECRET`, `NOTIFY_EMAIL` y `testLead()`.
-- **Formulario y tracking (111 comprobaciones):**
-  - nada de Facebook sin consentimiento;
-  - aviso de cookies;
-  - eventos: PageView, ViewContent, DescargaCatalogo (desde Más equipos) y Contact;
-  - "Lo quiero" salta al perfil con el modelo;
-  - 4 preguntas (equipo, perfil, nombre y WhatsApp) y consentimiento, con progreso 1/4 a 4/4;
-  - perfil: opciones, aviso si no se elige, avance automático y se conserva al volver;
-  - "Prefiero por correo": enlace bajo el WhatsApp, misma pregunta para el correo, 12 formatos incorrectos rechazados, sin espacios, minúsculas, aviso de dominio mal escrito y corrección en un toque, vuelta a WhatsApp, envío con "Correo" y un dominio propio sin avisos;
-  - "Cambiar";
-  - validaciones;
-  - prefijos: buscador, Enter y Escape, opción resaltada con el ratón, hoja inferior en móvil;
-  - "Otro equipo": desplegable que se abre hacia arriba cerca del borde y se ve entero, con teclado y ratón;
-  - envío con UTM y exactamente las columnas de la hoja;
-  - doble clic sin duplicar;
-  - Lead único con `eventID` = `event_id`;
-  - "Enviar otra solicitud": vuelve al paso 1 conservando perfil y contacto, pide de nuevo el consentimiento y envía con otro `event_id` (un Lead por solicitud); "Lo quiero" tras el gracias empieza otra con ese modelo;
-  - endpoint vacío, error del servidor y antispam.
-- **Interfaz (131):**
-  - hero, franja de garantías y 5 secciones;
-  - 6 dudas, iguales en la web y en el JSON-LD;
-  - sin "no comerciales";
-  - palabras;
-  - CTA por sección (con "Descargar catálogo" junto al de Más equipos);
-  - alineación centrada de titulares y CTA en móvil y escritorio;
-  - Por qué VytalGroup: a la derecha de la foto en escritorio, centrado en móvil, historia en dos líneas y sin líneas separadoras;
-  - cabecera fija siempre visible;
-  - barra de progreso;
-  - franja de garantías: sección propia bajo el hero, visible en la primera pantalla, más grande, un icono distinto en cada una y en bucle infinito;
-  - hero en móvil y escritorio (foto de fondo precargada según el ancho, a todo el hero, velo marino, sin filtro, titular y logo en blanco, sin equipo recortado, ondas ni vídeos);
-  - segmentado;
-  - carrusel de una tarjeta centrada, sin flechas;
-  - Por qué VytalGroup: titular, historia, foto, firma y CTA, sin cifras ni tabla;
-  - transiciones: Más equipos se funde arriba con Lo más pedido (dentro de su margen); el resto de secciones y el pie, con corte recto; Javier y la comparativa a todo el ancho;
-  - titular del formulario en una línea de 320 a 1440 px y el formulario cerca de Dudas;
-  - panel de cookies en escritorio, móvil y horizontal: se abre sin barra de scroll ni saltos (medido fotograma a fotograma), como hoja en móvil, se cierra con animación (también con Escape) y se puede volver a abrir;
-  - ¿Por qué elegir VytalGroup?: sección propia tras la de Javier, sin subtítulo, con CTA, fondo distinto del de arriba y del de abajo, cabeceras centradas "OTRAS MARCAS" y "VYTALGROUP", 5 filas y, en escritorio, todas en una línea a la misma altura;
-  - pie: logo, columnas con título, enlaces, nombre en grande a todo el ancho con las letras animadas, y el mismo pie en las legales;
-  - nada ensancha la página de 320 a 1024 px, con el texto al 100 y al 130 % y simulando un navegador sin `overflow: clip`: la cabecera y la barra fija nunca se cortan;
-  - solo WebP;
-  - Más equipos, comparador (tabla centrada con fondo) y acordeón;
-  - movimiento reducido;
-  - CSP, caché, PDF, URLs limpias, metadatos y OG.
-- **Diseño (17 tamaños):** capturas de página completa de 320 a 1920 px, horizontal y páginas legales, con comprobación por código de desbordes, textos partidos, solapes y áreas táctiles. Revisadas una a una.
-- `node tests/inp.cjs`: interacción más lenta 96 ms con la CPU ×4 (INP < 200 ms), incluidas las 4 preguntas y "Prefiero por correo".
+- **Apps Script (52):** el `Code.gs` desplegado contra una hoja de Google simulada (es_ES y en_US): contrato con la web, validaciones, campo trampa, duplicados, inyección de fórmulas, migraciones, Resumen, email y `testLead()`.
+- **API de conversiones (12):** `api/lead-capi.js` con vectores conocidos de SHA-256; sin token no llama a Meta; el evento exacto (Lead, mismo `event_id`, datos con hash, IP y navegador de la petición, `fbc`, `fbp`, `custom_data`); un fallo de Meta (HTTP o red) no llega al usuario; PRUEBA no se envía; solo desde la propia web.
+- **Formulario y tracking (150):**
+  - **contrato con la hoja:** exactamente los mismos 14 campos de siempre (falla si cambian) y `Code.gs` sin cambios;
+  - las preguntas y opciones de siempre; el aviso de privacidad bajo el botón; prefijo según el idioma (es-MX → +52);
+  - **WhatsApp tras enviar** en móvil con Safari de iPhone y con el navegador de Instagram: navega a wa.me con el texto exacto, al menos 800 ms después del Lead; Contact `gracias-auto`; el botón de respaldo cancela la apertura (`gracias-boton`); al volver atrás se ve el gracias sin reenviar ni repetir Lead;
+  - escritorio sin redirección (como mucho una pestaña nueva); correo sin redirección;
+  - **Lead** una vez por solicitud, por píxel y por servidor (`/api/lead-capi`) con el mismo `event_id`, coincidencia avanzada en cada píxel antes del Lead; nada antes de enviar, ni con error ni con antispam; sin lead parcial;
+  - embudo `FormStart`, `FormStep` y `FormError`; FAQ "¿Otra duda?" al formulario sin preselección;
+  - pantalla de error con todos los datos en el WhatsApp y Contact `error-envio`;
+  - el PDF del catálogo responde 301 a `/#asesoramiento`;
+  - lo de antes: cookies, "Pedir asesoramiento" de las tarjetas, validaciones, prefijos, "Otro equipo", "Prefiero por correo", doble clic, otra solicitud, endpoint vacío, error del servidor y antispam.
+- **Interfaz (138):**
+  - **sin fugas:** el código (`index.html`, el JS de la landing y las legales) solo tiene WhatsApp, teléfono, correo o Instagram en el gracias, el error, el JSON-LD y el texto legal; en la página servida todos los enlaces son internos, legales en pestaña nueva o el WhatsApp de después del envío; nada de eso visible al recorrer la página entera; logos a `#inicio`; legales que se abren en otra pestaña;
+  - **hero por campaña** (TOFU 1, TOFU 3, DESCUBRIR, MOFU 2, BOFU 1, BOFU 2, `?v=` y sin UTM) en 390 y 1440 px, con CLS 0; el AX8 primero con campaña;
+  - barra móvil con un único botón a todo el ancho; pie sin contacto con CTA; 7 dudas iguales en la web y en el JSON-LD; 7 garantías con icono distinto;
+  - lo de antes: estructura y palabras, CTA por sección, alineación, cabecera, barra de progreso, carrusel, comparativa, transiciones, panel de cookies, nada ensancha la página de 320 a 1024 px (texto al 100 y 130 %), solo WebP, movimiento reducido, CSP, caché, URLs limpias y metadatos.
+- **Diseño (17 tamaños):** capturas de página completa de 320 a 1920 px, horizontal y legales, con comprobación de desbordes, textos partidos, solapes y áreas táctiles.
+- `node tests/inp.cjs`: interacción más lenta 64 ms con la CPU ×4 (INP < 200 ms).
 
 | | Rendimiento | Accesibilidad | Buenas prácticas | SEO |
 |---|---|---|---|---|
-| Móvil, landing (3 pasadas) | 100 · 100 · 100 | 100 | 100 | 100 |
+| Móvil, landing (4G lenta simulada) | 98-100 | 100 | 100 | 100 |
 | Escritorio, landing | 100 | 100 | 100 | 100 |
 | Móvil, páginas legales | 100 | 100 | 100 | 100 |
 
-Móvil: LCP 1,35 s (el titular del hero), CLS 0. Escritorio: LCP 0,4 s. HTML válido (W3C). Sin rayas ni emojis, comprobado por código.
+Móvil: LCP 1,5-1,7 s, TBT 20-120 ms, CLS 0. Escritorio: LCP 0,4 s. HTML válido (vnu 26.10). Consola y CSP limpias. Sin rayas ni emojis.
 
 ---
 
@@ -470,8 +483,9 @@ node scripts/assets/build_og.mjs                    # imagen Open Graph (Playwri
 python3 scripts/assets/gen_legal.py                 # páginas legales (toman el pie y las cookies de index.html)
 ```
 
-Catálogo PDF comprimido con Ghostscript:
+Imágenes del hero (v17), con ImageMagick a partir de las fotos ya publicadas:
 
 ```bash
-gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook -dColorImageResolution=200 -dGrayImageResolution=200 -dJPEGQ=82 -dDetectDuplicateImages=true -o catalogo-vytalgroup-2026.pdf original.pdf
+convert assets/img/p-ax8-640.webp -trim +repage -resize 180x assets/img/hero-ax8-180.webp   # y 360x para hero-ax8-360.webp
+convert assets/img/javier-320.webp -crop 214x214+53+12 +repage -resize 40x40 assets/img/avatar-javier-40.webp   # y 80 y 120
 ```

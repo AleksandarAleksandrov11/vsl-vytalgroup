@@ -8,12 +8,13 @@ src = open('index.html', encoding='utf-8').read()
 
 sprite = re.search(r'<svg class="sprite".*?</svg>(?=\s*<a class="skip")', src, re.S).group(0)
 defs = re.search(r'<defs>.*?</defs>', sprite, re.S).group(0)
-keep = ['logo', 'i-arrow', 'i-close', 'i-check', 'i-phone', 'i-mail', 'i-insta', 'i-whatsapp']
+keep = ['logo', 'i-arrow', 'i-close', 'i-check']
 symbols = ''.join(m.group(0) for m in re.finditer(r'<symbol id="([^"]+)".*?</symbol>', sprite, re.S) if m.group(1) in keep)
 mini_sprite = f'<svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">{defs}{symbols}</svg>'
 
 # En las legales, los enlaces a secciones de la landing llevan a la página principal
-footer = re.search(r'<footer class="ft">.*?</footer>', src, re.S).group(0).replace('href="#inicio"', 'href="/"').replace('<a href="#', '<a href="/#')
+footer = re.search(r'<footer class="ft">.*?</footer>', src, re.S).group(0).replace('href="#inicio"', 'href="/"')
+footer = re.sub(r'(<a [^>]*?)href="#', r'\1href="/#', footer)
 cookies = re.search(r'<div class="ck" id="cookie-banner".*?</dialog>', src, re.S).group(0)
 
 HEAD = '''<!doctype html>
@@ -51,7 +52,7 @@ HEAD = '''<!doctype html>
     <p class="legal__lead">{lead}</p>
     <article class="legal__body">
 {body}
-      <p class="legal__date">Última actualización: 2 de octubre de 2026.</p>
+      <p class="legal__date">Última actualización: 28 de octubre de 2026.</p>
     </article>
   </div>
 </main>
@@ -85,7 +86,7 @@ aviso = f'''        <h2>1. Datos identificativos</h2>
         <h2>6. Responsabilidad</h2>
         <p>Trabajamos para que la información sea correcta y esté actualizada, pero no podemos garantizar la ausencia de errores ni la disponibilidad continua de la web. No respondemos de los daños derivados de un uso indebido de la web ni de los contenidos de sitios de terceros enlazados.</p>
         <h2>7. Enlaces</h2>
-        <p>La web puede incluir enlaces a servicios de terceros, como WhatsApp o Instagram. Al usarlos, se aplican las condiciones y políticas de privacidad de esos servicios.</p>
+        <p>Después de enviar el formulario, la web puede abrir WhatsApp para que nos escribas. Al usarlo, se aplican las condiciones y la política de privacidad de ese servicio.</p>
         <h2>8. Protección de datos y cookies</h2>
         <p>El tratamiento de tus datos personales se explica en la <a href="/privacidad">política de privacidad</a> y el uso de cookies en la <a href="/cookies">política de cookies</a>.</p>
         <h2>9. Legislación aplicable</h2>
@@ -95,23 +96,24 @@ priv = f'''        <h2>1. Responsable del tratamiento</h2>
 {TITULAR}
         <h2>2. Qué datos tratamos</h2>
         <ul>
-          <li><strong>Datos del formulario:</strong> nombre, teléfono de WhatsApp o correo electrónico (según prefieras que te escribamos), perfil profesional (clínica, fisioterapeuta, médico u otro), equipo de interés y, si lo eliges, el modelo. También la fecha de la solicitud y la constancia de que aceptaste esta política.</li>
-          <li><strong>Origen de la visita:</strong> los parámetros de campaña (UTM) del enlace por el que llegas, para saber de qué anuncio viene cada solicitud. Si aceptas las cookies de marketing, el píxel de Meta usa además sus propios identificadores en tu navegador (fbp y fbc).</li>
-          <li><strong>Datos técnicos:</strong> un identificador aleatorio de la solicitud, para no registrarla dos veces.</li>
+          <li><strong>Datos del formulario:</strong> nombre, teléfono de WhatsApp o correo electrónico (según prefieras que te escribamos), perfil profesional (clínica, fisioterapeuta, médico u otro), equipo de interés y, si lo eliges, el modelo. También la fecha y hora del envío, que es cuando aceptas esta política.</li>
+          <li><strong>Origen de la visita:</strong> los parámetros de campaña (UTM) del enlace por el que llegas, para saber de qué anuncio viene cada solicitud. Para medir los anuncios usamos además el identificador del clic en el anuncio de Meta (fbc) y, si aceptas las cookies de marketing, el identificador del píxel de Meta en tu navegador (fbp).</li>
+          <li><strong>Datos técnicos:</strong> un identificador aleatorio de la solicitud (para no registrarla dos veces) y, al enviar, la dirección IP, el tipo de navegador (user agent) y la página desde la que envías, que solo se comunican a Meta como se explica más abajo.</li>
           <li><strong>Comunicaciones:</strong> lo que nos cuentes por WhatsApp, teléfono o email.</li>
         </ul>
         <h2>3. Para qué los usamos</h2>
         <ul>
           <li>Atender tu solicitud, asesorarte y enviarte la información o propuesta que pidas.</li>
           <li>Saber de qué campaña o anuncio llega cada solicitud para mejorar nuestras campañas.</li>
-          <li>Si aceptas las cookies de marketing, medir la eficacia de los anuncios de Meta (Instagram y Facebook).</li>
+          <li>Comunicar a Meta que se ha producido una solicitud desde un anuncio (API de conversiones), para medir y mejorar nuestros anuncios en Instagram y Facebook. Lo hace nuestra web desde su servidor (Vercel) justo después de guardar tu solicitud. Se envían el identificador de la solicitud, el teléfono o el correo, el nombre de pila y el país <strong>cifrados con hash SHA-256</strong> (Meta no los recibe en claro), los identificadores fbc y fbp si existen, la dirección IP, el tipo de navegador, la página y qué te interesa. Estos datos no se guardan en nuestra hoja de solicitudes.</li>
+          <li>Si aceptas las cookies de marketing, medir la eficacia de los anuncios de Meta con el píxel en tu navegador.</li>
           <li>Proteger el formulario frente a envíos automáticos.</li>
         </ul>
         <h2>4. Base legal</h2>
         <ul>
-          <li><strong>Consentimiento</strong> (art. 6.1.a RGPD): al enviar el formulario marcando la casilla y al aceptar las cookies de marketing. Puedes retirarlo cuando quieras.</li>
-          <li><strong>Medidas precontractuales</strong> a petición tuya (art. 6.1.b RGPD): preparar y enviarte una propuesta.</li>
-          <li><strong>Interés legítimo</strong> (art. 6.1.f RGPD): seguridad de la web y prevención de envíos automáticos.</li>
+          <li><strong>Medidas precontractuales a petición tuya</strong> (art. 6.1.b RGPD): atender la solicitud que nos envías, asesorarte y preparar y enviarte una propuesta. Antes de enviar, bajo el botón, te informamos de esta política.</li>
+          <li><strong>Consentimiento</strong> (art. 6.1.a RGPD): para las cookies de marketing y el píxel de Meta en tu navegador. Puedes retirarlo cuando quieras desde "Configurar cookies".</li>
+          <li><strong>Interés legítimo</strong> (art. 6.1.f RGPD): medir la eficacia de nuestros anuncios comunicando a Meta las solicitudes con los datos cifrados, y la seguridad de la web y la prevención de envíos automáticos. Puedes oponerte en cualquier momento escribiéndonos (apartado 7) y dejaremos de hacerlo.</li>
         </ul>
         <h2>5. Cuánto tiempo los conservamos</h2>
         <p>Mientras mantengamos la relación contigo y, si no llegas a contratar, durante 12 meses desde el último contacto. Después, los datos se bloquean durante los plazos legales de prescripción y se eliminan.</p>
@@ -119,8 +121,8 @@ priv = f'''        <h2>1. Responsable del tratamiento</h2>
         <ul>
           <li><strong>Google</strong> (Google Sheets, Apps Script y Gmail), como encargado del tratamiento, para recibir y guardar las solicitudes del formulario y avisarnos por correo de cada una.</li>
           <li>Los profesionales que nos ayudan a gestionar la web y las campañas, como encargados del tratamiento y solo con los datos necesarios para atender tu solicitud.</li>
-          <li><strong>Meta Platforms Ireland Ltd.</strong>, solo si aceptas las cookies de marketing, para la medición de anuncios con el píxel de Meta.</li>
-          <li><strong>Vercel Inc.</strong>, proveedor de alojamiento de la web, como encargado del tratamiento.</li>
+          <li><strong>Meta Platforms Ireland Ltd.</strong>, para la medición de anuncios: con el píxel de Meta solo si aceptas las cookies de marketing, y desde nuestro servidor (API de conversiones) con los datos cifrados descritos en el apartado 3.</li>
+          <li><strong>Vercel Inc.</strong>, proveedor de alojamiento de la web y del servidor que comunica las solicitudes a Meta, como encargado del tratamiento.</li>
           <li>Autoridades y organismos públicos, cuando exista una obligación legal.</li>
         </ul>
         <p>Google, Meta y Vercel pueden tratar datos fuera del Espacio Económico Europeo. En ese caso lo hacen con las garantías previstas en el RGPD, como el Marco de Privacidad de Datos UE y EE. UU. o las cláusulas contractuales tipo de la Comisión Europea.</p>
@@ -142,13 +144,15 @@ cook = f'''        <h2>1. Qué son las cookies</h2>
             <tbody>
               <tr><td data-label="Nombre"><code>vg_consent</code></td><td data-label="Titular">VytalGroup (propia)</td><td data-label="Finalidad">Guardar tu elección sobre cookies (almacenamiento local)</td><td data-label="Duración">12 meses</td><td data-label="Tipo">Necesaria</td></tr>
               <tr><td data-label="Nombre"><code>vg_attr</code></td><td data-label="Titular">VytalGroup (propia)</td><td data-label="Finalidad">Guardar el origen de la visita (UTM y fbclid) para asociarlo a tu solicitud (almacenamiento de sesión)</td><td data-label="Duración">Sesión</td><td data-label="Tipo">Necesaria</td></tr>
-              <tr><td data-label="Nombre"><code>vg_vc</code>, <code>vg_lead_*</code></td><td data-label="Titular">VytalGroup (propia)</td><td data-label="Finalidad">Evitar que un mismo evento de medición se envíe dos veces (almacenamiento de sesión)</td><td data-label="Duración">Sesión</td><td data-label="Tipo">Marketing</td></tr>
+              <tr><td data-label="Nombre"><code>vg_done</code></td><td data-label="Titular">VytalGroup (propia)</td><td data-label="Finalidad">Volver a mostrar el mensaje de gracias si vuelves atrás desde WhatsApp, sin enviar nada otra vez (almacenamiento de sesión)</td><td data-label="Duración">Sesión</td><td data-label="Tipo">Necesaria</td></tr>
+              <tr><td data-label="Nombre"><code>vg_vc</code>, <code>vg_lead_*</code>, <code>vg_fs</code>, <code>vg_fstep_*</code></td><td data-label="Titular">VytalGroup (propia)</td><td data-label="Finalidad">Evitar que un mismo evento de medición (vista de equipos, solicitud o paso del formulario) se envíe dos veces (almacenamiento de sesión)</td><td data-label="Duración">Sesión</td><td data-label="Tipo">Marketing</td></tr>
               <tr><td data-label="Nombre"><code>_fbp</code></td><td data-label="Titular">Meta</td><td data-label="Finalidad">Identificar el navegador para medir los anuncios de Meta</td><td data-label="Duración">3 meses</td><td data-label="Tipo">Marketing</td></tr>
               <tr><td data-label="Nombre"><code>_fbc</code></td><td data-label="Titular">Meta</td><td data-label="Finalidad">Guardar el identificador del clic en un anuncio de Meta</td><td data-label="Duración">3 meses</td><td data-label="Tipo">Marketing</td></tr>
             </tbody>
           </table>
         </div>
-        <p>Las cookies de Meta solo se instalan si aceptas la categoría de marketing. Meta puede usar además sus propias cookies en sus dominios, según su <a href="https://www.facebook.com/privacy/policies/cookies/" target="_blank" rel="noopener">política de cookies</a>.</p>
+        <p>Las cookies de Meta solo se instalan si aceptas la categoría de marketing. Aparte de las cookies, cuando envías el formulario la web comunica la solicitud a Meta desde su servidor con los datos cifrados, como se explica en la <a href="/privacidad">política de privacidad</a>.</p>
+        <p>Meta puede usar además sus propias cookies en sus dominios, según su <a href="https://www.facebook.com/privacy/policies/cookies/" target="_blank" rel="noopener">política de cookies</a>.</p>
         <p><strong>Analítica:</strong> ahora mismo esta web no usa ninguna herramienta de analítica. Si en el futuro se añade, se cargará solo si aceptas esa categoría y se incluirá en esta tabla.</p>
         <h2>3. Cómo gestionar tus preferencias</h2>
         <p>Al entrar por primera vez puedes aceptar, rechazar o configurar las cookies. Puedes cambiar tu elección cuando quieras:</p>

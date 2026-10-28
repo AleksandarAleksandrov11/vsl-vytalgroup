@@ -2,6 +2,8 @@
 // · aplica las cabeceras de vercel.json (seguridad, CSP y caché) en el mismo orden,
 // · URLs limpias (/privacidad sirve privacidad.html y /privacidad.html redirige a /privacidad),
 // · redirecciones de vercel.json, compresión brotli/gzip y peticiones Range.
+// · /api/<nombre> ejecuta api/<nombre>.js como las funciones de Vercel (sin variables de entorno de
+//   Meta en local: /api/lead-capi responde sin enviar nada).
 // Uso: node scripts/serve.mjs [carpeta] [puerto]      → por defecto "dist" y 8080
 // Pruebas: CSP_CONNECT_EXTRA="http://localhost:8090" añade el Apps Script simulado a connect-src.
 import { createServer } from 'node:http';
@@ -48,8 +50,16 @@ createServer(async (req, res) => {
   try {
     const u = new URL(req.url, 'http://x');
     let path = decodeURIComponent(u.pathname);
-    const redirect = (to) => { res.writeHead(308, { Location: to + u.search }).end(); };
-    for (const r of vercel.redirects || []) if (path === r.source) return redirect(r.destination);
+    if (path.startsWith('/api/') && /^\/api\/[\w-]+$/.test(path)) {
+      const fn = resolve('api', `${path.slice(5)}.js`);
+      if (!(await exists(fn))) { res.writeHead(404, headersFor(path)).end(); return; }
+      for (const [k, v] of Object.entries(headersFor(path))) res.setHeader(k, v);
+      const { default: handler } = await import(fn);
+      await handler(req, res);
+      return;
+    }
+    const redirect = (to, code = 308) => { res.writeHead(code, { Location: to.includes('#') ? to : to + u.search }).end(); };
+    for (const r of vercel.redirects || []) if (path === r.source) return redirect(r.destination, r.statusCode || (r.permanent === false ? 307 : 308));
     if (vercel.cleanUrls && path.endsWith('.html')) return redirect(path === '/index.html' ? '/' : path.slice(0, -5));
     if (vercel.trailingSlash === false && path.length > 1 && path.endsWith('/')) return redirect(path.slice(0, -1));
     let file = normalize(join(root, path === '/' ? '/index.html' : path));

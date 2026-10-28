@@ -49,7 +49,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       nav: document.querySelectorAll('nav').length,
       ids: [...document.querySelectorAll('main > section')].map((x) => x.id),
     }));
-    ok(s.ids.join(',') === 'inicio,garantias,equipos,mas-equipos,por-que,comparativa,dudas,asesoramiento' && s.footers === 1, 'Estructura: hero, franja de garantías, 6 secciones (con "Lo habitual frente a VytalGroup" aparte) y el footer', s.ids.join(', '));
+    ok(s.ids.join(',') === 'inicio,garantias,equipos,comparativa,mas-equipos,por-que,dudas,asesoramiento' && s.footers === 1, 'Estructura: hero, franja de garantías, Lo más pedido, la comparativa justo después, Más equipos, Javier, Dudas, formulario y footer', s.ids.join(', '));
     ok(s.nav === 0, 'Minimalismo: sin menú de navegación');
     // Palabras visibles del contenido: sin cabecera, footer, respuestas del acordeón, formulario ni la línea de confianza
     const words = await p.evaluate(() => {
@@ -66,13 +66,16 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       }
       return out;
     });
-    ok(words.main <= 260, 'Minimalismo: unas 250 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
-    // Un CTA por sección con el mismo texto; el catálogo es la única excepción
-    const perSec = await p.$$eval('main > section:not(#asesoramiento):not(#garantias)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
-    const want = ['inicio:Quiero asesoramiento', 'equipos:Quiero asesoramiento', 'mas-equipos:Quiero asesoramiento+Descargar catálogo', 'por-que:Quiero asesoramiento', 'comparativa:Quiero asesoramiento', 'dudas:Quiero asesoramiento'];
-    ok(perSec.join('|') === want.join('|'), 'CTA: "Quiero asesoramiento" en cada sección y "Descargar catálogo" junto a él en Más equipos', perSec.join(' | '));
-    const cta = await p.$$eval('[data-cta]', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
-    ok(cta.length === 1 && cta[0] === 'Quiero asesoramiento', 'CTA: texto de asesoramiento idéntico en todas partes (cabecera, secciones y barra móvil)', cta.join(' | '));
+    // v10: + línea de confianza y firma de Javier en el hero, "¿No sabes cuál elegir?" y "¿Otra duda?"
+    ok(words.main <= 290, 'Minimalismo: menos de 290 palabras visibles en las secciones (sin acordeón ni formulario)', `${words.main} en secciones · ${words.ticker} en la línea de confianza · ${words.chrome} en cabecera y footer`);
+    // Un CTA por sección con el mismo texto (en Más equipos, solo el de asesoramiento)
+    const perSec = await p.$$eval('main > section:not(#asesoramiento):not(#garantias)', (els) => els.map((sec) => `${sec.id}:${[...sec.querySelectorAll('[data-cta], .btn[data-catalog-ask], .btn[data-catalog]')].map((a) => a.textContent.trim()).join('+')}`));
+    const want = ['inicio:Pedir asesoramiento gratis', 'equipos:Pedir asesoramiento gratis', 'comparativa:Pedir asesoramiento gratis', 'mas-equipos:Pedir asesoramiento gratis', 'por-que:Pedir asesoramiento gratis', 'dudas:Pedir asesoramiento gratis'];
+    ok(perSec.join('|') === want.join('|'), 'CTA: "Pedir asesoramiento gratis" en cada sección, uno solo por sección', perSec.join(' | '));
+    const cta = await p.$$eval('[data-cta]', (els) => [...new Set(els.map((e) => e.getAttribute('aria-label') || e.textContent.trim()))]);
+    ok(cta.length === 1 && cta[0] === 'Pedir asesoramiento gratis', 'CTA: texto de asesoramiento idéntico en todas partes (cabecera, secciones, pie y barra móvil)', cta.join(' | '));
+    const cards = await p.$$eval('.card .btn', (els) => [...new Set(els.map((e) => e.textContent.trim()))]);
+    ok(cards.join() === 'Pedir asesoramiento', 'Tarjetas: botón "Pedir asesoramiento" (antes "Lo quiero")', cards.join(' | '));
     const badges = await p.evaluate(() => [...document.querySelectorAll('[class]')].map((e) => String(e.className.baseVal ?? e.className)).filter((c) => /badge|chip|tag\b|pill|label--|ribbon/.test(c)));
     ok(!badges.length, 'Minimalismo: sin badges, chips ni etiquetas', badges.join(', '));
     const perCard = await p.$$eval('.card', (els) => els.map((c) => c.querySelectorAll('a, button').length));
@@ -81,7 +84,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const gone = ['Ver ficha', 'También te equipamos', 'Cómo trabajamos', 'wa-float', 'Testimonio de ejemplo', 'tsts', 'data-ejemplo', 'Me interesa', 'Habla con Javier', 'No sé cuál elegir', 'ISO 13485', 'FDA', 'veterinari'].filter((x) => html.includes(x));
     ok(!gone.length, 'Contenido: nada de lo eliminado ni prohibido (ISO, FDA, veterinaria)', gone.join(', '));
     const qs = await p.$$eval('.acc__btn', (els) => els.map((e) => e.textContent.trim()));
-    ok(qs.join('|') === '¿Cuál me conviene?|¿Qué garantía tienen?|¿Y el mantenimiento?|¿Están certificados?|¿Enviáis fuera de España?|¿Qué pasa cuando envío el formulario?', 'Dudas: 6 preguntas, sin "¿Solo vendéis...?" y con garantía y qué pasa al enviar', qs.join(' · '));
+    ok(qs.join('|') === '¿Cuánto cuesta?|¿Cuál me conviene?|¿Qué garantía tienen?|¿Y el mantenimiento?|¿Están certificados?|¿Enviáis fuera de España?|¿Qué pasa cuando envío el formulario?', 'Dudas: 7 preguntas, "¿Cuánto cuesta?" la primera y qué pasa al enviar la última', qs.join(' · '));
     const nc = await p.evaluate(() => [...document.querySelectorAll('body *:not(script):not(style)')].filter((e) => e.children.length === 0 && /no comerciales/i.test(e.textContent)).length + (/no comerciales/i.test(document.head.innerHTML) ? 1 : 0));
     ok(nc === 0, 'Texto: "Fisioterapeutas te asesoran" sin "no comerciales" (web y metadatos)', `${nc}`);
     ok(!logs.length, 'Consola limpia (inicio)', logs.join(' / '));
@@ -126,12 +129,11 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
           const btn = document.querySelector('.hd .btn').getBoundingClientRect();
           const logo = document.querySelector('.hd__logo').getBoundingClientRect();
           const bar = document.querySelector('[data-mbar]');
-          const wa = bar.querySelector('.mbar__wa').getBoundingClientRect();
           const cta = bar.querySelector('.mbar__cta');
           const barOn = getComputedStyle(bar).display !== 'none' && bar.classList.contains('is-on');
-          return { sw: document.documentElement.scrollWidth, vw, hdR: Math.round(btn.right), gap: Math.round(btn.left - logo.right), txtFits: document.querySelector('.hd .btn').scrollWidth <= Math.ceil(btn.width) + 1, barOn, waR: Math.round(wa.right), ctaFits: cta.scrollWidth <= cta.clientWidth + 1 };
+          return { sw: document.documentElement.scrollWidth, vw, hdR: Math.round(btn.right), gap: Math.round(btn.left - logo.right), txtFits: document.querySelector('.hd .btn').scrollWidth <= Math.ceil(btn.width) + 1, barOn, ctaR: Math.round(cta.getBoundingClientRect().right), ctaFits: cta.scrollWidth <= cta.clientWidth + 1 };
         });
-        const fine = r.sw <= r.vw && r.hdR <= r.vw && r.gap >= 8 && r.txtFits && (!r.barOn || (r.waR <= r.vw && r.ctaFits));
+        const fine = r.sw <= r.vw && r.hdR <= r.vw && r.gap >= 8 && r.txtFits && (!r.barOn || (r.ctaR <= r.vw && r.ctaFits));
         if (!fine) bad.push(`${w}px ${zoom}% ${JSON.stringify(r)}`);
         await ctx.close();
       }
@@ -203,7 +205,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
     await scrollToSel(p, '#dudas', 60); await p.waitForTimeout(900);
     await p.tap('#q1'); await p.waitForTimeout(800);
-    ok((await p.getAttribute('#q1', 'aria-expanded')) === 'true' && await p.isVisible('#a1') && (await p.textContent('#a1')).includes('te recomendamos uno'), 'Acordeón: abre al tocar');
+    ok((await p.getAttribute('#q1', 'aria-expanded')) === 'true' && await p.isVisible('#a1') && (await p.textContent('#a1')).includes('presupuesto por escrito'), 'Acordeón: abre al tocar');
     const clean = await p.evaluate(() => [...document.querySelectorAll('.acc__item, .faq__more, #asesoramiento, .ft')].every((e) => !e.style.transform));
     ok(clean, 'Acordeón: la animación solo usa transform y termina limpia');
     await p.focus('#q2'); await p.keyboard.press('Enter'); await p.waitForTimeout(700);
@@ -221,18 +223,19 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await p.waitForTimeout(800);
     ok(!(await p.evaluate(() => document.querySelector('[data-mbar]').classList.contains('is-on'))), 'Barra móvil: oculta en el hero');
     await scrollToSel(p, '#equipos', -200); await p.waitForTimeout(900);
-    const on = await p.evaluate(() => { const m = document.querySelector('[data-mbar]'); const r = m.getBoundingClientRect(); return { on: m.classList.contains('is-on'), inert: m.inert, bottom: Math.round(r.bottom), vh: innerHeight, btns: m.querySelectorAll('a').length }; });
-    ok(on.on && !on.inert && on.bottom <= on.vh && on.btns === 2, 'Barra móvil: aparece al pasar el hero (CTA + WhatsApp)', JSON.stringify(on));
-    await scrollToSel(p, '[data-faq-wa]', 300); await p.waitForTimeout(700);
-    const waVisible = await p.evaluate(() => [...document.querySelectorAll('a[href*="wa.me"]')].filter((a) => { const r = a.getBoundingClientRect(); const s = getComputedStyle(a); return r.width && r.bottom > 0 && r.top < innerHeight && s.display !== 'none' && a.checkVisibility({ visibilityProperty: true }) && !a.closest('[inert]'); }).length);
-    ok(waVisible === 1, 'WhatsApp: un solo enlace visible a la vez', `${waVisible} visibles`);
+    const on = await p.evaluate(() => { const m = document.querySelector('[data-mbar]'); const r = m.getBoundingClientRect(); const a = m.querySelectorAll('a, button'); const c = a[0].getBoundingClientRect(); return { on: m.classList.contains('is-on'), inert: m.inert, bottom: Math.round(r.bottom), vh: innerHeight, btns: a.length, txt: a[0].textContent.trim(), href: a[0].getAttribute('href'), w: Math.round(c.width), vw: innerWidth }; });
+    ok(on.on && !on.inert && on.bottom <= on.vh && on.btns === 1 && on.txt === 'Pedir asesoramiento gratis' && on.href === '#asesoramiento' && on.w >= on.vw - 2 * 16, 'Barra móvil: aparece al pasar el hero, con un único botón a todo el ancho "Pedir asesoramiento gratis"', JSON.stringify(on));
+    let waSeen = 0;
+    for (let y = 0; y < 12000; y += 400) {
+      await p.evaluate((y) => window.scrollTo({ top: y, behavior: 'instant' }), y); await p.waitForTimeout(40);
+      waSeen += await p.evaluate(() => [...document.querySelectorAll('a[href]')].filter((a) => /wa\.me|api\.whatsapp|^tel:|^mailto:|instagram\.com/.test(a.getAttribute('href')) && a.checkVisibility({ visibilityProperty: true }) && a.getBoundingClientRect().width > 0).length);
+    }
+    ok(waSeen === 0, 'Sin fugas: ningún WhatsApp, teléfono, correo ni Instagram visible antes de enviar (toda la página)', `${waSeen}`);
     await scrollToSel(p, '.fcard', 100); await p.waitForTimeout(900);
     ok(!(await p.evaluate(() => document.querySelector('[data-mbar]').classList.contains('is-on'))), 'Barra móvil: se oculta con el formulario en pantalla');
     await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await p.waitForTimeout(900);
     const foot = await p.evaluate(() => { const last = document.querySelector('.ft__word-in').getBoundingClientRect(); const m = document.querySelector('[data-mbar]'); const r = m.getBoundingClientRect(); return { last: Math.round(last.bottom), bar: m.classList.contains('is-on') ? Math.round(r.top) : 99999, noWa: m.classList.contains('no-wa') }; });
     ok(foot.last <= foot.bar, 'Barra móvil: no tapa el final del footer (ni el nombre en grande)', JSON.stringify(foot));
-    await p.evaluate(() => document.querySelector('[data-ft-wa]').scrollIntoView({ block: 'center' })); await p.waitForTimeout(700);
-    ok(await p.evaluate(() => document.querySelector('[data-mbar]').classList.contains('no-wa')), 'Barra móvil: sin icono de WhatsApp con el WhatsApp del pie a la vista');
     await ctx.close();
   });
 
@@ -251,7 +254,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       return { halfW: Math.round(tr.scrollWidth / 2), vw: innerWidth, lists: lists.length, dup: lists[1] && lists[1].getAttribute('aria-hidden'), same: lists[0].textContent === lists[1].textContent, anim: getComputedStyle(tr).animationName, own: !sec.closest('#inicio') && sec.tagName === 'SECTION' && !!sec.getAttribute('aria-label'), below: Math.abs(tk.top - hero.bottom) <= 1, fold: tk.bottom <= innerHeight + 1, bg: getComputedStyle(sec).backgroundColor, h: Math.round(tk.height), strong: parseFloat(getComputedStyle(li.querySelector('strong')).fontSize), txt: parseFloat(getComputedStyle(li).fontSize), icons: [...lists[0].querySelectorAll('.ticker__ico use')].map((u) => u.getAttribute('href')), items: [...lists[0].children].map((x) => x.textContent.trim().replace(/\s+/g, ' ')) };
     });
     ok(t.own && t.below && t.fold && t.bg === 'rgb(255, 255, 255)', 'Garantías: sección propia bajo el hero, con fondo propio, visible en la primera pantalla', JSON.stringify({ own: t.own, below: t.below, fold: t.fold, bg: t.bg, h: t.h }));
-    ok(t.icons.length === 6 && new Set(t.icons).size === 6 && t.strong >= 18 && t.txt >= 16 && t.h >= 84, 'Garantías: más grande, textos más grandes y un icono distinto en cada una', JSON.stringify({ icons: t.icons, strong: t.strong, txt: t.txt, h: t.h }));
+    ok(t.icons.length === 7 && new Set(t.icons).size === 7 && t.items.includes('Menos de 24 h de respuesta') && t.strong >= 18 && t.txt >= 16 && t.h >= 84, 'Garantías: 7 garantías (con "Menos de 24 h de respuesta"), textos grandes y un icono distinto en cada una', JSON.stringify({ items: t.items, icons: t.icons, strong: t.strong, txt: t.txt, h: t.h }));
     ok(t.lists === 4 && t.dup === 'true' && t.same && t.anim === 'marquee' && t.halfW >= t.vw, 'Garantías: en bucle infinito sin huecos (media pista ≥ ancho de pantalla) y con las copias ocultas a lectores', `${t.items.join(' · ')} · media pista ${t.halfW}px`);
     const p0 = await p.evaluate(() => getComputedStyle(document.querySelector('.progress span')).transform);
     await scrollToSel(p, '#por-que'); await p.waitForTimeout(400);
@@ -271,7 +274,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
       note: document.querySelector('.more__note').textContent.trim(),
     }));
     ok(r.names.join('|') === 'Presoterapia|Ondas de choque|Magnetoterapia de alta intensidad|Láser de alta potencia|Electrólisis percutánea ecoguiada|Camillas de fisioterapia' && r.imgs === 6 && r.cols === 2, 'Más equipos: 6 categorías con imagen y nombre (3 columnas en escritorio)', r.names.join(', '));
-    ok(r.note === 'Y más de 50 páginas de equipos en el catálogo.', 'Más equipos: nota del catálogo', r.note);
+    ok(r.note === '¿Buscas otro equipo? Pregúntanos: trabajamos con más de 50 modelos.', 'Más equipos: nota "¿Buscas otro equipo?"', r.note);
     const op = () => p.evaluate(() => [...document.querySelectorAll('.cat__desc')].map((d) => getComputedStyle(d).opacity).join(','));
     ok((await op()) === '0,0,0,0,0,0', 'Más equipos: descripción oculta al inicio');
     await p.hover('.cat:nth-child(4) .cat__btn'); await p.waitForTimeout(800);
@@ -329,7 +332,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
           after: sec.previousElementSibling.id, before: sec.nextElementSibling.id,
         };
       });
-      ok(t.title === '¿Por qué elegir VytalGroup?' && !t.lead && t.cta === 'Quiero asesoramiento' && t.after === 'por-que' && t.before === 'dudas', `Comparativa ${w}px: "¿Por qué elegir VytalGroup?" tras la de Javier, sin subtítulo y con CTA`, JSON.stringify({ title: t.title, after: t.after, before: t.before }));
+      ok(t.title === '¿Por qué elegir VytalGroup?' && !t.lead && t.cta === 'Pedir asesoramiento gratis' && t.after === 'equipos' && t.before === 'mas-equipos', `Comparativa ${w}px: "¿Por qué elegir VytalGroup?" justo después de Lo más pedido, sin subtítulo y con CTA`, JSON.stringify({ title: t.title, after: t.after, before: t.before }));
       ok(t.th.join('|') === 'Otras marcas:center:uppercase|VytalGroup:center:uppercase', `Comparativa ${w}px: cabeceras centradas, "OTRAS MARCAS" y "VYTALGROUP"`, t.th.join(' | '));
       if (!m) ok(t.w >= 900 && Math.max(...t.rowsH.slice(0, 4)) - Math.min(...t.rowsH.slice(0, 4)) <= 1, `Comparativa ${w}px: tabla más grande, con todas las filas en una línea y a la misma altura`, JSON.stringify({ w: t.w, rows: t.rowsH }));
       ok(/gradient/.test(t.bg) && t.bg !== t.why && t.bg !== t.faq, `Comparativa ${w}px: fondo propio (turquesa claro), distinto del de Javier y del de Dudas`, t.bg.slice(0, 60));
@@ -364,15 +367,68 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
           media: document.querySelectorAll('#inicio video, .reel, .stage, .hero__visual').length,
           anim: [...document.querySelectorAll('#inicio *')].map((e) => getComputedStyle(e).animationName).filter((n) => n !== 'none' && n !== 'word-up' && n !== 'fade-up' && n !== 'marquee'),
           tall: Math.round(hb.height) >= Math.min(innerHeight, 980) - document.querySelector('#garantias').offsetHeight - 2,
+          peek: document.querySelector('#equipos').getBoundingClientRect().top < innerHeight,
         };
       });
       ok(r.alt === '' && r.hidden === 'true' && r.prio === 'high' && r.loaded && /hero-fondo-(m-600|960|1600)/.test(r.src) && r.preload === '(max-width: 899px) | (min-width: 900px)', `Hero ${w}px: foto de clínica de fondo (decorativa), prioritaria y precargada por tamaño`, r.src);
-      ok(r.cover && r.veil && r.filter === 'none' && r.tall, `Hero ${w}px: la foto cubre todo el hero, velo marino encima y difuminado ya en el archivo (sin filter)`, JSON.stringify({ cover: r.cover, veil: r.veil, filter: r.filter, tall: r.tall }));
+      ok(r.cover && r.veil && r.filter === 'none' && (m ? r.peek : r.tall), `Hero ${w}px: la foto cubre todo el hero, velo marino encima y difuminado ya en el archivo (sin filter)${m ? '; Lo más pedido asoma en la primera pantalla' : ''}`, JSON.stringify({ cover: r.cover, veil: r.veil, filter: r.filter, tall: r.tall, peek: r.peek }));
       ok(r.h1 === 'rgb(255, 255, 255)' && r.logo.toUpperCase() === '#FFF', `Hero ${w}px: titular y logo de cabecera en blanco`, JSON.stringify({ h1: r.h1, logo: r.logo }));
       ok(r.media === 0 && !r.anim.length, `Hero ${w}px: solo foto, sin equipo recortado, ondas, vídeos ni fotos de clientes`, r.anim.join(','));
       ok(!logs.length, `Hero ${w}px: consola limpia`, logs.join(' / '));
       await ctx.close();
     }
+  });
+
+  // Titular según la campaña (utm_content / utm_campaign o ?v=), sin parpadeo ni saltos (CLS 0)
+  await block('Hero por campaña', async () => {
+    const H = {
+      base: ['Equipos médicos de alta calidad. Sin letra pequeña.', 'Ecógrafos, diatermias y todo lo que tu clínica necesita. Te asesoran fisioterapeutas.'],
+      eco: ['¿Vas a comprar un ecógrafo? Antes, hablemos.', 'Fisioterapeutas te ayudan a elegir el que necesitas. Y te decimos cuál no.'],
+      mofu2: ['¿Ecógrafo portátil o de carro?', 'Cuéntanos cómo trabajas y te decimos cuál encaja contigo.'],
+      bofu1: ['Asesoramiento sin compromiso.', '10 minutos para saber qué equipo tiene sentido para ti.'],
+      bofu2: ['Todo por escrito. Sin sorpresas.', 'Qué incluye, qué garantía tiene y cuánto cuesta el mantenimiento, antes de pagar.'],
+    };
+    const cases = [
+      ['sin-utm', '', 'base'],
+      ['tofu1', '?utm_source=meta&utm_medium=paid&utm_campaign=DESCUBRIR&utm_term=Fisios&utm_content=TOFU%201', 'eco'],
+      ['tofu3', '?utm_source=meta&utm_campaign=DESCUBRIR&utm_content=TOFU%203', 'eco'],
+      ['descubrir', '?utm_source=meta&utm_campaign=DESCUBRIR', 'eco'],
+      ['mofu2', '?utm_source=meta&utm_medium=paid&utm_campaign=CERRAR&utm_content=MOFU%202', 'mofu2'],
+      ['bofu1', '?utm_source=meta&utm_medium=paid&utm_campaign=CERRAR&utm_content=BOFU%201', 'bofu1'],
+      ['bofu2', '?utm_source=meta&utm_medium=paid&utm_campaign=CERRAR&utm_content=BOFU%202', 'bofu2'],
+      ['v-bofu2', '?v=bofu2', 'bofu2'],
+    ];
+    const bad = [];
+    const dir = path.join('tests', 'output', 'screenshots');
+    fs.mkdirSync(dir, { recursive: true });
+    for (const [w, h, m] of [[390, 844, true], [1440, 900, false]]) {
+      for (const [name, q, v] of cases) {
+        const { ctx, p, logs } = await page(b, { width: w, height: h, mobile: m });
+        await p.addInitScript(() => { window.__cls = 0; new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) window.__cls += e.value; }).observe({ type: 'layout-shift', buffered: true }); });
+        await p.goto(BASE + '/' + q, { waitUntil: 'networkidle' });
+        await p.waitForTimeout(1800);
+        const r = await p.evaluate(() => {
+          const vis = (sel) => [...document.querySelectorAll(sel)].filter((e) => getComputedStyle(e).display !== 'none').map((e) => e.textContent.replace(/\s+/g, ' ').trim());
+          return { h1: vis('#hero-title .hv'), lead: vis('.hero__lead .hv'), cls: Math.round(window.__cls * 1000) / 1000, cl: document.documentElement.className };
+        });
+        if (r.h1.join('|') !== H[v][0] || r.lead.join('|') !== H[v][1] || r.cls > 0.001 || logs.length) bad.push(`${w}px ${name}: ${JSON.stringify(r)} ${logs.join(' / ')}`);
+        if (['sin-utm', 'tofu1', 'mofu2', 'bofu1', 'bofu2'].includes(name)) await p.screenshot({ path: path.join(dir, `hero-${name}-${w}.png`) });
+        await ctx.close();
+      }
+    }
+    ok(!bad.length, 'Hero por campaña: TOFU y DESCUBRIR "¿Vas a comprar un ecógrafo?", MOFU 2, BOFU 1 y BOFU 2 con su titular, sin UTM el de siempre; CLS 0 en 390 y 1440 px', bad.join(' | ') || `${cases.length * 2} casos`);
+    // Con una variante, el AX8 pasa a la primera tarjeta de Lo más pedido
+    const { ctx, p } = await page(b, { width: 390, height: 844, mobile: true });
+    await p.goto(BASE + '/?utm_content=BOFU%201', { waitUntil: 'networkidle' });
+    const first = await p.evaluate(() => document.querySelector('#panel-eco .card .card__name').textContent.trim());
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const same = await p.evaluate(() => document.documentElement.className.includes('v-bofu1'));
+    await ctx.close();
+    const { ctx: c2, p: p2 } = await page(b, { width: 390, height: 844, mobile: true });
+    await p2.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const firstBase = await p2.evaluate(() => document.querySelector('#panel-eco .card .card__name').textContent.trim());
+    await c2.close();
+    ok(/AX8/.test(first) && !/AX8/.test(firstBase) && same, 'Lo más pedido: con campaña, el AX8 va primero (y la variante se mantiene en la sesión); sin campaña, el orden de siempre', `${first} · ${firstBase}`);
   });
 
   // Mismo sistema en todos los dispositivos: titulares y CTA de sección centrados
@@ -438,6 +494,9 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
           logoH: Math.round(logo.height), heads, cols,
           hSize: parseFloat(getComputedStyle(ft.querySelector('.ft__h')).fontSize),
           links: [...ft.querySelectorAll('a[href], button')].map((a) => a.getAttribute('href') || a.textContent.trim()),
+          legal: [...ft.querySelectorAll('a[href^="/"]')].map((a) => `${a.getAttribute('href')}:${a.target}:${a.rel}`),
+          logo: ft.querySelector('.ft__logo').getAttribute('href'),
+          cta: (ft.querySelector('.ft__cta') || {}).textContent,
           word: wd.textContent, hidden: wd.closest('[aria-hidden="true"]') !== null, isLast: last.classList.contains('ft__word'),
           fill: Math.round((wr.width / (document.querySelector('.ft .wrap').clientWidth - parseFloat(getComputedStyle(document.querySelector('.ft .wrap')).paddingLeft) * 2)) * 100),
           fs: parseFloat(getComputedStyle(wd).fontSize), inView: wr.top < innerHeight && wr.bottom > 0,
@@ -447,8 +506,8 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
           sw: document.documentElement.scrollWidth, vw,
         };
       });
-      ok(r.logoH >= 30 && r.heads.join('|') === 'Contacto|Equipos|Legal|Síguenos' && r.hSize <= 13 && r.cols.map((c) => c[1]).join(',') === '3,4,4,1', `Pie ${w}px: logo grande y columnas con título pequeño (Contacto, Equipos, Legal, Síguenos)`, JSON.stringify({ logoH: r.logoH, cols: r.cols, hSize: r.hSize }));
-      ok(['tel:+34616372644', 'mailto:vytalkinetech@gmail.com', 'https://www.instagram.com/fisioruiz_/', '#equipos', '#mas-equipos', '/assets/docs/catalogo-vytalgroup-2026.pdf', '#asesoramiento', '/aviso-legal', '/privacidad', '/cookies', 'Configurar cookies'].every((x) => r.links.includes(x)) && r.links.some((x) => /wa\.me/.test(x)), `Pie ${w}px: teléfono, WhatsApp, correo, Instagram, equipos, catálogo, asesoramiento y legales`, r.links.length + ' enlaces');
+      ok(r.logoH >= 30 && r.heads.join('|') === 'Equipos|Legal' && r.hSize <= 13 && r.cols.map((c) => c[1]).join(',') === '3,4' && r.cta === 'Pedir asesoramiento gratis' && r.logo === '#inicio', `Pie ${w}px: logo (sube al inicio), claim, CTA "Pedir asesoramiento gratis" y columnas Equipos y Legal`, JSON.stringify({ logoH: r.logoH, cols: r.cols, hSize: r.hSize, cta: r.cta }));
+      ok(r.links.join(',') === '#inicio,#asesoramiento,#equipos,#mas-equipos,#asesoramiento,/aviso-legal,/privacidad,/cookies,Configurar cookies' && r.legal.every((x) => x.endsWith(':_blank:noopener')), `Pie ${w}px: sin teléfono, WhatsApp, correo ni Instagram; legales en pestaña nueva`, r.links.join(' '));
       ok(before.armed && before.op === '0' && r.word === 'VytalGroup' && r.hidden && r.isLast && r.fill >= 94 && r.fill <= 101 && r.inView && r.done && r.delays[0] === '0s' && r.delays[1] === '0.495s' && r.colors[0] !== r.colors[1] && r.sw <= r.vw, `Pie ${w}px: "VytalGroup" en grande a todo el ancho al final, con las letras que suben una a una al llegar`, JSON.stringify({ before, fill: r.fill, fs: r.fs, done: r.done, delays: r.delays, colors: r.colors }));
       ok(!logs.length, `Pie ${w}px: consola limpia`, logs.join(' / '));
       await ctx.close();
@@ -458,7 +517,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await p.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }));
     await p.waitForTimeout(2000);
     const l = await p.evaluate(() => ({ hrefs: [...document.querySelectorAll('.ft a')].map((a) => a.getAttribute('href')).filter((h) => h.includes('#')), icons: [...document.querySelectorAll('.ft use')].every((u) => document.querySelector(u.getAttribute('href'))), done: [...document.querySelectorAll('.ft__word-in span')].every((x) => getComputedStyle(x).opacity === '1') }));
-    ok(l.hrefs.join(',') === '/#equipos,/#mas-equipos,/#asesoramiento' && l.icons && l.done && !logs.length, 'Pie en las páginas legales: mismo pie, enlaces a la página principal, iconos y nombre animado', JSON.stringify(l));
+    ok(l.hrefs.join(',') === '/#asesoramiento,/#equipos,/#mas-equipos,/#asesoramiento' && l.icons && l.done && !logs.length, 'Pie en las páginas legales: mismo pie, enlaces a la página principal, iconos y nombre animado', JSON.stringify(l));
     await ctx.close();
   });
 
@@ -483,7 +542,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     ok(!bad.length, 'Formulario: "Cuéntanos qué necesitas." en una línea (320 a 1440 px) y el formulario cerca, sin el hueco blanco con Dudas', bad.join(' | ') || '6 anchos');
   });
 
-  // Solo Más equipos (la cuadrícula) se funde arriba con Lo más pedido; el resto de secciones,
+  // Solo Más equipos (la cuadrícula) se funde arriba con la comparativa; el resto de secciones,
   // incluidas Javier y la comparativa, mantienen su corte recto
   await block('Transiciones entre secciones', async () => {
     for (const [w, h, m] of [[1440, 900, false], [390, 844, true]]) {
@@ -497,7 +556,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
         const full = ['por-que', 'comparativa'].map((id) => { const el = document.getElementById(id); const b = el.getBoundingClientRect(); return [id, Math.round(b.width), getComputedStyle(el).borderTopLeftRadius]; });
         return { first: cols[0], last: cols[cols.length - 1], body: getComputedStyle(document.body).backgroundColor, h: parseFloat(a.height), pad: parseFloat(getComputedStyle(sec).paddingTop), straight, full, vw: document.documentElement.clientWidth, ft: getComputedStyle(document.querySelector('.ft'), '::after').content };
       });
-      ok(r.first === r.body && /, 0\)$/.test(r.last) && r.h <= r.pad + 1 && r.h >= 60, `Secciones ${w}px: Más equipos (la cuadrícula) se funde arriba con Lo más pedido, dentro de su margen`, JSON.stringify({ first: r.first, h: r.h, pad: r.pad }));
+      ok(r.first === 'rgb(210, 235, 235)' && /, 0\)$/.test(r.last) && r.h <= r.pad + 1 && r.h >= 60, `Secciones ${w}px: Más equipos (la cuadrícula) se funde arriba con el color de la comparativa, dentro de su margen`, JSON.stringify({ first: r.first, h: r.h, pad: r.pad }));
       ok(r.straight.every(([, c]) => c === 'none') && r.ft === 'none', `Secciones ${w}px: Javier, la comparativa, Dudas, el formulario y el pie con corte recto`, JSON.stringify(r.straight));
       ok(r.full.every(([, wd, rad]) => wd === r.vw && rad === '0px'), `Secciones ${w}px: Por qué VytalGroup y la comparativa ocupan todo el ancho`, JSON.stringify(r.full));
       await ctx.close();
@@ -547,14 +606,49 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
   await block('Catálogo', async () => {
     const { ctx, p } = await page(b, {});
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
-    const r = await p.evaluate(() => {
-      const a = document.querySelector('#mas-equipos .btn[data-catalog]');
-      const cta = document.querySelector('#mas-equipos [data-cta]');
-      const s = getComputedStyle(a);
-      return { dl: a.hasAttribute('download'), href: a.getAttribute('href'), txt: a.textContent.trim(), bg: s.backgroundColor, color: s.color, sameRow: Math.abs(a.getBoundingClientRect().top - cta.getBoundingClientRect().top) < 2, hero: document.querySelector('.hero__more').getAttribute('href'), foot: !!document.querySelector('.ft a[href$="catalogo-vytalgroup-2026.pdf"]') };
-    });
-    ok(r.dl && /catalogo-vytalgroup-2026\.pdf$/.test(r.href) && r.txt === 'Descargar catálogo' && r.bg === 'rgb(11, 25, 41)' && r.color === 'rgb(255, 255, 255)' && r.sameRow, 'Catálogo: botón oscuro "Descargar catálogo" junto al CTA en Más equipos (descarga directa)', JSON.stringify(r));
-    ok(r.hero === '#mas-equipos' && r.foot && !(await p.$('#catalogo')), 'Catálogo: sin sección propia; "Ver catálogo" lleva a Más equipos y el PDF sigue en el footer', r.hero);
+    const r = await p.evaluate(() => ({ btns: [...document.querySelectorAll('#mas-equipos a.btn, #mas-equipos button.btn')].map((a) => a.textContent.trim()), hero: document.querySelector('.hero__more').getAttribute('href'), heroTxt: document.querySelector('.hero__more').textContent.trim(), pdf: /\.pdf\b|download|catálogo completo|Pídenos el catálogo/i.test(document.body.innerHTML) }));
+    ok(r.btns.join() === 'Pedir asesoramiento gratis', 'Más equipos ("Todo lo que tu clínica necesita"): solo el CTA de asesoramiento', r.btns.join(' | '));
+    ok(r.hero === '#equipos' && r.heroTxt === 'Ver equipos' && !r.pdf && !(await p.$('#catalogo')), 'Catálogo: ningún PDF ni descarga; el enlace del hero es "Ver equipos" (a #equipos)', JSON.stringify({ hero: r.hero, pdf: r.pdf }));
+    await ctx.close();
+  });
+
+  // ------------------------------------------------------------ sin fugas: un solo camino (el formulario)
+  await block('Sin fugas', async () => {
+    // 1) Código fuente: WhatsApp, teléfono, correo e Instagram solo donde se permite
+    const PAT = /wa\.me|api\.whatsapp|tel:[+\d]|mailto:|instagram\.com/g;
+    const found = [];
+    const scan = (file, allow) => {
+      const src = fs.readFileSync(file, 'utf8');
+      for (const m of src.matchAll(PAT)) {
+        const line = src.slice(src.lastIndexOf('\n', m.index) + 1, src.indexOf('\n', m.index));
+        if (!allow(line, src, m.index)) found.push(`${file}: ${line.trim().slice(0, 90)}`);
+      }
+    };
+    const inLd = (src, i) => { const a = src.lastIndexOf('<script type="application/ld+json">', i); return a >= 0 && src.indexOf('</script>', a) > i; };
+    scan('index.html', (line, src, i) => inLd(src, i) || /data-done-wa|data-fail-wa/.test(line));
+    fs.readdirSync('assets/js').filter((f) => f.endsWith('.js')).forEach((f) => scan(`assets/js/${f}`, (line) => f === 'form.js' && /^const WA = 'https:\/\/wa\.me\/34616372644\?text=';$/.test(line.trim())));
+    // Legales: los datos de contacto del titular y de derechos (texto legal), nada más
+    for (const f of ['aviso-legal.html', 'privacidad.html', 'cookies.html', 'scripts/assets/gen_legal.py']) scan(f, (line) => /<dd><a href="(mailto|tel):|ejercer tus derechos/.test(line));
+    ok(!found.length, 'Sin fugas (código): wa.me, api.whatsapp, tel:, mailto: e instagram.com solo en el gracias, el error, el JSON-LD y el texto legal', found.join(' | ') || 'limpio');
+    // 2) Página servida: todos los enlaces son internos, legales en pestaña nueva o el WhatsApp de después de enviar
+    const { ctx, p } = await page(b, { width: 390, height: 844, mobile: true, consent: null });
+    await p.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const links = await p.evaluate(() => [...document.querySelectorAll('a[href]')].map((a) => ({ href: a.getAttribute('href'), t: a.target, rel: a.rel, after: !!a.closest('[data-done], [data-fail]'), sprite: !!a.closest('svg') })));
+    const bad = links.filter((l) => !(l.href.startsWith('#') || (['/privacidad', '/aviso-legal', '/cookies'].includes(l.href) && l.t === '_blank' && /noopener/.test(l.rel)) || (l.after && l.href.startsWith('https://wa.me/34616372644'))));
+    ok(!bad.length && links.length > 20, 'Sin fugas (página): solo enlaces internos, legales en pestaña nueva (rel="noopener") y el WhatsApp de después del envío', bad.map((l) => l.href).join(' ') || `${links.length} enlaces`);
+    const logos = await p.$$eval('.hd__logo, .ft__logo', (els) => els.map((e) => e.getAttribute('href')));
+    ok(logos.join() === '#inicio,#inicio', 'Logo de cabecera y pie: solo sube al inicio (#inicio)', logos.join());
+    // 3) Legales del aviso de cookies y del pie: se abren encima y la landing sigue abierta
+    const [tab] = await Promise.all([ctx.waitForEvent('page'), p.click('#cookie-banner a[href="/cookies"]')]);
+    await tab.waitForLoadState();
+    ok(tab.url().endsWith('/cookies') && p.url() === BASE + '/', 'Legales: "Política de cookies" del aviso de cookies se abre en otra pestaña y la landing sigue abierta', tab.url());
+    await tab.close();
+    await p.click('#cookie-banner [data-cookie="reject"]');
+    await p.evaluate(() => document.querySelector('.ft a[href="/privacidad"]').scrollIntoView({ block: 'center' }));
+    await p.waitForTimeout(400);
+    const [tab2] = await Promise.all([ctx.waitForEvent('page'), p.tap('.ft a[href="/privacidad"]')]);
+    await tab2.waitForLoadState();
+    ok(tab2.url().endsWith('/privacidad') && p.url() === BASE + '/', 'Legales: "Privacidad" del pie se abre en otra pestaña y la landing sigue abierta', tab2.url());
     await ctx.close();
   });
 
@@ -577,7 +671,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     await p.keyboard.press('Tab');
     await p.keyboard.press('Tab');
     const f3 = await p.evaluate(() => { const a = document.activeElement; const s = getComputedStyle(a); return { txt: a.textContent.trim(), outline: s.outlineStyle, w: s.outlineWidth }; });
-    ok(f1.cls === 'skip' && f1.t === 'none' && f3.txt === 'Quiero asesoramiento' && f3.outline !== 'none', 'Teclado: salto al contenido, cabecera y foco visible', JSON.stringify([f1, f3]));
+    ok(f1.cls === 'skip' && f1.t === 'none' && f3.txt.startsWith('Pedir asesoramiento gratis') && f3.outline !== 'none', 'Teclado: salto al contenido, cabecera y foco visible', JSON.stringify([f1, f3]));
     await ctx.close();
   });
 
@@ -639,7 +733,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const hs = await Promise.all([img, font, js].map(get));
     ok(hs.every((r) => r.status === 200 && r.headers['cache-control'] === 'public, max-age=31536000, immutable'), 'Caché: /assets con hash, un año e immutable', [img, font, js].join(', '));
     const pdf = await get('/assets/docs/catalogo-vytalgroup-2026.pdf');
-    ok(pdf.status === 200 && /attachment/.test(pdf.headers['content-disposition']) && pdf.headers['cache-control'] === 'public, max-age=604800' && pdf.body.slice(0, 5).toString() === '%PDF-', 'PDF: se descarga (attachment) con caché de 7 días', `${(pdf.body.length / 1024).toFixed(0)} KB`);
+    ok(pdf.status === 301 && pdf.headers.location === '/#asesoramiento' && !fs.existsSync('dist/assets/docs') && !fs.existsSync('assets/docs/catalogo-vytalgroup-2026.pdf'), 'Catálogo: el PDF ya no existe (ni en el repo ni en dist) y su URL redirige con 301 a /#asesoramiento', `${pdf.status} ${pdf.headers.location}`);
     const clean = await Promise.all(['/aviso-legal', '/privacidad', '/cookies'].map(get));
     ok(clean.every((r) => r.status === 200 && r.body.toString().includes('<h1')), 'URLs limpias: /aviso-legal, /privacidad y /cookies');
     const red = await Promise.all(['/privacidad.html', '/cookies/', '/index', '/index.html'].map(get));
@@ -669,7 +763,7 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     const faq = ld['@graph'].find((x) => x['@type'] === 'FAQPage');
     const org = ld['@graph'].find((x) => x['@type'] === 'Organization');
     const visibleQs = [...html.matchAll(/class="acc__btn"[^>]*>([^<]+)</g)].map((x) => x[1]);
-    ok(org && org.url === `${SITE_URL}/` && faq && faq.mainEntity.length === 6 && faq.mainEntity.map((q) => q.name).join('|') === visibleQs.join('|'), 'Metadatos: JSON-LD Organization y FAQPage con las mismas 6 preguntas que la web');
+    ok(org && org.url === `${SITE_URL}/` && faq && faq.mainEntity.length === 7 && faq.mainEntity.map((q) => q.name).join('|') === visibleQs.join('|'), 'Metadatos: JSON-LD Organization y FAQPage con las mismas 7 preguntas que la web');
     const sitemap = (await get('/sitemap.xml')).body.toString();
     const robots = (await get('/robots.txt')).body.toString();
     ok(sitemap.includes(`<loc>${SITE_URL}/</loc>`) && sitemap.includes(`${SITE_URL}/privacidad`) && robots.includes(`Sitemap: ${SITE_URL}/sitemap.xml`), 'Metadatos: sitemap y robots con SITE_URL');
