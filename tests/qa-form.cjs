@@ -30,8 +30,10 @@ async function open(b, { width = 1280, height = 900, mobile = false, ua = 'insta
   // Registro de fbq y de las visitas a wa.me que sobrevive a la navegación
   const rec = [];
   const wa = [];
+  // Eventos por servidor (función de Vercel /api/capi): srv = todos, capi = solo los Lead
   const capi = [];
-  await ctx.route('**/api/lead-capi', (r) => { capi.push({ t: Date.now(), body: JSON.parse(r.request().postData() || '{}'), method: r.request().method() }); r.continue(); });
+  const srv = [];
+  await ctx.route('**/api/capi', (r) => { const x = { t: Date.now(), body: JSON.parse(r.request().postData() || '{}'), method: r.request().method() }; srv.push(x); if (x.body.event_name === 'Lead') capi.push(x); r.continue(); });
   await ctx.exposeBinding('__rec', (_, a) => { rec.push({ t: Date.now(), c: JSON.parse(a) }); });
   await ctx.addInitScript(({ consent, slow }) => {
     try { if (consent !== null) localStorage.setItem('vg_consent', JSON.stringify({ v: 2, date: new Date().toISOString(), necessary: true, marketing: consent })); } catch (e) { /* */ }
@@ -47,7 +49,7 @@ async function open(b, { width = 1280, height = 900, mobile = false, ua = 'insta
   p.on('console', (m) => { if (['error', 'warning'].includes(m.type())) logs.push(`${m.type()}: ${m.text()}`); });
   p.on('pageerror', (e) => logs.push(`pageerror: ${e.message}`));
   await p.goto(BASE + '/' + query, { waitUntil: 'networkidle' });
-  return { ctx, p, fbReq, logs, rec, wa, capi };
+  return { ctx, p, fbReq, logs, rec, wa, capi, srv };
 }
 const fb = (p) => p.evaluate(() => window.__fb || []);
 const step = (p) => p.evaluate(() => document.querySelector('#qf .qf__step.is-active')?.dataset.step || null);
@@ -82,16 +84,25 @@ async function block(name, fn) {
 
   // ------------------------------------------------------------ 1. Sin consentimiento no se carga nada de Meta
   await block('Sin consentimiento no se carga nada de Meta', async () => {
-    const { ctx, p, fbReq, logs } = await open(b, { consent: null, width: 390, height: 844, mobile: true });
+    const { ctx, p, fbReq, logs, srv } = await open(b, { consent: null, width: 390, height: 844, mobile: true, query: UTM });
     await p.waitForTimeout(1200);
     ok(await p.isVisible('#cookie-banner'), 'Cookies: aparece el aviso en la primera visita');
+    const hero = await p.evaluate(() => { const c = document.querySelector('.hero__cta').getBoundingClientRect(); const k = document.getElementById('cookie-banner').getBoundingClientRect(); return { cta: Math.round(c.bottom), ck: Math.round(k.top) }; });
+    ok(hero.cta < hero.ck, 'Cookies: el aviso no tapa el botón del hero (390 × 844)', JSON.stringify(hero));
+    const pv = srv.filter((x) => x.body.event_name === 'PageView');
+    ok(pv.length === 1 && /^[0-9a-f-]{36}$/.test(pv[0].body.event_id) && /^fb\.1\.\d{13}\.abc123$/.test(pv[0].body.fbc) && pv[0].body.event_source_url.startsWith(BASE + '/?utm_source=facebook') && !('nombre' in pv[0].body), 'API de conversiones: PageView por servidor al cargar, sin aceptar cookies, con event_id, la URL y fbc construido desde el fbclid', JSON.stringify(pv[0] && pv[0].body).slice(0, 160));
     const btns = await p.$$eval('#cookie-banner button', (els) => els.map((e) => ({ t: e.textContent.trim(), c: e.className, w: Math.round(e.getBoundingClientRect().width), h: Math.round(e.getBoundingClientRect().height) })));
     ok(btns.length === 3 && btns.map((x) => x.t).join('|') === 'Rechazar|Aceptar|Configurar' && new Set(btns.slice(0, 2).map((x) => `${x.c}${x.w}${x.h}`)).size === 1 && /\blink\b/.test(btns[2].c), 'Cookies: Rechazar y Aceptar con el mismo peso y Configurar como enlace', JSON.stringify(btns));
     const ck = await p.evaluate(() => { const r = document.getElementById('cookie-banner').getBoundingClientRect(); return { h: Math.round(r.height), bottom: Math.round(r.bottom), vh: innerHeight }; });
     ok(ck.h <= 150 && ck.bottom <= ck.vh, 'Cookies: aviso compacto en móvil (390 px)', JSON.stringify(ck));
-    ok(await p.evaluate(() => getComputedStyle(document.querySelector('[data-mbar]')).transform !== 'none' || !document.querySelector('[data-mbar]').classList.contains('is-on')), 'Cookies: la barra móvil no se muestra con el aviso abierto');
+    await p.evaluate(() => document.querySelector('#equipos').scrollIntoView());
+    await p.waitForTimeout(1000);
+    const bar = await p.evaluate(() => { const m = document.querySelector('[data-mbar]'); const r = m.getBoundingClientRect(); const k = document.getElementById('cookie-banner').getBoundingClientRect(); return { on: m.classList.contains('is-on'), barTop: Math.round(r.top), vh: innerHeight, ckBottom: Math.round(k.bottom), ckVisible: !document.getElementById('cookie-banner').hidden }; });
+    ok(bar.on && bar.ckVisible && bar.ckBottom <= bar.barTop && Math.round(bar.barTop) < bar.vh, 'Cookies: con el aviso abierto la barra móvil sigue a la vista y el aviso queda encima, sin taparla', JSON.stringify(bar));
     for (let y = 0; y < 6000; y += 500) { await p.evaluate((y) => window.scrollTo(0, y), y); await p.waitForTimeout(80); }
     await p.waitForTimeout(500);
+    const vcs = srv.filter((x) => x.body.event_name === 'ViewContent');
+    ok(vcs.length === 1 && vcs[0].body.content_category === 'Ecógrafos' && /^[0-9a-f-]{36}$/.test(vcs[0].body.event_id) && srv.filter((x) => x.body.event_name === 'PageView').length === 1, 'API de conversiones: ViewContent por servidor una vez por sesión al ver los equipos, sin aceptar cookies', JSON.stringify(vcs.map((x) => x.body.content_category)));
     ok(fbReq.length === 0 && !(await p.evaluate(() => typeof window.fbq === 'function')), 'Tracking: nada de Facebook antes de aceptar (red interceptada)', fbReq.join(', '));
     // Configurar: el panel se abre con interruptor de marketing apagado; rechazar
     await p.evaluate(() => window.scrollTo(0, 0));
@@ -109,13 +120,15 @@ async function block(name, fn) {
 
   // ------------------------------------------------------------ 2. Aceptar: PageView, ViewContent, Contact; sin catálogo público
   await block('Aceptar: PageView, ViewContent, Contact', async () => {
-    const { ctx, p, fbReq, logs } = await open(b, { consent: null });
+    const { ctx, p, fbReq, logs, srv } = await open(b, { consent: null });
     await p.waitForTimeout(1300);
     await p.click('#cookie-banner [data-cookie="accept"]');
     await p.waitForTimeout(600);
     ok(fbReq.some((u) => u.includes('fbevents.js')), 'Tracking: el píxel se carga al aceptar');
     let calls = await fb(p);
-    ok(calls.some((c) => c[0] === 'init' && c[1] === '1234567890') && calls.filter((c) => c[0] === 'track' && c[1] === 'PageView').length === 1, 'Tracking: init + PageView una vez');
+    const pvPix = calls.filter((c) => c[0] === 'track' && c[1] === 'PageView');
+    const pvSrv = srv.filter((x) => x.body.event_name === 'PageView');
+    ok(calls.some((c) => c[0] === 'init' && c[1] === '1234567890') && pvPix.length === 1 && pvSrv.length === 1 && pvPix[0][3] && pvPix[0][3].eventID === pvSrv[0].body.event_id, 'Tracking: al aceptar, init + PageView una vez con el mismo event_id que ya se envió por servidor (deduplicación)', JSON.stringify({ pixel: pvPix[0] && pvPix[0][3], servidor: pvSrv[0] && pvSrv[0].body.event_id }));
     ok(!calls.some((c) => c[1] === 'ViewContent'), 'Tracking: sin ViewContent antes de ver los equipos');
     // Se cambia de pestaña sin desplazar la página: la sección aún no se ha visto
     await p.evaluate(() => document.getElementById('tab-dia').click());
@@ -127,7 +140,8 @@ async function block(name, fn) {
     await p.waitForTimeout(700);
     calls = await fb(p);
     const vc = calls.filter((c) => c[1] === 'ViewContent');
-    ok(vc.length === 1 && vc[0][2].content_category === 'Diatermias', 'Tracking: ViewContent una vez, con la categoría activa', JSON.stringify(vc));
+    const vcSrv = srv.filter((x) => x.body.event_name === 'ViewContent');
+    ok(vc.length === 1 && vc[0][2].content_category === 'Diatermias' && vcSrv.length === 1 && vc[0][3] && vc[0][3].eventID === vcSrv[0].body.event_id && vcSrv[0].body.content_category === 'Diatermias', 'Tracking: ViewContent una vez, con la categoría activa, por el píxel y por servidor con el mismo event_id', JSON.stringify({ pixel: vc[0] && vc[0][3], servidor: vcSrv.map((x) => x.body.event_id) }));
     const pdf = await fetch(`${BASE}/assets/docs/catalogo-vytalgroup-2026.pdf`, { redirect: 'manual' });
     ok(pdf.status === 301 && pdf.headers.get('location') === '/#asesoramiento', 'Catálogo: el PDF ya no es público (301 a /#asesoramiento)', `${pdf.status} ${pdf.headers.get('location')}`);
     const html = await p.content();
@@ -286,8 +300,8 @@ async function block(name, fn) {
     ok(iMatch >= 0 && JSON.stringify(calls[iMatch]) === JSON.stringify(['init', '1234567890', { fn: 'laura', ph: '34612345678', country: 'es' }]) && iMatch < calls.indexOf(leads[0]), 'Coincidencia avanzada: fbq init con fn, ph y country normalizados, justo antes del Lead', JSON.stringify(calls[iMatch]));
     ok(leads[0][2].content_name === 'Acclarix AX8 (EDAN)' && leads[0][2].content_category === 'Ecógrafo', 'Lead: content_name con el modelo y content_category con el equipo', JSON.stringify(leads[0][2]));
     const sv = capi[0] && capi[0].body;
-    ok(capi.length === 1 && capi[0].method === 'POST' && sv.event_id === d.event_id && sv.nombre === 'Laura Gómez' && sv.telefono === '+34 612 345 678' && sv.email === '' && sv.country === 'ES' && sv.content_name === 'Acclarix AX8 (EDAN)' && sv.content_category === 'Ecógrafo' && /^fb\.1\.\d{13}\.abc123$/.test(sv.fbc) && sv.fbp === 'fb.1.1700000000000.987654321' && sv.event_source_url.startsWith(BASE + '/'), 'Lead por servidor: una llamada a /api/lead-capi tras guardar, con el mismo event_id, los datos del lead, fbc y fbp', JSON.stringify(sv && { id: sv.event_id === d.event_id, fbc: sv.fbc, country: sv.country }));
-    ok(/fetch\('\/api\/lead-capi', \{ method: 'POST', keepalive: true/.test(fs.readFileSync('assets/js/form.js', 'utf8')), 'Lead por servidor: fetch con keepalive (llega aunque se abra WhatsApp)');
+    ok(capi.length === 1 && capi[0].method === 'POST' && sv.event_id === d.event_id && sv.nombre === 'Laura Gómez' && sv.telefono === '+34 612 345 678' && sv.email === '' && sv.country === 'ES' && sv.content_name === 'Acclarix AX8 (EDAN)' && sv.content_category === 'Ecógrafo' && /^fb\.1\.\d{13}\.abc123$/.test(sv.fbc) && sv.fbp === 'fb.1.1700000000000.987654321' && sv.event_source_url.startsWith(BASE + '/'), 'Lead por servidor: una llamada a /api/capi tras guardar, con el mismo event_id, los datos del lead, fbc y fbp', JSON.stringify(sv && { id: sv.event_id === d.event_id, fbc: sv.fbc, country: sv.country }));
+    ok(/fetch\('\/api\/capi', \{ method: 'POST', keepalive: true/.test(fs.readFileSync('assets/js/tracking.js', 'utf8')) && /serverEvent\('Lead'/.test(fs.readFileSync('assets/js/form.js', 'utf8')), 'Eventos por servidor: fetch con keepalive (llegan aunque se abra WhatsApp)');
     const [tab] = await Promise.all([ctx.waitForEvent('page'), p.click('[data-done-wa]')]);
     await p.waitForTimeout(300);
     await tab.close();

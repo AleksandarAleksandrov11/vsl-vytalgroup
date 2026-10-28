@@ -154,3 +154,13 @@ Se mantiene el sistema visual del rediseño (Geist + Instrument Serif, paleta, e
 - [x] Sin logos, cuotas, plazos, intereses, nombres de clientes ni testimonios.
 - [x] Pruebas: Apps Script 52/52, API de conversiones 12/12, formulario 150/150, interfaz 151/151, diseño 17/17. INP 64 ms. Lighthouse 100 en móvil y escritorio. HTML válido.
 - [ ] Producción: un envío PRUEBA en la revisión final; la fila la borra Aleks.
+
+## 15. v19: Meta ve todas las visitas (anuncios activos: 41 clics, 5 visitas medidas, 0 leads)
+- [x] `api/capi.js` (antes `api/lead-capi.js`): PageView al cargar y ViewContent una vez por sesión por servidor para todos los visitantes, además del Lead. IP, navegador, URL, fbc (cookie o fbclid guardado al aterrizar) y fbp. Sin datos personales en las visitas. Sin token no hace nada.
+- [x] Mismo event_id en píxel y servidor: al aceptar las cookies, el píxel dispara PageView (y ViewContent) con el id que ya se envió por servidor.
+- [x] Robots, Lighthouse y navegadores automatizados no cuentan.
+- [x] Aviso de cookies encima de la barra móvil, que ya no se esconde; no tapa el botón del hero.
+- [x] Entrada del hero más corta en móvil.
+- [x] Privacidad y cookies al día.
+- [ ] Token en Vercel (Aleks) y comprobación en "Probar eventos" con y sin cookies.
+- [x] Pruebas: Apps Script 52/52, API de conversiones 16/16, formulario 153/153, interfaz 151/151, diseño 17/17. INP 72 ms. Lighthouse móvil con el navegador de Instagram (4G lenta) 100 en todo: FCP 1,1 s, LCP 1,5 s, sin recursos que bloqueen. HTML válido.

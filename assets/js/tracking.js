@@ -7,8 +7,13 @@
 //   hoja; antes se actualizan los datos de coincidencia avanzada) y Contact (WhatsApp).
 // · Embudo del formulario (eventos personalizados, no se optimiza con ellos): FormStart y FormStep
 //   (una vez por sesión y paso) y FormError (cada error de validación).
+// · API de conversiones (función de Vercel /api/capi): PageView al cargar, ViewContent una vez por
+//   sesión y Lead tras guardar, para todos los visitantes. Si el píxel está o llega a estar cargado,
+//   usa el mismo event_id y Meta los deduplica. fetch con keepalive: no bloquea nada y, sin
+//   META_CAPI_TOKEN en Vercel, la función no envía nada.
 
 import { consentState } from './consent.js';
+import { getAttribution } from './attribution.js';
 
 let allowed = false;
 let loaded = false;
@@ -25,6 +30,26 @@ function ss(key, val) {
   return null;
 }
 
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID()
+  : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  }));
+
+// Evento por servidor: fbc (cookie _fbc o construida desde el fbclid guardado al aterrizar) y fbp
+export function serverEvent(name, eventId, extra = {}) {
+  const a = getAttribution();
+  const body = { event_name: name, event_id: eventId, event_source_url: location.href.slice(0, 1000), fbc: a.fbc || '', fbp: a.fbp || '', ...extra };
+  try {
+    // Se lee la respuesta (es mínima) para que el navegador dé la petición por terminada
+    fetch('/api/capi', { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then((r) => r.text()).catch(() => {});
+  } catch { /* sin conexión */ }
+}
+
+// PageView de esta carga: el mismo event_id por servidor y, si se acepta, por el píxel
+const pageViewId = uuid();
+
 function loadPixel(ids) {
   /* eslint-disable */
   !function (f, b, e, v, n, t, s) {
@@ -37,7 +62,7 @@ function loadPixel(ids) {
     window.fbq('set', 'autoConfig', false, id);
     window.fbq('init', id);
   });
-  window.fbq('track', 'PageView');
+  window.fbq('track', 'PageView', {}, { eventID: pageViewId });
   loaded = true;
 }
 
@@ -69,6 +94,7 @@ function apply(c) {
 export function initTracking() {
   window.addEventListener('vg:consent', (e) => apply(e.detail));
   apply(consentState());
+  serverEvent('PageView', pageViewId);
 }
 
 function send(kind, name, params, eventID) {
@@ -81,9 +107,23 @@ function send(kind, name, params, eventID) {
 export const track = (name, params, eventID) => send('track', name, params, eventID);
 export const trackCustom = (name, params, eventID) => send('trackCustom', name, params, eventID);
 
+// ViewContent: una vez por sesión por servidor (con o sin cookies) y por el píxel cuando esté cargado,
+// los dos con el mismo event_id. Devuelve true cuando ya no queda nada por enviar.
+let vcServer = false;
 export function viewContent(category) {
+  const params = { content_category: category, content_name: `Equipos: ${category}` };
+  let id = ss('vg_vc_id');
+  if (!id) {
+    id = uuid();
+    ss('vg_vc_id', id);
+  }
+  if (!vcServer && !ss('vg_vc_srv')) {
+    vcServer = true;
+    ss('vg_vc_srv', '1');
+    serverEvent('ViewContent', id, params);
+  }
   if (ss('vg_vc')) return true;
-  const sent = track('ViewContent', { content_category: category, content_name: `Equipos: ${category}` });
+  const sent = track('ViewContent', params, id);
   if (sent) ss('vg_vc', '1');
   return sent;
 }

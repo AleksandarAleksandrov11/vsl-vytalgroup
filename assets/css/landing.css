@@ -121,6 +121,16 @@ html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
   .hero__proof { animation-delay: .64s; }
   .stats .ticker { animation-delay: .7s; }
 }
+/* Móvil (anuncios de Instagram y Facebook): entrada más corta, el botón se ve entero en menos de 0,7 s */
+@media (prefers-reduced-motion: no-preference) and (max-width: 899px) {
+  .h1 .w > span { animation-duration: .6s; animation-delay: calc(40ms + var(--i, 0) * 35ms); }
+  .hero__lead, .hero__actions, .hero__micro, .hero__social, .hero__trust, .hero__proof, .stats .ticker { animation-duration: .5s; }
+  .hero__lead { animation-delay: .12s; }
+  .hero__actions { animation-delay: .16s; }
+  .hero__micro, .hero__social { animation-delay: .2s; }
+  .hero__trust { animation-delay: .22s; }
+  .hero__proof, .stats .ticker { animation-delay: .26s; }
+}
 @keyframes word-up { to { transform: none; } }
 @keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
@@ -382,7 +392,8 @@ html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
    ========================================================================== */
 .mbar { position: fixed; z-index: 60; left: 0; right: 0; bottom: 0; display: flex; gap: 10px; padding: 10px max(12px, env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); background: rgba(250, 251, 252, .86); -webkit-backdrop-filter: saturate(1.8) blur(16px); backdrop-filter: saturate(1.8) blur(16px); box-shadow: 0 -1px 0 var(--line); transform: translateY(110%); transition: transform .55s var(--ease); }
 .mbar.is-on { transform: none; }
-html.has-cookie-banner .mbar { transform: translateY(110%); }
+/* Con la barra a la vista, el aviso de cookies se coloca encima: no la tapa */
+@media (max-width: 899px) { .ck { transition: opacity .5s var(--ease), transform .6s var(--ease), bottom .45s var(--ease); } html.has-mbar .ck { bottom: calc(80px + env(safe-area-inset-bottom)); } }
 .mbar__cta { flex: 1 1 auto; width: 100%; min-width: 0; min-height: 52px; padding: 0 16px; }
 @media (min-width: 900px) { .mbar { display: none; } }
 /* Móvil y tableta: el pie deja sitio a la barra fija de abajo */

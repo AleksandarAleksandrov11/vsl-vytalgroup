@@ -1,8 +1,8 @@
-// Pruebas de la función de Vercel api/lead-capi.js (API de conversiones de Meta), sin salir a internet:
+// Pruebas de la función de Vercel api/capi.js (API de conversiones de Meta), sin salir a internet:
 // fetch se sustituye por un doble que registra las llamadas a graph.facebook.com.
 import { createHash } from 'node:crypto';
 import { Readable } from 'node:stream';
-import handler, { sha256, buildEvent } from '../api/lead-capi.js';
+import handler, { sha256, buildEvent } from '../api/capi.js';
 
 const results = [];
 const ok = (c, n, x = '') => results.push(`${c ? 'PASS' : 'FAIL'}  ${n}${x ? `  · ${x}` : ''}`);
@@ -64,7 +64,25 @@ console.error = realError;
 ok(f1.statusCode === 202 && f2.statusCode === 202 && f1.body.reason === 'error' && errs.length === 2 && /Invalid OAuth/.test(errs[0]), 'Fallo de Meta (HTTP 400 o red): responde 202 sin error para el usuario y queda en los logs de Vercel', errs.join(' / '));
 reply = () => ({ ok: true, status: 200, text: async () => '{}' });
 
-// 5. Pruebas, origen y validación
+// 5. PageView y ViewContent: visitas sin datos personales, con IP, navegador, fbc y fbp
+env({ META_CAPI_TOKEN: 'EAAtoken', META_PIXEL_ID: '1593490341777612' });
+calls.length = 0;
+const visit = { event_name: 'PageView', event_id: '8e1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d', event_source_url: `https://${HOST}/?utm_source=meta&fbclid=IwAR0abc`, fbc: 'fb.1.1700000000000.IwAR0abc', fbp: '' };
+const pv = await call({ ...visit, nombre: 'Lucía', telefono: '+34 612 345 678' });
+const vc = await call({ ...visit, event_name: 'ViewContent', event_id: '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d', content_category: 'Ecógrafos', content_name: 'Equipos: Ecógrafos' });
+const ePv = calls[0] && calls[0].body.data[0];
+const eVc = calls[1] && calls[1].body.data[0];
+ok(pv.statusCode === 200 && vc.statusCode === 200 && ePv.event_name === 'PageView' && ePv.event_id === visit.event_id && ePv.event_source_url === visit.event_source_url && !ePv.custom_data, 'PageView por servidor: mismo event_id, URL de la página y sin custom_data', JSON.stringify({ n: ePv && ePv.event_name, url: ePv && ePv.event_source_url }));
+ok(ePv && Object.keys(ePv.user_data).join() === 'client_ip_address,client_user_agent,fbc' && ePv.user_data.client_ip_address === '83.45.12.7', 'PageView: solo IP, navegador y fbc; nunca datos personales aunque lleguen', JSON.stringify(ePv && Object.keys(ePv.user_data)));
+ok(eVc && eVc.event_name === 'ViewContent' && eVc.custom_data.content_category === 'Ecógrafos' && eVc.custom_data.content_name === 'Equipos: Ecógrafos' && !eVc.user_data.ph, 'ViewContent por servidor: con la categoría vista y sin datos personales', JSON.stringify(eVc && eVc.custom_data));
+calls.length = 0;
+const bot = await call(visit, { headers: { 'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/140.0 Safari/537.36' } });
+const lh = await call(visit, { headers: { 'user-agent': 'Mozilla/5.0 (Linux; Android 11) Chrome/120 Mobile Safari/537.36 Chrome-Lighthouse' } });
+const gb = await call(visit, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' } });
+const badName = await call({ ...visit, event_name: 'Purchase' });
+ok(bot.body.reason === 'robot' && lh.body.reason === 'robot' && gb.body.reason === 'robot' && badName.statusCode === 400 && !calls.length, 'Robots, Lighthouse y navegadores automatizados no cuentan como visitas; solo PageView, ViewContent y Lead', [bot, lh, gb, badName].map((x) => x.body.reason || x.statusCode).join(','));
+
+// 6. Pruebas, origen y validación
 calls.length = 0;
 const p = await call({ ...lead, nombre: 'PRUEBA' });
 ok(p.body.reason === 'prueba' && !calls.length, 'Envío de prueba (nombre "PRUEBA"): no llega a Meta');

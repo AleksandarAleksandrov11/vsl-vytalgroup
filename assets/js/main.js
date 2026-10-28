@@ -338,6 +338,7 @@ function paintBar() {
   const on = !vis.hero && !vis.form;
   bar.classList.toggle('is-on', on);
   bar.inert = !on;
+  html.classList.toggle('has-mbar', on && !desktop.matches);
 }
 if (hasIO) {
   const io = new IntersectionObserver((entries) => {

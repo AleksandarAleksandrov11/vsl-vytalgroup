@@ -3,7 +3,7 @@
 // · URLs limpias (/privacidad sirve privacidad.html y /privacidad.html redirige a /privacidad),
 // · redirecciones de vercel.json, compresión brotli/gzip y peticiones Range.
 // · /api/<nombre> ejecuta api/<nombre>.js como las funciones de Vercel (sin variables de entorno de
-//   Meta en local: /api/lead-capi responde sin enviar nada).
+//   Meta en local: /api/capi responde sin enviar nada).
 // Uso: node scripts/serve.mjs [carpeta] [puerto]      → por defecto "dist" y 8080
 // Pruebas: CSP_CONNECT_EXTRA="http://localhost:8090" añade el Apps Script simulado a connect-src.
 import { createServer } from 'node:http';

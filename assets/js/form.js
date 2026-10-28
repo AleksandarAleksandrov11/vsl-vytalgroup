@@ -12,7 +12,7 @@
 // · Envío a Google Apps Script (texto plano, sin preflight CORS) con los mismos campos de siempre
 //   (contrato con la hoja: tests/qa-form.cjs). Solo tras una respuesta { ok: true } se muestra el
 //   "gracias" y se dispara Lead una vez, por el píxel y por servidor (función de Vercel
-//   /api/lead-capi, API de conversiones), con el mismo event_id.
+//   /api/capi, API de conversiones), con el mismo event_id.
 // · Con WhatsApp, en móvil se abre WhatsApp solo con el mensaje escrito (navegación, a los 1,5 s);
 //   en escritorio se intenta en otra pestaña si el navegador lo permite y queda el botón.
 // · "Enviar otra solicitud" (o un "Pedir asesoramiento" después del gracias) empieza otra con un event_id nuevo.
@@ -21,7 +21,7 @@
 import { COUNTRIES } from './data.js';
 import { createSelect } from './select.js';
 import { getAttribution } from './attribution.js';
-import { lead, contact, matchUser, formStart, formStep, formError } from './tracking.js';
+import { lead, contact, matchUser, formStart, formStep, formError, serverEvent } from './tracking.js';
 
 const TOTAL = 4;
 const MIN_MS = 3000;
@@ -365,26 +365,18 @@ function payload() {
     website: form.elements.website.value || '',
   };
 }
-// Lead por servidor (API de conversiones, función de Vercel /api/lead-capi) con el mismo event_id
+// Lead por servidor (API de conversiones, función de Vercel /api/capi) con el mismo event_id
 // que el píxel. Es el mismo dominio y no espera respuesta: si falla, el usuario no lo nota.
 function serverLead() {
-  const a = getAttribution();
   const byEmail = state.contact === 'email';
-  const body = {
-    event_id: state.eventId,
+  serverEvent('Lead', state.eventId, {
     nombre: ui.name.value.trim(),
     telefono: byEmail ? '' : phoneFull(),
     email: byEmail ? emailValue() : '',
     country: byEmail || state.country.iso === 'XX' ? '' : state.country.iso,
     content_name: state.modelo || equipoFinal(),
     content_category: equipoFinal(),
-    fbc: a.fbc || '',
-    fbp: a.fbp || '',
-    event_source_url: location.href.slice(0, 1000),
-  };
-  try {
-    fetch('/api/lead-capi', { method: 'POST', keepalive: true, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => {});
-  } catch { /* sin conexión */ }
+  });
 }
 // Mensaje de WhatsApp ya escrito, sin emojis: tres líneas tras enviar; si el envío falla, además
 // el teléfono o el correo, para que no se pierda ningún dato

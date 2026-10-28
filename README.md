@@ -6,7 +6,7 @@ Landing de una sola página para las campañas de Instagram y Facebook de VytalG
 - Hero, franja de garantías, 6 secciones y un footer (apartado 1).
 - Imágenes solo en WebP. Carga inicial en móvil: unos 68 KB (presupuesto 250 KB). JS propio: 15,9 KB. CSS: 10,7 KB (gzip).
 - Lighthouse: móvil 98-100 en rendimiento y 100 en el resto; escritorio y páginas legales, 100 en todo.
-- Lead por píxel (con consentimiento) y por servidor (función de Vercel `api/lead-capi.js`, API de conversiones), con el mismo `event_id`.
+- `PageView`, `ViewContent` y `Lead` por servidor para todos los visitantes (función de Vercel `api/capi.js`, API de conversiones) y por el píxel si se aceptan las cookies, con el mismo `event_id`.
 
 ---
 
@@ -49,7 +49,16 @@ Sin teléfono, WhatsApp, correo ni Instagram: los datos de contacto del titular 
 
 ## 2. Cambios de las últimas rondas
 
-**v18 (esta ronda): financiación y prueba social (datos confirmados por Aleks)**
+**v19 (esta ronda): Meta ve todas las visitas**
+
+- Los anuncios llevaban 41 clics y solo 5 visitas en Meta: el píxel solo se carga si se aceptan las cookies y casi nadie las acepta. Ahora la función de Vercel (`api/capi.js`, antes `api/lead-capi.js`) envía también **`PageView`** (al cargar) y **`ViewContent`** (una vez por sesión, al ver los equipos) por servidor, para todos los visitantes, con IP, navegador, URL, `fbc` (cookie `_fbc` o construida desde el `fbclid` guardado al aterrizar) y `fbp` si existe. Sin datos personales.
+- Al aceptar las cookies, el píxel se carga al momento y dispara `PageView` (y `ViewContent`) con el **mismo `event_id`** que ya se envió por servidor: Meta los deduplica.
+- No cuentan como visitas los robots, Lighthouse ni los navegadores automatizados (las pruebas).
+- **Aviso de cookies:** la barra móvil ya no se esconde mientras está abierto; el aviso se coloca encima de ella y no tapa el botón del hero.
+- **Primer pantallazo en móvil:** la entrada animada del hero es más corta; el botón se ve entero en menos de 0,7 s desde que pinta.
+- Privacidad y cookies al día.
+
+**v18: financiación y prueba social: financiación y prueba social (datos confirmados por Aleks)**
 
 - **Financiación:** "Financiación disponible con Hotmart y Klarna" en las 6 tarjetas (no hay precios); "Asesoramiento gratis · Financiación con Hotmart y Klarna" bajo el CTA del hero y bajo el botón del formulario; nueva duda "¿Se puede financiar?" (también en el JSON-LD); y en los anuncios de CERRAR (MOFU 1, MOFU 2, BOFU 1 y BOFU 2) el subtítulo del hero termina con "Y puedes financiarlo con Hotmart o Klarna.". Solo texto: sin logos, cuotas, plazos ni intereses.
 - **Prueba social:** "Ya hemos equipado 8 clínicas y 2 clubes de alto rendimiento" bajo el CTA del hero (primera pantalla en 390 × 844) y encima del formulario. En la franja de garantías sustituye a "0 sorpresas en mantenimiento", que no era una cifra confirmada.
@@ -60,7 +69,7 @@ Sin teléfono, WhatsApp, correo ni Instagram: los datos de contacto del titular 
 - **Un solo camino, el formulario.** Fuera el WhatsApp de la barra móvil, el de Dudas y las columnas Contacto y Síguenos del pie (también en las legales). WhatsApp solo aparece después de enviar (o en la pantalla de error). Una prueba falla si aparece cualquier otro `wa.me`, `tel:`, `mailto:`, `instagram.com` o enlace externo. Los legales se abren en otra pestaña.
 - **Sin catálogo PDF:** fuera de la web y del repositorio. `/assets/docs/catalogo-vytalgroup-2026.pdf` redirige con 301 a `/#asesoramiento`. "53 páginas de catálogo" pasa a "Asesoramiento sin compromiso".
 - **WhatsApp tras enviar**, que se abre solo en móvil (apartado 1).
-- **Lead por servidor (API de conversiones)** en una función de Vercel, `api/lead-capi.js`, para todos los leads y con el mismo `event_id` que el píxel (apartado 5). **El Apps Script y la hoja no cambian:** el formulario les envía exactamente los mismos campos que antes y una prueba lo vigila.
+- **Lead por servidor (API de conversiones)** en una función de Vercel (`api/lead-capi.js`, hoy `api/capi.js`), para todos los leads y con el mismo `event_id` que el píxel (apartado 5). **El Apps Script y la hoja no cambian:** el formulario les envía exactamente los mismos campos que antes y una prueba lo vigila.
 - **Hero por campaña** sin parpadeo (CLS 0), con equipo, garantías y la firma de Javier en la primera pantalla; la comparativa sube tras Lo más pedido; "¿Cuánto cuesta?" en Dudas; "Respuesta en menos de 24 h"; botón "Pedir asesoramiento gratis" en todas partes.
 - **Formulario:** las mismas preguntas y opciones; prefijo según el idioma del navegador, botón "Enviar y abrir WhatsApp" y aviso de privacidad bajo el botón en lugar de la casilla.
 - **Píxel:** embudo del formulario (`FormStart`, `FormStep`, `FormError`), coincidencia avanzada antes del Lead y `Contact` según el origen (`gracias-auto`, `gracias-boton`, `error-envio`). Fuera `DescargaCatalogo`.
@@ -204,7 +213,7 @@ Sin teléfono, WhatsApp, correo ni Instagram: los datos de contacto del titular 
 │   ├── img/                    Productos, categorías, fondo del hero, diatermia de la OG y Javier (WebP)
 │   ├── fonts/                  Geist e Instrument Serif cursiva (woff2, subset latino)
 │   └── brand/                  Favicon, iconos e imagen Open Graph
-├── api/lead-capi.js            Función de Vercel: Lead por servidor (API de conversiones de Meta)
+├── api/capi.js                 Función de Vercel: PageView, ViewContent y Lead por servidor (API de conversiones de Meta)
 ├── integrations/apps-script/   Code.gs (Apps Script de los leads, el desplegado) y README-apps-script.md (guía)
 ├── scripts/                    build.mjs, serve.mjs y generadores de recursos (assets/)
 ├── tests/                      Pruebas con Playwright (npm test)
@@ -302,8 +311,8 @@ Detalles:
 
 | Evento | Cuándo |
 |---|---|
-| `PageView` | Al inicializar el píxel. |
-| `ViewContent` | Una vez por sesión, al ver Lo más pedido, con la categoría activa. |
+| `PageView` | Al inicializar el píxel (al aceptar las cookies), con el mismo `event_id` que el `PageView` ya enviado por servidor. |
+| `ViewContent` | Una vez por sesión, al ver Lo más pedido, con la categoría activa y el mismo `event_id` que por servidor. |
 | `Lead` | Solo tras un envío correcto a la hoja, una única vez, con `eventID` = `event_id`. Justo antes se actualiza la coincidencia avanzada (`fbq('init', id, { ph, em, fn, country })` en cada píxel; el píxel los cifra). |
 | `Contact` | Al abrir WhatsApp después de enviar: `gracias-auto` (se abre solo), `gracias-boton` (botón) o `error-envio` (pantalla de error). |
 | `FormStart` | Personalizado. Primera interacción con el formulario, una vez por sesión. |
@@ -312,8 +321,16 @@ Detalles:
 
 Los eventos personalizados sirven para ver en el Administrador de eventos en qué paso se cae la gente. No se usan para optimizar: las campañas optimizan `Lead`.
 
-**API de conversiones (Lead por servidor).** `api/lead-capi.js` es una función de Vercel. El navegador la llama con `fetch` (`keepalive`) justo después de que la hoja responda `{ ok: true }`, con el mismo `event_id` que el Lead del píxel, para **todos** los leads (también quien rechaza las cookies). Meta deduplica los dos.
-- La función calcula el SHA-256 del teléfono (cifras con prefijo), del correo, del nombre de pila y del país, toma la IP y el navegador de la propia petición y añade `fbc` (cookie `_fbc` o, si no existe, construida desde el `fbclid`) y `fbp`.
+**API de conversiones (eventos por servidor).** `api/capi.js` es una función de Vercel. El navegador la llama con `fetch` (`keepalive`, sin bloquear nada) para **todos** los visitantes, acepten o no las cookies:
+
+| Evento | Cuándo | Datos |
+|---|---|---|
+| `PageView` | Al cargar la página. | IP y navegador de la petición, URL, `fbc` y `fbp` si existen. |
+| `ViewContent` | Una vez por sesión, al ver Lo más pedido. | Lo mismo y la categoría vista (`Ecógrafos` o `Diatermias`). |
+| `Lead` | Justo después de que la hoja responda `{ ok: true }`. | Lo mismo y, con SHA-256, teléfono (cifras con prefijo), correo, nombre de pila y país; modelo y equipo. |
+
+- Cada evento lleva un `event_id`. Si el píxel está cargado (o se carga al aceptar las cookies), usa el mismo: Meta los deduplica y no cuenta dos veces.
+- `fbc`: la cookie `_fbc` o, si no existe (sin cookies aceptadas), la que se construye desde el `fbclid` del anuncio, que se guarda en `sessionStorage` al aterrizar. Así el clic del anuncio llega a Meta aunque se rechacen las cookies.
 - **Variables de entorno de Vercel** (Settings > Environment Variables, entorno Production):
   - `META_PIXEL_ID` = `1593490341777612`;
   - `META_CAPI_TOKEN` = el token (lo pone Aleks; nunca en el repositorio);
@@ -321,10 +338,15 @@ Los eventos personalizados sirven para ver en el Administrador de eventos en qu�
 
   Después de crearlas o cambiarlas hay que volver a desplegar (Deployments > los tres puntos del último > **Redeploy**).
 - **Sin token no hace nada** (responde sin error). Si Meta falla, el usuario no lo nota y el error queda en los logs de la función en Vercel.
-- Los envíos de prueba cuyo nombre empieza por **PRUEBA** no se mandan a Meta.
-- Solo acepta peticiones desde la propia web (mismo dominio).
+- No se envían los Lead de prueba (nombre que empieza por **PRUEBA**) ni las visitas de robots, Lighthouse o navegadores automatizados.
+- Solo acepta peticiones desde la propia web (mismo dominio) y solo esos tres eventos.
 - **Crear el token:** Administrador de eventos > dataset **LANDING VSL** (`1593490341777612`) > **Configuración** > **API de conversiones** > **Generar token de acceso**. Se copia una sola vez.
-- **Comprobar la deduplicación:** crea `META_TEST_EVENT_CODE` con el código de "Probar eventos", redespliega, abre la web, acepta las cookies y envía una solicitud con un nombre que no empiece por PRUEBA. Deben aparecer dos `Lead` (Navegador y Servidor) con el mismo identificador de evento, marcados como deduplicados. Después borra la variable, redespliega y borra tú esa fila de la hoja.
+- **Comprobar que llega todo y sin duplicar:** crea `META_TEST_EVENT_CODE` con el código de "Probar eventos" y redespliega. Abre la web desde el móvil:
+  1. **rechazando las cookies:** deben llegar `PageView` y `ViewContent` desde **Servidor**;
+  2. **aceptándolas** (en otra sesión o tras borrar los datos del sitio): `PageView` y `ViewContent` desde **Navegador** y **Servidor**, marcados como deduplicados;
+  3. envía una solicitud con un nombre que no empiece por PRUEBA: `Lead` desde los dos, deduplicado.
+
+  Después borra la variable, redespliega y borra tú esa fila de la hoja.
 
 **Verificar el dominio** en [Configuración del negocio](https://business.facebook.com/settings) > **Seguridad de la marca** > **Dominios** > **Añadir** > `vytalgroupem.com` (sin `vsl.`). Registro TXT en los DNS de Hostinger: hPanel > **Dominios** > `vytalgroupem.com` > **DNS / Nameservers** > **Registros DNS** > tipo **TXT**, nombre `@`, valor `facebook-domain-verification=...`.
 
@@ -365,7 +387,7 @@ vercel --prod
 O conecta el repositorio en vercel.com: cada push despliega solo. **Ahora mismo** el proyecto está conectado así: lo que entra en `main` se publica en https://vsl.vytalgroupem.com. La URL de la hoja y el píxel van en `config.js` y el dominio en `site.config.mjs`. Las únicas variables de entorno son las de la API de conversiones (`META_CAPI_TOKEN` y `META_PIXEL_ID`, apartado 5); sin ellas la web funciona igual. La carpeta `api/` la publica Vercel como funciones (Node). `vercel.json` ya define:
 - **Compilación:** `npm run build` y carpeta de salida `dist/`.
 - **URLs limpias:** `/privacidad`, `/cookies` y `/aviso-legal`. Las rutas `.html`, con barra final o `/index` redirigen (308).
-- **Seguridad:** `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Strict-Transport-Security`, `Permissions-Policy` y la **CSP** del brief. El único script dentro de la página es el que elige el titular del hero, autorizado en la CSP por su hash SHA-256 (la compilación falla si no coincide). La llamada a `/api/lead-capi` es del mismo dominio, así que la CSP no cambia.
+- **Seguridad:** `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Strict-Transport-Security`, `Permissions-Policy` y la **CSP** del brief. El único script dentro de la página es el que elige el titular del hero, autorizado en la CSP por su hash SHA-256 (la compilación falla si no coincide). Las llamadas a `/api/capi` son del mismo dominio, así que la CSP no cambia.
 - **Caché:** todo `/assets` lleva hash en el nombre y se cachea un año (`immutable`). HTML, `config.js`, `robots.txt`, `sitemap.xml`, el manifest y `/api` se revalidan siempre (`max-age=0, must-revalidate`), así los cambios en `config.js` se ven al momento.
 - **Redirecciones:** el antiguo catálogo PDF (301 a `/#asesoramiento`) y `vsl-vytalgroup.vercel.app` al dominio.
 
@@ -373,7 +395,7 @@ Ajustes respecto al `vercel.json` del brief:
 - Se añade `/((?!assets/).*)` con `must-revalidate`: con URLs limpias, `/privacidad` no termina en `.html` y no la cubriría la regla de los HTML.
 - Si se añade cualquier recurso de otro dominio (un vídeo, una fuente…), hay que añadirlo a la CSP.
 
-**Comprobarlo en local:** `npm run build && npm run preview` sirve `dist/` con las mismas cabeceras y redirecciones de `vercel.json` y ejecuta `api/*.js` como Vercel (sin variables de Meta: `/api/lead-capi` no envía nada). La única diferencia es que en local se quita `upgrade-insecure-requests`, porque no hay https en `localhost`.
+**Comprobarlo en local:** `npm run build && npm run preview` sirve `dist/` con las mismas cabeceras y redirecciones de `vercel.json` y ejecuta `api/*.js` como Vercel (sin variables de Meta: `/api/capi` no envía nada). La única diferencia es que en local se quita `upgrade-insecure-requests`, porque no hay https en `localhost`.
 
 ---
 
@@ -387,10 +409,10 @@ Si el dominio cambia algún día: añade el nuevo en **Vercel > Settings > Domai
 
 ## 8. Pendientes antes de lanzar los anuncios
 
-1. **Token de la API de conversiones** (lo pone Aleks): `META_CAPI_TOKEN` y `META_PIXEL_ID` = `1593490341777612` en Vercel, redesplegar y comprobar la deduplicación (apartado 5).
+1. **Token de la API de conversiones** (lo pone Aleks): `META_CAPI_TOKEN` y `META_PIXEL_ID` = `1593490341777612` en Vercel, redesplegar y comprobar en "Probar eventos" que `PageView`, `ViewContent` y `Lead` llegan por servidor y, con cookies aceptadas, deduplicados (apartado 5). **Sin el token, Meta sigue viendo solo a quien acepta las cookies.**
 2. **Verificación del dominio** en Meta, si aún no está (apartado 5).
 3. **Parámetros de URL** de cada anuncio con el formato del apartado 5, para que el titular del hero y la hoja reciban la campaña y el anuncio.
-4. **Revisión legal** de los textos (apartado 9), en especial el envío del Lead a Meta desde el servidor para todos los leads (interés legítimo, con datos cifrados y derecho de oposición).
+4. **Revisión legal** de los textos (apartado 9), en especial el envío a Meta desde el servidor de las visitas y de los leads de quien no acepta las cookies (interés legítimo, sin datos personales en las visitas y con datos cifrados en el lead, con derecho de oposición).
 5. **Material que no llegó** (opcional): fotos de los Acclarix a más resolución (el catálogo trae unos 550 px) y una foto de Javier más grande (la recibida es de 640 × 640).
 
 Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas y Resumen (desplegado), avisos a aaswebmarketing@gmail.com y "respuesta en menos de 24 h" (confirmado). Financiación (Hotmart y Klarna) y prueba social (8 clínicas y 2 clubes de alto rendimiento) confirmadas por Aleks. Precios, cuotas, nombres de clientes, logos y testimonios no se mencionan.
@@ -433,7 +455,7 @@ Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas 
 
 ## 10. Historial
 
-- **v18 (esta ronda)**, **v17** y de la **v5** a la **v16:** ver apartado 2.
+- **v19 (esta ronda)**, **v18**, **v17** y de la **v5** a la **v16:** ver apartado 2.
 - **v4:** hero con fotos y vídeo de clientes y sin testimonios. Sustituido en la v5.
 - **v3:**
   - enfoque "equipos médicos sin letra pequeña";
@@ -451,8 +473,8 @@ Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas 
 `npm test` compila y ejecuta sobre `dist/`, con las cabeceras de `vercel.json`, un Apps Script simulado y Meta simulado (nada sale a internet ni llega a la hoja real):
 
 - **Apps Script (52):** el `Code.gs` desplegado contra una hoja de Google simulada (es_ES y en_US): contrato con la web, validaciones, campo trampa, duplicados, inyección de fórmulas, migraciones, Resumen, email y `testLead()`.
-- **API de conversiones (12):** `api/lead-capi.js` con vectores conocidos de SHA-256; sin token no llama a Meta; el evento exacto (Lead, mismo `event_id`, datos con hash, IP y navegador de la petición, `fbc`, `fbp`, `custom_data`); un fallo de Meta (HTTP o red) no llega al usuario; PRUEBA no se envía; solo desde la propia web.
-- **Formulario y tracking (150):**
+- **API de conversiones (16):** `api/capi.js` con vectores conocidos de SHA-256; sin token no llama a Meta; el Lead exacto (mismo `event_id`, datos con hash, IP y navegador de la petición, `fbc`, `fbp`, `custom_data`); `PageView` y `ViewContent` sin datos personales aunque lleguen; robots, Lighthouse y navegadores automatizados fuera; un fallo de Meta (HTTP o red) no llega al usuario; PRUEBA no se envía; solo desde la propia web y solo esos tres eventos.
+- **Formulario y tracking (153):** también `PageView` y `ViewContent` por servidor sin cookies (con `fbc` desde el `fbclid`) y, al aceptar, el píxel con el mismo `event_id`;
   - **contrato con la hoja:** exactamente los mismos 14 campos de siempre (falla si cambian) y `Code.gs` sin cambios;
   - las preguntas y opciones de siempre; el aviso de privacidad bajo el botón; prefijo según el idioma (es-MX → +52);
   - **WhatsApp tras enviar** en móvil con Safari de iPhone y con el navegador de Instagram: navega a wa.me con el texto exacto, al menos 800 ms después del Lead; Contact `gracias-auto`; el botón de respaldo cancela la apertura (`gracias-boton`); al volver atrás se ve el gracias sin reenviar ni repetir Lead;

@@ -3,9 +3,9 @@
 //  · qa-apps-script → el Apps Script real (integrations/apps-script/Code.gs) contra una hoja simulada
 //                en es_ES y en_US: contrato con la web, validaciones, duplicados, Estado y Notas,
 //                migración de la hoja anterior, Resumen sin errores y aviso por email.
-//  · qa-capi   → la función de Vercel api/lead-capi.js (API de conversiones de Meta): hash SHA-256,
-//                evento Lead con el mismo event_id, IP y navegador, sin token no hace nada y los fallos
-//                no llegan al usuario.
+//  · qa-capi   → la función de Vercel api/capi.js (API de conversiones de Meta): PageView, ViewContent y
+//                Lead con el mismo event_id que el píxel, hash SHA-256, IP y navegador, sin token no hace
+//                nada, sin robots y los fallos no llegan al usuario.
 //  · qa-form   → formulario de 4 preguntas (equipo, perfil, nombre y WhatsApp o correo), desplegables,
 //                validaciones, envío (Apps Script simulado), UTM, antispam, consentimiento y
 //                eventos del píxel (Meta simulado, sin salir a internet).
