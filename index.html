@@ -400,6 +400,11 @@
               <label class="opt"><input type="radio" name="perfil" value="Médico"><span>Médico</span></label>
               <label class="opt"><input type="radio" name="perfil" value="Otro"><span>Otro</span></label>
             </div>
+            <div class="qf__other" data-perfil-other hidden>
+              <label class="qf__other-label" for="f-perfil-otro">¿Cuál es tu profesión?</label>
+              <input class="field" id="f-perfil-otro" type="text" autocomplete="organization-title" autocapitalize="sentences" enterkeyhint="next" maxlength="40" placeholder="Ej.: osteópata, podólogo" aria-describedby="e-perfil-otro">
+              <p class="qf__err" id="e-perfil-otro" data-error-perfil-otro></p>
+            </div>
             <p class="qf__err" data-error></p>
             <button class="btn btn--primary btn--block qf__next" type="button" data-next>Siguiente</button>
           </fieldset>
@@ -488,7 +493,7 @@
       </div>
     </div>
     <div class="ft__bottom">
-      <p>© 2026 VytalGroup. Todos los derechos reservados. Web creada por <a href="https://www.aasmarketing.com/">AAS Marketing</a></p>
+      <p>© 2026 VytalGroup. Todos los derechos reservados. Web creada por <a href="https://www.aasmarketing.com/" target="_blank" rel="noopener" data-credit>AAS Marketing</a></p>
       <p>Ecógrafos, diatermias y equipamiento para clínicas.</p>
     </div>
   </div>

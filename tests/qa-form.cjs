@@ -441,6 +441,44 @@ async function block(name, fn) {
     await ctx.close();
   });
 
+  // ------------------------------------------------------------ 4a'''''. Perfil "Otro": profesión escrita a mano, obligatoria
+  await block('Perfil Otro', async () => {
+    fs.writeFileSync(LOG, '');
+    const { ctx, p, logs, wa } = await open(b, { consent: false, width: 390, height: 844, mobile: true });
+    await toForm(p);
+    await p.waitForTimeout(3100);
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Ecógrafo"])'); await p.waitForTimeout(800);
+    ok(await p.isHidden('[data-perfil-other]'), 'Perfil Otro: el campo de la profesión está oculto hasta elegir "Otro"');
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Otro"])'); await p.waitForTimeout(900);
+    const st = await p.evaluate(() => ({ step: document.querySelector('#qf .qf__step.is-active').dataset.step, shown: !document.querySelector('[data-perfil-other]').hidden, focus: document.activeElement.id, label: document.querySelector('label[for="f-perfil-otro"]').textContent.trim(), ph: document.getElementById('f-perfil-otro').placeholder, max: document.getElementById('f-perfil-otro').maxLength }));
+    ok(st.step === '2' && st.shown && st.focus === 'f-perfil-otro' && st.label === '¿Cuál es tu profesión?' && st.ph === 'Ej.: osteópata, podólogo' && st.max === 40, 'Perfil Otro: al tocar "Otro" no avanza, se abre "¿Cuál es tu profesión?" con el foco (teclado abierto)', JSON.stringify(st));
+    await p.tap('.qf__step.is-active [data-next]'); await p.waitForTimeout(300);
+    ok((await step(p)) === '2' && (await p.textContent('#e-perfil-otro')) === 'Escribe tu profesión.' && (await p.getAttribute('#f-perfil-otro', 'aria-invalid')) === 'true', 'Perfil Otro: obligatorio, no deja seguir sin escribirla');
+    await p.fill('#f-perfil-otro', 'x'); await p.tap('.qf__step.is-active [data-next]'); await p.waitForTimeout(300);
+    ok((await p.textContent('#e-perfil-otro')) === 'Revisa tu profesión.', 'Perfil Otro: al menos 2 letras');
+    await p.fill('#f-perfil-otro', '  Osteópata   deportivo ');
+    ok((await p.textContent('#e-perfil-otro')) === '', 'Perfil Otro: el error se borra al escribir');
+    await p.press('#f-perfil-otro', 'Enter'); await p.waitForTimeout(700);
+    ok((await step(p)) === '3', 'Perfil Otro: Enter (o Siguiente) pasa al nombre');
+    await p.tap('[data-back]'); await p.waitForTimeout(600);
+    ok((await step(p)) === '2' && await p.isVisible('#f-perfil-otro') && (await p.inputValue('#f-perfil-otro')) === '  Osteópata   deportivo ', 'Perfil Otro: al volver se conserva lo escrito');
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Médico"])'); await p.waitForTimeout(900);
+    ok((await step(p)) === '3' && await p.isHidden('[data-perfil-other]'), 'Perfil Otro: elegir otro perfil esconde el campo y avanza solo, como siempre');
+    await p.tap('[data-back]'); await p.waitForTimeout(600);
+    await p.tap('.qf__step.is-active label.opt:has(input[value="Otro"])'); await p.waitForTimeout(600);
+    await p.tap('.qf__step.is-active [data-next]'); await p.waitForTimeout(700);
+    await p.fill('#f-name', 'Rosa Vidal'); await p.press('#f-name', 'Enter'); await p.waitForTimeout(600);
+    await p.fill('#f-tel', '622334455');
+    await p.tap('[data-submit]');
+    await p.waitForURL(/wa\.me/, { timeout: 5000 }).catch(() => {});
+    const d = posts()[0] ? JSON.parse(posts()[0].body) : {};
+    ok(posts().length === 1 && Object.keys(d).join(',') === SHEET_CONTRACT.join(',') && d.perfil === 'Otro: Osteópata deportivo', 'Perfil Otro: la hoja lo recibe en el mismo campo Perfil ("Otro: Osteópata deportivo"), sin campos nuevos', d.perfil);
+    const nav = wa.filter((x) => x.main);
+    ok(nav[0] && waMsg(nav[0].url) === 'Hola, soy Rosa Vidal. Acabo de pedir asesoramiento en la web.\nMe interesa: Ecógrafo.\nPerfil: Osteópata deportivo.', 'Perfil Otro: el WhatsApp dice "Perfil: Osteópata deportivo."', nav[0] && waMsg(nav[0].url));
+    ok(!logs.filter((l) => !/wa\.me/.test(l)).length, 'Consola limpia (perfil Otro)', logs.join(' / '));
+    await ctx.close();
+  });
+
   // ------------------------------------------------------------ 4a''. Prefijo según el idioma del navegador
   await block('Prefijo por idioma', async () => {
     const { ctx, p } = await open(b, { consent: false, locale: 'es-MX' });

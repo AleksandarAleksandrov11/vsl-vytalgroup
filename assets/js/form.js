@@ -1,7 +1,8 @@
 // Formulario corto de 4 preguntas, una por pantalla:
 //   1. ¿Qué equipo te interesa? (desde "Pedir asesoramiento" de una tarjeta el modelo ya viene elegido y
 //      se salta este paso)
-//   2. ¿Cuál es tu perfil?
+//   2. ¿Cuál es tu perfil? Con "Otro" no se avanza solo: se abre un campo obligatorio para escribir la
+//      profesión, que llega a la hoja dentro del mismo campo Perfil ("Otro: osteópata").
 //   3. ¿Cómo te llamas?
 //   4. ¿A qué WhatsApp te escribimos? Con "Prefiero por correo" la misma pregunta pasa a pedir el
 //      correo (formato validado y aviso si el dominio parece mal escrito). Sin casilla: bajo el
@@ -216,10 +217,32 @@ function problem(n) {
     if (!state.equipo) return 'Elige una opción.';
     return state.equipo === 'Otro equipo' && !state.otro ? 'Elige qué equipo buscas.' : '';
   }
-  if (n === 2) return state.perfil ? '' : 'Elige una opción.';
+  if (n === 2) {
+    if (!state.perfil) return 'Elige una opción.';
+    return state.perfil === 'Otro' ? perfilOtroProblem() : '';
+  }
   if (n === 3) return nameProblem();
   return state.contact === 'email' ? emailProblem() : telProblem();
 }
+// "Otro" en el perfil: la profesión escrita a mano (obligatoria, de 2 a 40 caracteres)
+const perfilOtro = () => ui.perfilOtro.value.replace(/\s+/g, ' ').trim();
+function perfilOtroProblem() {
+  const v = perfilOtro();
+  if (!v) return 'Escribe tu profesión.';
+  return v.length >= 2 && /\p{L}/u.test(v) ? '' : 'Revisa tu profesión.';
+}
+function showPerfilOtro(on) {
+  ui.perfilOtroBox.hidden = !on;
+  if (!on) perfilOtroError('');
+}
+function perfilOtroError(msg) {
+  if (!msg && !ui.perfilOtroErr.textContent) return;
+  ui.perfilOtroErr.textContent = msg;
+  ui.perfilOtro.setAttribute('aria-invalid', String(!!msg));
+}
+// Lo que llega a la hoja y lo que se lee en el WhatsApp
+const perfilFinal = () => (state.perfil === 'Otro' ? `Otro: ${perfilOtro()}` : state.perfil);
+const perfilTexto = () => (state.perfil === 'Otro' ? perfilOtro() || 'Otro' : state.perfil);
 // Errores de los pasos de opciones (1 y 2)
 function setError(n, msg) {
   stepEl(n).querySelector('[data-error]').textContent = msg;
@@ -235,16 +258,18 @@ function fieldError(which, msg) {
 // Muestra el error del paso n donde toca y devuelve si el paso está bien
 function check(n) {
   const msg = problem(n);
-  if (n <= 2) setError(n, msg);
+  const otroPerfil = n === 2 && state.perfil === 'Otro';
+  if (otroPerfil) { setError(2, ''); perfilOtroError(msg); } else if (n <= 2) setError(n, msg);
   else fieldError(n === 3 ? 'name' : state.contact, msg);
-  if (msg) formError(n, [state.equipo === 'Otro equipo' ? 'otro' : 'equipo', 'perfil', 'nombre', state.contact === 'email' ? 'email' : 'telefono'][n - 1]);
+  if (msg) formError(n, [state.equipo === 'Otro equipo' ? 'otro' : 'equipo', otroPerfil ? 'perfil_otro' : 'perfil', 'nombre', state.contact === 'email' ? 'email' : 'telefono'][n - 1]);
   return !msg;
 }
 // Campo que recibe el foco en cada paso (en el 4, el de WhatsApp o el de correo)
 function fieldOf(n) {
   const el = stepEl(n);
   if (n === 4) return state.contact === 'email' ? ui.email : ui.tel;
-  return el.querySelector('.field') || el.querySelector('input[type=radio]:checked') || el.querySelector('input[type=radio]');
+  if (n === 2 && state.perfil === 'Otro') return ui.perfilOtro;
+  return (n !== 2 && el.querySelector('.field')) || el.querySelector('input[type=radio]:checked') || el.querySelector('input[type=radio]');
 }
 
 // ------------------------------------------------------------------ navegación
@@ -352,7 +377,7 @@ function payload() {
     nombre: ui.name.value.trim(),
     telefono: byEmail ? '' : phoneFull(),
     email: byEmail ? emailValue() : '',
-    perfil: state.perfil,
+    perfil: perfilFinal(),
     equipo: equipoFinal(),
     modelo: state.modelo || (WITH_MODELS.includes(state.equipo) ? 'Sin decidir' : ''),
     consentimiento: `Sí · ${new Date().toISOString()}`,
@@ -388,7 +413,7 @@ function waText() {
   const lines = [
     `Hola, soy ${ui.name.value.trim()}. Acabo de pedir asesoramiento en la web.`,
     interest(),
-    `Perfil: ${state.perfil}.`,
+    `Perfil: ${perfilTexto()}.`,
   ];
   return encodeURIComponent(lines.join('\n'));
 }
@@ -397,7 +422,7 @@ function failText() {
   const lines = [
     `Hola${name ? `, soy ${name}` : ''}. He intentado pedir asesoramiento en la web y no se ha enviado.`,
     interest(),
-    state.perfil ? `Perfil: ${state.perfil}.` : '',
+    state.perfil ? `Perfil: ${perfilTexto()}.` : '',
     state.contact === 'email' ? `Mi correo: ${emailValue()}.` : `Mi WhatsApp: ${phoneFull()}.`,
   ];
   return encodeURIComponent(lines.filter(Boolean).join('\n'));
@@ -612,6 +637,9 @@ export function initForm() {
     tel: $('#f-tel'),
     email: $('#f-email'),
     nameErr: $('[data-error-name]'),
+    perfilOtroBox: $('[data-perfil-other]'),
+    perfilOtro: $('#f-perfil-otro'),
+    perfilOtroErr: $('[data-error-perfil-otro]'),
     telErr: $('[data-error-tel]'),
     emailErr: $('[data-error-email]'),
     hint: $('[data-email-hint]'),
@@ -681,11 +709,16 @@ export function initForm() {
       } else if (t.name === 'perfil') {
         state.perfil = t.value;
         setError(2, '');
+        // Con "Otro" no se avanza: se abre el campo para escribir la profesión
+        wait = t.value === 'Otro';
+        showPerfilOtro(wait);
       }
       update();
       if (wait) {
-        // Con "Otro equipo" no se avanza: se abre el desplegable para elegir cuál
-        if (pointerPick) setTimeout(() => other.button.click(), reduced() ? 0 : 200);
+        // Con "Otro equipo" se abre el desplegable para elegir cuál; con "Otro" perfil, el campo de texto
+        // (el foco, en el mismo toque: si se retrasa, iOS no abre el teclado)
+        if (t.name === 'perfil') ui.perfilOtro.focus({ preventScroll: true });
+        else if (pointerPick) setTimeout(() => other.button.click(), reduced() ? 0 : 200);
         pointerPick = false;
         return;
       }
@@ -723,6 +756,7 @@ export function initForm() {
     next();
   });
   ui.name.addEventListener('input', () => fieldError('name', ''));
+  ui.perfilOtro.addEventListener('input', () => perfilOtroError(''));
   ui.tel.addEventListener('input', onTelInput);
   ui.email.addEventListener('input', onEmailInput);
   // Al salir del campo solo se limpia (minúsculas y sin espacios). El aviso de dominio mal escrito sale al
@@ -731,7 +765,7 @@ export function initForm() {
   ui.doneWa.addEventListener('click', stopGo);
   // Embudo: primera interacción con el formulario
   ['pointerdown', 'focusin', 'input'].forEach((ev) => form.addEventListener(ev, formStart, { once: true }));
-  [ui.name, ui.tel, ui.email].forEach((f) => f.addEventListener('focus', () => setTimeout(fitStep, 350)));
+  [ui.name, ui.tel, ui.email, ui.perfilOtro].forEach((f) => f.addEventListener('focus', () => setTimeout(fitStep, 350)));
   if (window.visualViewport) window.visualViewport.addEventListener('resize', () => { if (form.contains(document.activeElement)) fitStep(); });
 
   ready = true;

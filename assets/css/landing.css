@@ -292,6 +292,7 @@ html:not(.v-eco):not(.v-mofu2):not(.v-bofu1):not(.v-bofu2) .hv--base,
 .qf__label { display: block; margin-bottom: 8px; font-size: .9375rem; font-weight: 500; color: var(--ink-2); }
 
 .qf__other { margin-top: 14px; }
+label.qf__other-label { display: block; }
 .qf__other-label { margin-bottom: 8px; font-size: .9375rem; font-weight: 500; color: var(--ink-2); }
 .qf__other .sel__btn { width: 100%; justify-content: space-between; }
 .qf__other .sel__panel { width: 100%; }

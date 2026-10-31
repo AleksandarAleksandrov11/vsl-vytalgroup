@@ -559,7 +559,9 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
         };
       });
       ok(r.logoH >= 30 && r.heads.join('|') === 'Equipos|Legal' && r.hSize <= 13 && r.cols.map((c) => c[1]).join(',') === '3,4' && r.cta === 'Pedir asesoramiento gratis' && r.logo === '#inicio', `Pie ${w}px: logo (sube al inicio), claim, CTA "Pedir asesoramiento gratis" y columnas Equipos y Legal`, JSON.stringify({ logoH: r.logoH, cols: r.cols, hSize: r.hSize, cta: r.cta }));
-      ok(r.links.join(',') === '#inicio,#asesoramiento,#equipos,#mas-equipos,#asesoramiento,/aviso-legal,/privacidad,/cookies,Configurar cookies' && r.legal.every((x) => x.endsWith(':_blank:noopener')), `Pie ${w}px: sin teléfono, WhatsApp, correo ni Instagram; legales en pestaña nueva`, r.links.join(' '));
+      // Única salida permitida en el pie: el crédito de la agencia, en otra pestaña (la landing sigue abierta)
+      const credit = await p.evaluate(() => { const a = document.querySelector('.ft__bottom a[data-credit]'); return a && `${a.getAttribute('href')}:${a.target}:${a.rel}`; });
+      ok(r.links.join(',') === '#inicio,#asesoramiento,#equipos,#mas-equipos,#asesoramiento,/aviso-legal,/privacidad,/cookies,Configurar cookies,https://www.aasmarketing.com/' && r.legal.every((x) => x.endsWith(':_blank:noopener')) && credit === 'https://www.aasmarketing.com/:_blank:noopener', `Pie ${w}px: sin teléfono, WhatsApp, correo ni Instagram; legales y crédito de AAS Marketing en pestaña nueva`, r.links.join(' '));
       ok(before.armed && before.op === '0' && r.word === 'VytalGroup' && r.hidden && r.isLast && r.fill >= 94 && r.fill <= 101 && r.inView && r.done && r.delays[0] === '0s' && r.delays[1] === '0.495s' && r.colors[0] !== r.colors[1] && r.sw <= r.vw, `Pie ${w}px: "VytalGroup" en grande a todo el ancho al final, con las letras que suben una a una al llegar`, JSON.stringify({ before, fill: r.fill, fs: r.fs, done: r.done, delays: r.delays, colors: r.colors }));
       ok(!logs.length, `Pie ${w}px: consola limpia`, logs.join(' / '));
       await ctx.close();
@@ -686,9 +688,9 @@ const scrollToSel = (p, s, off = 0) => p.evaluate(([s, off]) => { const el = doc
     // 2) Página servida: todos los enlaces son internos, legales en pestaña nueva o el WhatsApp de después de enviar
     const { ctx, p } = await page(b, { width: 390, height: 844, mobile: true, consent: null });
     await p.goto(BASE + '/', { waitUntil: 'networkidle' });
-    const links = await p.evaluate(() => [...document.querySelectorAll('a[href]')].map((a) => ({ href: a.getAttribute('href'), t: a.target, rel: a.rel, after: !!a.closest('[data-done], [data-fail]'), sprite: !!a.closest('svg') })));
-    const bad = links.filter((l) => !(l.href.startsWith('#') || (['/privacidad', '/aviso-legal', '/cookies'].includes(l.href) && l.t === '_blank' && /noopener/.test(l.rel)) || (l.after && l.href.startsWith('https://wa.me/34616372644'))));
-    ok(!bad.length && links.length > 20, 'Sin fugas (página): solo enlaces internos, legales en pestaña nueva (rel="noopener") y el WhatsApp de después del envío', bad.map((l) => l.href).join(' ') || `${links.length} enlaces`);
+    const links = await p.evaluate(() => [...document.querySelectorAll('a[href]')].map((a) => ({ href: a.getAttribute('href'), t: a.target, rel: a.rel, after: !!a.closest('[data-done], [data-fail]'), credit: a.matches('.ft__bottom a[data-credit]'), sprite: !!a.closest('svg') })));
+    const bad = links.filter((l) => !(l.href.startsWith('#') || (['/privacidad', '/aviso-legal', '/cookies'].includes(l.href) && l.t === '_blank' && /noopener/.test(l.rel)) || (l.after && l.href.startsWith('https://wa.me/34616372644')) || (l.credit && l.href === 'https://www.aasmarketing.com/' && l.t === '_blank' && /noopener/.test(l.rel))));
+    ok(!bad.length && links.length > 20, 'Sin fugas (página): solo enlaces internos, legales y crédito del pie en pestaña nueva (rel="noopener") y el WhatsApp de después del envío', bad.map((l) => l.href).join(' ') || `${links.length} enlaces`);
     const logos = await p.$$eval('.hd__logo, .ft__logo', (els) => els.map((e) => e.getAttribute('href')));
     ok(logos.join() === '#inicio,#inicio', 'Logo de cabecera y pie: solo sube al inicio (#inicio)', logos.join());
     // 3) Legales del aviso de cookies y del pie: se abren encima y la landing sigue abierta

@@ -96,7 +96,7 @@ priv = f'''        <h2>1. Responsable del tratamiento</h2>
 {TITULAR}
         <h2>2. Qué datos tratamos</h2>
         <ul>
-          <li><strong>Datos del formulario:</strong> nombre, teléfono de WhatsApp o correo electrónico (según prefieras que te escribamos), perfil profesional (clínica, fisioterapeuta, médico u otro), equipo de interés y, si lo eliges, el modelo. También la fecha y hora del envío, que es cuando aceptas esta política.</li>
+          <li><strong>Datos del formulario:</strong> nombre, teléfono de WhatsApp o correo electrónico (según prefieras que te escribamos), perfil profesional (clínica, fisioterapeuta, médico u otra profesión que nos indiques), equipo de interés y, si lo eliges, el modelo. También la fecha y hora del envío, que es cuando aceptas esta política.</li>
           <li><strong>Origen de la visita:</strong> los parámetros de campaña (UTM) del enlace por el que llegas, para saber de qué anuncio viene cada solicitud. Para medir los anuncios usamos además el identificador del clic en el anuncio de Meta (fbc) y, si aceptas las cookies de marketing, el identificador del píxel de Meta en tu navegador (fbp).</li>
           <li><strong>Datos técnicos:</strong> un identificador aleatorio de cada visita y de cada solicitud (para no contarlas dos veces), la dirección IP, el tipo de navegador (user agent) y la página que visitas, que solo se comunican a Meta como se explica más abajo.</li>
           <li><strong>Comunicaciones:</strong> lo que nos cuentes por WhatsApp, teléfono o email.</li>

@@ -25,7 +25,7 @@ Hablamos como empresa, en primera persona del plural ("Lo que nos preguntáis", 
 6. **Dudas** ("Lo que *nos preguntáis.*"). 8 preguntas: ¿Cuánto cuesta? · ¿Se puede financiar? (Hotmart o Klarna) · ¿Cuál me conviene? · ¿Qué garantía tienen? · ¿Y el mantenimiento? · ¿Están certificados? · ¿Enviáis fuera de España? · ¿Qué pasa cuando envío el formulario? El CTA y "¿Otra duda? Déjanos tu WhatsApp y te la resolvemos" (al formulario, sin preselección).
 7. **Formulario** ("Cuéntanos qué *necesitas.*", siempre en una línea; justo debajo, "Ya hemos equipado 8 clínicas y 2 clubes de alto rendimiento"). Las mismas 4 preguntas y opciones de siempre, una por pantalla:
    1. ¿Qué equipo te interesa? Ecógrafo · Diatermia · Presoterapia · Ondas de choque · Otro equipo (desplegable con magnetoterapia, láser, electrólisis percutánea, camillas u otro).
-   2. ¿Cuál es tu perfil? Clínica · Fisioterapeuta · Médico · Otro.
+   2. ¿Cuál es tu perfil? Clínica · Fisioterapeuta · Médico · Otro. Con "Otro" no se avanza solo: se abre "¿Cuál es tu profesión?" (obligatorio, de 2 a 40 caracteres) y llega a la hoja en el mismo campo Perfil, como "Otro: osteópata". En el WhatsApp: "Perfil: osteópata.".
    3. ¿Cómo te llamas?
    4. ¿A qué WhatsApp te escribimos? El prefijo sale solo según el idioma del navegador (es-MX → +52, es-AR → +54…; si no, +34). Debajo, **"Prefiero por correo"** abre la misma pregunta para el correo, con teclado de correo, formato validado y aviso si el dominio parece mal escrito. El botón dice **"Enviar y abrir WhatsApp"** (o "Enviar" con correo). Debajo, "Asesoramiento gratis · Financiación con Hotmart y Klarna". Sin casilla: bajo el botón, "Al enviar aceptas la política de privacidad y que VytalGroup te contacte sobre tu solicitud."
 
@@ -49,7 +49,12 @@ Sin teléfono, WhatsApp, correo ni Instagram: los datos de contacto del titular 
 
 ## 2. Cambios de las últimas rondas
 
-**v19 (esta ronda): Meta ve todas las visitas**
+**v20 (esta ronda): profesión cuando el perfil es "Otro"**
+
+- Al elegir "Otro" en el perfil se abre un campo obligatorio, "¿Cuál es tu profesión?". Va a la hoja dentro del campo Perfil ("Otro: osteópata"): ni columnas nuevas ni cambios en el Apps Script. En el Resumen, "Otro" se reparte por profesión.
+- "Prefiero por correo" se queda (decisión de Aleks).
+
+**v19: Meta ve todas las visitas**
 
 - Los anuncios llevaban 41 clics y solo 5 visitas en Meta: el píxel solo se carga si se aceptan las cookies y casi nadie las acepta. Ahora la función de Vercel (`api/capi.js`, antes `api/lead-capi.js`) envía también **`PageView`** (al cargar) y **`ViewContent`** (una vez por sesión, al ver los equipos) por servidor, para todos los visitantes, con IP, navegador, URL, `fbc` (cookie `_fbc` o construida desde el `fbclid` guardado al aterrizar) y `fbp` si existe. Sin datos personales.
 - Al aceptar las cookies, el píxel se carga al momento y dispara `PageView` (y `ViewContent`) con el **mismo `event_id`** que ya se envió por servidor: Meta los deduplica.
@@ -455,7 +460,7 @@ Hechos: datos legales del titular, ID del píxel, Apps Script con Estado, Notas 
 
 ## 10. Historial
 
-- **v19 (esta ronda)**, **v18**, **v17** y de la **v5** a la **v16:** ver apartado 2.
+- **v20 (esta ronda)**, **v19**, **v18**, **v17** y de la **v5** a la **v16:** ver apartado 2.
 - **v4:** hero con fotos y vídeo de clientes y sin testimonios. Sustituido en la v5.
 - **v3:**
   - enfoque "equipos médicos sin letra pequeña";
